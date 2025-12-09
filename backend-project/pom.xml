@@ -121,7 +121,7 @@
               간단히 테스트 할 수 있는 UI 또한 구비되어있기 때문에
               예제 데이터를 통해 간단한 테스트도 가능하다.
             - 라이브러리 연동 후 서버 구동을 하면
-              http://localhost:8006/backend/swagger-ui/index.html
+              http://localhost:8001/foodding/swagger-ui/index.html
               로 접속이 가능해지고, 접속 시 api (개발 문서) 가 나온다.
         -->
         <dependency>
