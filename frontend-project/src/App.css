@@ -30,7 +30,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 80px;
 }
 
 .header__brand {
@@ -41,7 +41,7 @@
 }
 
 .header__logo {
-  height: 100px;
+  height: 120px;
 }
 
 .header__nav {
@@ -53,6 +53,8 @@
   color: #374151;
   text-decoration: none;
   font-weight: 500;
+  font-size: 20px;
+  font-style: bold;
 }
 
 .header__nav-link:hover {
@@ -462,12 +464,6 @@
   top: 96px;
 }
 
-.rank-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 24px;
-  overflow-x: auto;
-}
 
 .rank-tab {
   padding: 8px 16px;

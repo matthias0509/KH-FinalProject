@@ -5,17 +5,7 @@ export default function RankSection({ projects }) {
     <aside className="rank-section">
       <div className="rank-card">
         <h2 className="section-title">실시간 베스트</h2>
-        <div className="rank-tabs">
-          {BEST_TABS.map((tab, idx) => (
-            <button
-              type="button"
-              key={tab}
-              className={`rank-tab${idx === 0 ? ' is-active' : ''}`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        <br />
         <div className="rank-list">
           {projects.map((project, idx) => {
             const rate = Math.floor((project.current / project.goal) * 100);

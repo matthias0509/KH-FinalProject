@@ -23,7 +23,7 @@ export default function Header() {
           <button type="button" className="icon-button" aria-label="마이 페이지">
             <User size={20} color="#6b7280" />
           </button>
-          <button type="button" className="header__cta">프로젝트 올리기</button>
+          <button type="button" className="header__cta"><a href="http://localhost:5173/create">프로젝트 올리기</a></button>
         </div>
       </div>
     </header>
