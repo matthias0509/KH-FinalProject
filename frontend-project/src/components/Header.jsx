@@ -8,9 +8,9 @@ export default function Header() {
         <div className="header__brand">
           <img src={logo} alt="Foodding" className="header__logo" />
           <nav className="header__nav">
-            <a href="#" className="header__nav-link">펀딩하기</a>
-            <a href="#" className="header__nav-link">스토어</a>
-            <a href="#" className="header__nav-link">커뮤니티</a>
+            <a href="http://localhost:5173/" className="header__nav-link">펀딩하기</a>
+            <a href="#" className="header__nav-link">마감임박</a>
+            <a href="#" className="header__nav-link">공지사항</a>
           </nav>
         </div>
         <div className="header__actions">
