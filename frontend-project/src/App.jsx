@@ -4,6 +4,7 @@ import CreateProjectPage from './pages/CreateProjectPage';
 import NoticePage from './pages/NoticePage';
 import ImbakPage from './pages/ImbakPage';
 import './App.css';
+import LoginPage from './components/Login/LoginPage';
 
 export default function App() {
   return (
@@ -12,6 +13,7 @@ export default function App() {
       <Route path="/create" element={<CreateProjectPage />} />
       <Route path="/notice" element={<NoticePage />}/>
       <Route path='/imbak' element={<ImbakPage/> }/>
+      <Route path="/login" element={<LoginPage />} />
     </Routes>
   );
 }
