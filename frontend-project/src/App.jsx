@@ -3,6 +3,8 @@ import HomePage from './pages/HomePage';
 import CreateProjectPage from './pages/CreateProjectPage';
 import NoticePage from './pages/NoticePage';
 import ImbakPage from './pages/ImbakPage';
+import SearchPage from './pages/SearchPage';
+import ProductDetailPage from './pages/ProductDetailPage';
 import './App.css';
 import LoginPage from './components/Login/LoginPage';
 
