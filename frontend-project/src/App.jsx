@@ -3,6 +3,8 @@ import HomePage from './pages/HomePage';
 import CreateProjectPage from './pages/CreateProjectPage';
 import NoticePage from './pages/NoticePage';
 import ImbakPage from './pages/ImbakPage';
+import SearchPage from './pages/SearchPage';
+import ProductDetailPage from './pages/ProductDetailPage';
 import './App.css';
 
 export default function App() {
@@ -12,6 +14,8 @@ export default function App() {
       <Route path="/create" element={<CreateProjectPage />} />
       <Route path="/notice" element={<NoticePage />}/>
       <Route path='/imbak' element={<ImbakPage/> }/>
+      <Route path="/search" element={<SearchPage />} />
+      <Route path="/projects/premium-macarons" element={<ProductDetailPage />} />
     </Routes>
   );
 }
