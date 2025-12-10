@@ -90,6 +90,10 @@
   cursor: pointer;
   color: #fff;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
   background-image: linear-gradient(to right, var(--accent), var(--accent-strong));
 }
 
@@ -621,6 +625,68 @@
   border-top: 1px solid #374151;
   font-size: 14px;
   color: #6b7280;
+}
+
+.create-project {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.create-project__intro {
+  max-width: 640px;
+}
+
+.create-project__description {
+  margin-top: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.create-project__form {
+  background-color: var(--surface);
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.create-project__submit {
+  align-self: flex-start;
+  min-width: 160px;
+}
+
+@media (max-width: 600px) {
+  .create-project__form {
+    padding: 24px;
+  }
 }
 
 @media (max-width: 1200px) {

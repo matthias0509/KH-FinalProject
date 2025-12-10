@@ -1,4 +1,5 @@
 import { Search, User, Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
 
 export default function Header() {
@@ -8,9 +9,9 @@ export default function Header() {
         <div className="header__brand">
           <img src={logo} alt="Foodding" className="header__logo" />
           <nav className="header__nav">
-            <a href="http://localhost:5173/" className="header__nav-link">펀딩하기</a>
-            <a href="#" className="header__nav-link">마감임박</a>
-            <a href="#" className="header__nav-link">공지사항</a>
+            <a href="http://localhost:5173/" className="header__nav-link">프로젝트</a>
+            <a href="/imbak" className="header__nav-link">마감임박</a>
+            <a href="/notice" className="header__nav-link">공지사항</a>
           </nav>
         </div>
         <div className="header__actions">
@@ -23,7 +24,9 @@ export default function Header() {
           <button type="button" className="icon-button" aria-label="마이 페이지">
             <User size={20} color="#6b7280" />
           </button>
-          <button type="button" className="header__cta"><a href="http://localhost:5173/create">프로젝트 올리기</a></button>
+          <Link to="/create" className="header__cta">
+            프로젝트 올리기
+          </Link>
         </div>
       </div>
     </header>
