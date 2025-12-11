@@ -15,7 +15,6 @@ import CreateMember from './pages/Login/CreateMemberPage';
 import NoticePage from './pages/NoticePage';
 
 // 박주현
-import MyPage from './pages/MyPage'
 import ProfileEditPage from './pages/ProfileEditPage'
 import MakerPage from './pages/MakerPage'
 import MyPage from './pages/MyPage'
