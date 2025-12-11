@@ -93,3 +93,38 @@
 .link-group .separator {
   color: var(--border); 
 }
+
+/* 공지사항 css */
+.notice-card {
+  /* .project-card 클래스를 직접 사용해도 되지만, 분리를 위해 별도 정의 */
+  background-color: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%; /* 너비 100% 확보 */
+}
+
+.notice-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.notice-card__body {
+    /* 내부 패딩 등 레이아웃은 App.css의 .project-card__body를 참고했습니다. */
+    padding: 20px;
+}
+
+.pagination-controls {
+    margin-top: 40px;
+    text-align: center; 
+    
+    /* Flexbox를 사용하여 내부 요소들을 한 줄에 배치하고 중앙 정렬 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination-number {
+    margin: 0 5px; /* 숫자 간 간격 */
+}
