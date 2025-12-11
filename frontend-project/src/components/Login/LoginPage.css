@@ -1,0 +1,130 @@
+/* 1. 로그인 페이지 컨테이너 스타일 */
+.login-container-wrapper { /* 전체 페이지 레벨 컨테이너 */
+  max-width: 400px;
+  margin: 80px auto; 
+  padding: 0 24px;
+}
+
+/* 2. 로그인 폼 영역 (배경, 그림자, 모서리) */
+.login-box {
+  background-color: var(--surface); 
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+  display: flex;
+  flex-direction: column;
+  gap: 24px; 
+}
+
+.login-title {
+  font-size: 24px;
+  color: var(--text);
+  margin-bottom: 8px; 
+  text-align: center;
+}
+
+/* 3. 입력 그룹 */
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.input-group label {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.input-group input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 4. 로그인 버튼 스타일 */
+.login-button {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  font-weight: 600;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-image: linear-gradient(to right, var(--accent), var(--accent-strong));
+  transition: opacity 0.2s ease;
+}
+
+.login-button:hover {
+  opacity: 0.9;
+}
+
+/* 5. 링크 그룹 스타일 */
+.link-group {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.link-group .link {
+  color: var(--muted); 
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.link-group .link:hover {
+  color: var(--accent);
+}
+
+.link-group .separator {
+  color: var(--border); 
+}
+
+/* 공지사항 css */
+.notice-card {
+  /* .project-card 클래스를 직접 사용해도 되지만, 분리를 위해 별도 정의 */
+  background-color: var(--surface);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  width: 100%; /* 너비 100% 확보 */
+}
+
+.notice-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.notice-card__body {
+    /* 내부 패딩 등 레이아웃은 App.css의 .project-card__body를 참고했습니다. */
+    padding: 20px;
+}
+
+.pagination-controls {
+    margin-top: 40px;
+    text-align: center; 
+    
+    /* Flexbox를 사용하여 내부 요소들을 한 줄에 배치하고 중앙 정렬 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pagination-number {
+    margin: 0 5px; /* 숫자 간 간격 */
+}

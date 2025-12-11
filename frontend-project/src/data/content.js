@@ -7,6 +7,11 @@ export const categories = [
   { name: '일식', icon: '🍱' },
   { name: '음료', icon: '☕' },
   { name: '건강식품', icon: '🥗' },
+  { name: '간편식/밀키트', icon: '🥡' },
+  { name: '비건/대체식품', icon: '🌱' },
+  { name: '간식/스낵', icon: '🍿' },
+  { name: '지역/로컬', icon: '🏞️' },
+  { name: '반려동물 간식', icon: '🐾' },
 ];
 
 export const projects = [

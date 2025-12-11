@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Heart } from 'lucide-react';
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
 import { premiumMacaronDetail } from '../data/content';
+
+import { useNavigate } from 'react-router-dom';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 
@@ -12,6 +14,9 @@ export default function ProductDetailPage() {
   const progressWidth = Math.min(progressRate, 100);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const rewardSectionRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const toggleLike = () => {
     setIsLiked((prev) => !prev);
@@ -25,6 +30,14 @@ export default function ProductDetailPage() {
     console.log('Creator profile clicked');
   };
 
+  const handleDonateClick = () => {
+    rewardSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handlePayment= () => {
+    navigate('/payment')
+  }
+
   return (
     <div className="app">
       <Header />
@@ -34,15 +47,6 @@ export default function ProductDetailPage() {
             <img src={project.heroImage} alt={project.title} />
           </div>
           <div className="detail-hero__content">
-            <div className="detail-hero__tags">
-              <span className="tag">{project.category}</span>
-              <span className="tag tag--muted">{project.location}</span>
-              {project.badges.map((badge) => (
-                <span key={badge} className="tag tag--outline">
-                  {badge}
-                </span>
-              ))}
-            </div>
             <h1 className="detail-hero__title">{project.title}</h1>
             <p className="detail-hero__subtitle">{project.subtitle}</p>
 
@@ -71,7 +75,7 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="detail-hero__actions">
-              <button type="button" className="detail-cta detail-cta--primary">
+              <button type="button" className="detail-cta detail-cta--primary" onClick={handleDonateClick}>
                 지금 후원하기
               </button>
               <button
@@ -86,15 +90,9 @@ export default function ProductDetailPage() {
                   fill={isLiked ? '#ef4444' : 'none'}
                   color={isLiked ? '#b91c1c' : '#6b7280'}
                 />
-                {isLiked ? '좋아요 취소' : '좋아요'}
+                {isLiked ? '좋아요' : '좋아요'}
               </button>
             </div>
-
-            <ul className="detail-highlights">
-              {project.highlights.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
           </div>
         </section>
 
@@ -178,12 +176,12 @@ export default function ProductDetailPage() {
                   {isFollowing ? '팔로잉' : '팔로우'}
                 </button>
                 <button type="button" className="detail-cta detail-cta--chat">
-                  문의하기
+                  1:1 문의하기
                 </button>
               </div>
             </div>
 
-            <div className="detail-card" >
+            <div className="detail-card" ref={rewardSectionRef}>
               <h3>리워드 선택</h3>
               {/* <div className="detail-rewards detail-rewards--scroll"> */}
                 {project.rewards.map((reward) => (
@@ -199,7 +197,7 @@ export default function ProductDetailPage() {
                       ))}
                     </ul>
                     <div className="detail-reward__shipping">배송 예정: {reward.shipping}</div>
-                    <button type="button" className="detail-cta detail-cta--outline">
+                    <button type="button" className="detail-cta detail-cta--outline" onClick={handlePayment}>
                       리워드 선택
                     </button>
                   </div>

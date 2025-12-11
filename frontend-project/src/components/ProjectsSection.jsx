@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import ProjectCard from './ProjectCard';
 
 export default function ProjectsSection({
@@ -10,7 +11,27 @@ export default function ProjectsSection({
   showSort = true,
 }) {
   const gridClass = `project-grid${variant === 'compact' ? ' project-grid--compact' : ''}`;
-  const visibleProjects = typeof limit === 'number' ? projects.slice(0, limit) : projects;
+  const pageSize = typeof limit === 'number' && limit > 0 ? limit : projects.length || 1;
+  const totalPages = Math.max(1, Math.ceil(projects.length / pageSize));
+  const [page, setPage] = useState(0);
+
+  useEffect(() => {
+    setPage(0);
+  }, [projects, pageSize]);
+
+  const visibleProjects = useMemo(() => {
+    if (!projects.length) return [];
+    const start = page * pageSize;
+    return projects.slice(start, start + pageSize);
+  }, [projects, page, pageSize]);
+
+  const maxVisiblePages = 5;
+  const startPageIndex = Math.floor(page / maxVisiblePages) * maxVisiblePages;
+  const visiblePageNumbers = Array.from({ length: Math.min(maxVisiblePages, totalPages - startPageIndex) }, (_, index) => startPageIndex + index);
+
+  const goToPage = (target) => {
+    setPage(Math.max(0, Math.min(totalPages - 1, target)));
+  };
 
   return (
     <section className={className.trim()}>
@@ -31,6 +52,36 @@ export default function ProjectsSection({
           <ProjectCard key={project.id} project={project} variant={variant} />
         ))}
       </div>
+      {limit && totalPages > 1 && (
+        <div className="projects-pagination">
+          <button
+            type="button"
+            className="projects-pagination__button"
+            onClick={() => goToPage(page - 1)}
+            disabled={page === 0}
+          >
+            이전
+          </button>
+          {visiblePageNumbers.map((pageNumber) => (
+            <button
+              key={`page-${pageNumber}`}
+              type="button"
+              className={`projects-pagination__button${pageNumber === page ? ' is-active' : ''}`}
+              onClick={() => goToPage(pageNumber)}
+            >
+              {pageNumber + 1}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="projects-pagination__button"
+            onClick={() => goToPage(page + 1)}
+            disabled={page === totalPages - 1}
+          >
+            다음
+          </button>
+        </div>
+      )}
     </section>
   );
 }

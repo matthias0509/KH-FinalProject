@@ -10,6 +10,7 @@ import MakerPage from './pages/MakerPage';
 import ProfileEditPage from './pages/ProfileEditPage';
 
 import './App.css';
+
 import FundingHistoryPage from './pages/supporter/FundingHistoryPage';
 import FundingCancelPage from './pages/supporter/FundingCancelPage';
 import FundingDetailPage from './pages/supporter/FundingDetailPage';
@@ -18,6 +19,14 @@ import FollowProjectsPage from './pages/supporter/FollowProjectPage';
 import ChatHistoryPage from './pages/supporter/ChatHistoryPage';
 import QnAPage from './pages/supporter/QnAPage';
 
+import LoginPage from './components/Login/LoginPage';
+
+import Paymentcompotnet from './pages/payment/PaymentComponent';
+import CreateMember from './components/Login/CreateMember';
+import ChangePage from './pages/ChangePage';
+import ChatComponent from './pages/chat/ChatComponent';
+
+
 export default function App() {
   return (
     <Routes>
@@ -25,7 +34,10 @@ export default function App() {
       <Route path="/create" element={<CreateProjectPage />} />
       <Route path="/notice" element={<NoticePage />}/>
       <Route path='/imbak' element={<ImbakPage/> }/>
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/createmember" element={<CreateMember />} />
       <Route path="/search" element={<SearchPage />} />
+
       <Route path="/mypage" element={<MyPage />} />
       <Route path="/maker" element={<MakerPage />} />
       <Route path="/profile" element={<ProfileEditPage />} />
@@ -36,6 +48,12 @@ export default function App() {
       <Route path="/follow" element={<FollowProjectsPage />} />
       <Route path="/chat" element={<ChatHistoryPage />} />
       <Route path="/qna" element={<QnAPage />} />
+
+      <Route path="/projects/premium-macarons" element={<ProductDetailPage />} />
+      <Route path="/payment" element={<Paymentcompotnet />} />
+      {/* path="/projects/:slug 예정 각 상품별 상세페이지 */}
+      <Route path='/change' element={<ChangePage/>}/>
+      <Route path='/chat' element={<ChatComponent />}/>
     </Routes>
   );
 }

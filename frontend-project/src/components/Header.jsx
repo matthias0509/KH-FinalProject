@@ -48,6 +48,8 @@ export default function Header() {
             <a href="/" className="header__nav-link">푸슐랭</a>
             <a href="/imbak" className="header__nav-link">마감임박</a>
             <a href="/notice" className="header__nav-link">공지사항</a>
+            <a href="/change" className='header__nav-link'>(메이커 전환)</a>
+            <a href="/login" className='header__nav-link'>(로그인)</a>
           </nav>
         </div>
         <div className="header__actions">
@@ -89,9 +91,13 @@ export default function Header() {
           <button type="button" className="icon-button" aria-label="관심 프로젝트">
             <Heart size={20} color="#6b7280" />
           </button>
+
           <a href="/mypage" className="icon-button" aria-label="마이 페이지">
             <User size={20} color="#6b7280" />
           </a>
+
+        
+
           <Link to="/create" className="header__cta">
             프로젝트 올리기
           </Link>
