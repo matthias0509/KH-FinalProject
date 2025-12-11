@@ -6,10 +6,10 @@ import ImbakPage from './pages/ImbakPage';
 import SearchPage from './pages/SearchPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import './App.css';
-import LoginPage from './components/Login/LoginPage';
+import LoginPage from './pages/Login/LoginPage';
 
 import Paymentcompotnet from './components/payment/PaymentComponent';
-import CreateMember from './components/Login/CreateMember';
+import CreateMember from './pages/Login/CreateMemberPage';
 
 export default function App() {
   return (
