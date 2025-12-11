@@ -4,6 +4,8 @@ import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
 import { premiumMacaronDetail } from '../data/content';
 
+import { useNavigate } from 'react-router-dom';
+
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 
 export default function ProductDetailPage() {
@@ -13,6 +15,8 @@ export default function ProductDetailPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const rewardSectionRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const toggleLike = () => {
     setIsLiked((prev) => !prev);
@@ -29,6 +33,10 @@ export default function ProductDetailPage() {
   const handleDonateClick = () => {
     rewardSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+
+  const handlePayment= () => {
+    navigate('/payment')
+  }
 
   return (
     <div className="app">
@@ -189,7 +197,7 @@ export default function ProductDetailPage() {
                       ))}
                     </ul>
                     <div className="detail-reward__shipping">배송 예정: {reward.shipping}</div>
-                    <button type="button" className="detail-cta detail-cta--outline">
+                    <button type="button" className="detail-cta detail-cta--outline" onClick={handlePayment}>
                       리워드 선택
                     </button>
                   </div>
