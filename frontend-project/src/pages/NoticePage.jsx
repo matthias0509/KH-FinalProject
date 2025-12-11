@@ -114,7 +114,6 @@ function notice(){
                     </div>
                 </div>
 
-             <AppFooter/>
             <AppFooter/>
         </div>
     )
