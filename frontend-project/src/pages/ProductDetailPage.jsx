@@ -10,11 +10,25 @@ const currencyFormatter = new Intl.NumberFormat('ko-KR');
 
 export default function ProductDetailPage() {
   const project = premiumMacaronDetail;
+  const REVIEWS_PER_PAGE = 5;
   const progressRate = Math.round((project.funding.raised / project.funding.goal) * 100);
   const progressWidth = Math.min(progressRate, 100);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [activeDetailTab, setActiveDetailTab] = useState('story');
+  const [reviewPage, setReviewPage] = useState(1);
   const rewardSectionRef = useRef(null);
+  const reviews = project.reviews ?? [];
+  const detailTabs = [
+    { id: 'story', label: '프로젝트 스토리' },
+    { id: 'reviews', label: `후기 (${reviews.length})` },
+  ];
+  const totalReviewPages = Math.max(1, Math.ceil(reviews.length / REVIEWS_PER_PAGE));
+  const currentReviewPage = Math.min(reviewPage, totalReviewPages);
+  const paginatedReviews = reviews.slice(
+    (currentReviewPage - 1) * REVIEWS_PER_PAGE,
+    currentReviewPage * REVIEWS_PER_PAGE,
+  );
 
   const navigate = useNavigate();
 
@@ -25,6 +39,14 @@ export default function ProductDetailPage() {
   const toggleFollow = () => {
     setIsFollowing((prev) => !prev);
   };
+
+  const handleTabSelect = (tabId) => {
+    setActiveDetailTab(tabId);
+    if (tabId === 'reviews') {
+      setReviewPage(1);
+    }
+  };
+
 
   const handleCreatorProfileClick = () => {
     console.log('Creator profile clicked');
@@ -117,59 +139,124 @@ export default function ProductDetailPage() {
           </div>
         </section>
 
+        <div className="detail-tabs" role="tablist" aria-label="프로젝트 스토리 및 후기">
+          {detailTabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`detail-tab${activeDetailTab === tab.id ? ' is-active' : ''}`}
+              onClick={() => handleTabSelect(tab.id)}
+              role="tab"
+              aria-selected={activeDetailTab === tab.id}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="detail-layout">
           <div className="detail-main">
             <section className="detail-section">
-              <h2>프로젝트 스토리</h2>
-              {project.story.map((block) => (
-                <article key={block.heading} className="detail-story-block">
-                  <h3>{block.heading}</h3>
-                  {block.body.map((paragraph, index) => (
-                    <p key={index}>{paragraph}</p>
-                  ))}
-                  {block.highlights && (
-                    <ul className="detail-story-list">
-                      {block.highlights.map((highlight) => (
-                        <li key={highlight}>{highlight}</li>
+              {activeDetailTab === 'story' && (
+                <div role="tabpanel">
+                  <h2>프로젝트 스토리</h2>
+                  {project.story.map((block) => (
+                    <article key={block.heading} className="detail-story-block">
+                      <h3>{block.heading}</h3>
+                      {block.body.map((paragraph, index) => (
+                        <p key={index}>{paragraph}</p>
                       ))}
-                    </ul>
-                  )}
-                  {block.image && (
-                    <figure>
-                      <img src={block.image} alt={block.caption ?? block.heading} />
-                      {block.caption && <figcaption>{block.caption}</figcaption>}
-                    </figure>
-                  )}
-                </article>
-              ))}
-            </section>
+                      {block.highlights && (
+                        <ul className="detail-story-list">
+                          {block.highlights.map((highlight) => (
+                            <li key={highlight}>{highlight}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {block.image && (
+                        <figure>
+                          <img src={block.image} alt={block.caption ?? block.heading} />
+                          {block.caption && <figcaption>{block.caption}</figcaption>}
+                        </figure>
+                      )}
+                    </article>
+                  ))}
+                </div>
+              )}
 
-            <section className="detail-section">
-              <h2>생산 및 배송 일정</h2>
-              <ul className="detail-timeline">
-                {project.timeline.map((item) => (
-                  <li key={item.title}>
-                    <div className="detail-timeline__date">{item.date}</div>
-                    <div>
-                      <h3>{item.title}</h3>
-                      <p>{item.description}</p>
+              {activeDetailTab === 'reviews' && (
+                <div role="tabpanel">
+                  <h2>후기</h2>
+                  {reviews.length === 0 ? (
+                    <p className="detail-review-empty">아직 작성된 후기가 없습니다.</p>
+                  ) : (
+                    <div className="detail-review-list">
+                      {paginatedReviews.map((review) => (
+                        <article key={review.id} className="detail-review">
+                          <div className="detail-review__header">
+                            <strong>{review.title}</strong>
+                            <span>{review.date}</span>
+                          </div>
+                          <div className="detail-review__meta">
+                            <span>{review.author}</span>
+                            <span className="detail-review__rating" aria-label={`별점 ${review.rating}점`}>
+                              {'★'.repeat(review.rating)}{'☆'.repeat(Math.max(0, 5 - review.rating))}
+                            </span>
+                          </div>
+                          <p>{review.body}</p>
+                        </article>
+                      ))}
+                      {totalReviewPages > 1 && (
+                        <div className="detail-review-pagination" role="navigation" aria-label="후기 페이지">
+                          {Array.from({ length: totalReviewPages }, (_, index) => index + 1).map((page) => (
+                            <button
+                              key={`review-page-${page}`}
+                              type="button"
+                              className={`detail-pagination__button${currentReviewPage === page ? ' is-active' : ''}`}
+                              onClick={() => setReviewPage(page)}
+                              aria-current={currentReviewPage === page ? 'page' : undefined}
+                            >
+                              {page}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </li>
-                ))}
-              </ul>
+                  )}
+                </div>
+              )}
             </section>
 
-            <section className="detail-section">
-              <h2>FAQ</h2>
-              <div className="detail-faq">
-                {project.faqs.map((faq) => (
-                  <details key={faq.question}>
-                    <summary>{faq.question}</summary>
-                    <p>{faq.answer}</p>
-                  </details>
-                ))}
-              </div>
-            </section>
+            {activeDetailTab === 'story' && (
+              <>
+                <section className="detail-section">
+                  <h2>생산 및 배송 일정</h2>
+                  <ul className="detail-timeline">
+                    {project.timeline.map((item) => (
+                      <li key={item.title}>
+                        <div className="detail-timeline__date">{item.date}</div>
+                        <div>
+                          <h3>{item.title}</h3>
+                          <p>{item.description}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section className="detail-section">
+                  <h2>FAQ</h2>
+                  <div className="detail-faq">
+                    {project.faqs.map((faq) => (
+                      <details key={faq.question}>
+                        <summary>{faq.question}</summary>
+                        <p>{faq.answer}</p>
+                      </details>
+                    ))}
+                  </div>
+                </section>
+              </>
+            )}
           </div>
 
           <aside className="detail-sidebar">

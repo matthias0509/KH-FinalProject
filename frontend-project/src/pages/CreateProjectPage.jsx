@@ -33,6 +33,7 @@ const CustomImage = Image.extend({
 });
 
 const emptyReward = { title: '', price: '', description: '', shipping: '' };
+const MAX_REWARDS = 5;
 
 const STORY_GUIDE = `
 <h1><strong>안녕하세요. 스토리 작성을 시작한 메이커님을 환영해요!</strong></h1>
@@ -130,6 +131,8 @@ export default function CreateProjectPage() {
     const paragraphAlign = editor.getAttributes('paragraph').textAlign;
     return headingAlign || paragraphAlign || 'left';
   })();
+
+  const canAddMoreRewards = formData.rewards.length < MAX_REWARDS;
 
   const updateField = (event) => {
     const { name, value } = event.target;
@@ -267,6 +270,10 @@ export default function CreateProjectPage() {
   };
 
   const addReward = () => {
+    if (formData.rewards.length >= MAX_REWARDS) {
+      window.alert(`리워드는 최대 ${MAX_REWARDS}개까지만 추가할 수 있습니다.`);
+      return;
+    }
     setFormData((prev) => ({ ...prev, rewards: [...prev.rewards, { ...emptyReward }] }));
     window.setTimeout(() => {
       rewardListEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -637,7 +644,15 @@ export default function CreateProjectPage() {
                 </div>
               ))}
               <div ref={rewardListEndRef} />
-              <button type="button" className="array-field__add" onClick={addReward}>
+              {!canAddMoreRewards && (
+                <p className="array-field__hint">리워드는 최대 {MAX_REWARDS}개까지만 추가할 수 있습니다.</p>
+              )}
+              <button
+                type="button"
+                className="array-field__add"
+                onClick={addReward}
+                disabled={!canAddMoreRewards}
+              >
                 리워드 추가
               </button>
             </section>
