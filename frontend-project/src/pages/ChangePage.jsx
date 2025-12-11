@@ -141,6 +141,7 @@ export default function ChangePage() {
 
         <section className="change-page__section" ref={formRef}>
           <div className="change-page__section-header">
+            <br />
             <h2>전환 신청서</h2>
             <p>정확한 정보 입력 시 승인까지 더 빨라집니다.</p>
           </div>
