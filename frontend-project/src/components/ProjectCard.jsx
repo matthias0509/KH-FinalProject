@@ -1,10 +1,11 @@
 import { Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function ProjectCard({ project, variant = 'featured' }) {
   const rate = Math.floor((project.current / project.goal) * 100);
   const daysLabel = variant === 'featured' ? `${project.daysLeft}일 남음` : `${project.daysLeft}일`;
 
-  return (
+  const cardContent = (
     <div className={`project-card${variant === 'compact' ? ' project-card--compact' : ''}`}>
       <div className="project-card__media">
         <img src={project.image} alt={project.title} className="project-card__image" />
@@ -33,4 +34,14 @@ export default function ProjectCard({ project, variant = 'featured' }) {
       </div>
     </div>
   );
+
+  if (project.detailPath) {
+    return (
+      <Link to={project.detailPath} className="project-card__link">
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }

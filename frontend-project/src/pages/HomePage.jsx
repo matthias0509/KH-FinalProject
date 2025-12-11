@@ -29,7 +29,7 @@ export default function HomePage() {
         selectedCategory={selectedCategory}
         onSelect={setSelectedCategory}
       />
-      <HeroSlider slides={slides} />
+      {isAllCategory && <HeroSlider slides={slides} />}
 
       <main className="main-content">
         {isAllCategory ? (

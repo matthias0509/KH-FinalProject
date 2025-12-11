@@ -19,6 +19,7 @@ export const projects = [
     goal: 10000000,
     backers: 342,
     daysLeft: 37,
+    detailPath: '/projects/premium-macarons',
   },
   {
     id: 2,
@@ -118,3 +119,107 @@ export const slides = [
     image: 'https://images.unsplash.com/photo-1629642621587-9947ce328799?w=1200&h=500&fit=crop',
   },
 ];
+
+export const premiumMacaronDetail = {
+  id: 1,
+  slug: 'premium-macarons',
+  title: '프리미엄 수제 마카롱 정기구독',
+  subtitle: '매주 갓 만든 프리미엄 마카롱을 문 앞까지, 최소한의 당으로 더 가볍게 즐겨보세요.',
+  category: '디저트',
+  location: '서울 성동구',
+  heroImage:
+    'https://images.unsplash.com/photo-1569864358642-9d1684040f43?w=1200&h=800&fit=crop',
+  badges: ['정기구독', '당일 생산', '프리미엄 재료'],
+  funding: {
+    goal: 10000000,
+    raised: 15840000,
+    percent: 158,
+    daysLeft: 37,
+    backers: 342,
+  },
+  highlights: [
+    '프랑스산 발효버터와 유기농 재료만 사용합니다.',
+    '성수동 공방에서 오전 생산 · 오후 배송 시스템으로 운영합니다.',
+    '매달 시즌 한정 플레버 2종이 추가로 제공됩니다.',
+  ],
+  story: [
+    {
+      heading: '매주 새로운 감각의 프리미엄 마카롱',
+      body: [
+        '브루마카롱 랩은 프랑스 르꼬르동블루 출신 파티시에 3명이 모여 만든 디저트 브랜드입니다. 매일 새벽 4시부터 반죽을 시작하고, 오후 2시 이전에 전량 출고하여 신선한 식감을 그대로 전해드립니다.',
+        '설탕과 버터의 비율을 줄이고 시즌 과일퓨레와 견과류 페이스트를 직접 만들어 넣어, 진한 풍미는 유지하되 가벼운 여운만 남도록 설계했습니다.',
+      ],
+      image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1200&h=800&fit=crop',
+      caption: '성수동 공방의 오전 생산 라인',
+      highlights: [
+        '하루 최대 600세트 한정 생산',
+        'HACCP 인증 공정과 세척 시스템 구축',
+        '채식 고객을 위한 비건 옵션 주 1회 제공',
+      ],
+    },
+    {
+      heading: '정기구독자를 위한 커뮤니티와 혜택',
+      body: [
+        '정기구독을 신청하면 비공개 커뮤니티에 초대되어 다음 달 맛을 투표하고, 남은 재료로 만든 스페셜 굿즈를 받아볼 수 있습니다.',
+        '또한 배송 스케줄을 앱에서 자유롭게 변경할 수 있으며, 여행 기간에는 배송을 미루어도 구독 기간이 그대로 유지됩니다.',
+      ],
+      image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&h=800&fit=crop',
+      caption: '구독자와 함께 만드는 다음 시즌 맛 회의',
+    },
+  ],
+  timeline: [
+    { title: '프로젝트 오픈', date: '6월 1일', description: '얼리버드 구독 신청 시작' },
+    { title: '생산 준비', date: '6월 15일', description: '원재료 수급 및 시제품 생산 마무리' },
+    { title: '1차 배송', date: '7월 5일', description: '얼리버드/스탠다드 구독자 순차 발송' },
+    { title: '2차 배송', date: '7월 19일', description: '비건 옵션 포함 전 구독자 발송 완료' },
+  ],
+  rewards: [
+    {
+      id: 'reward-early',
+      title: '얼리버드 4주 구독',
+      price: 39000,
+      description: '첫 500명 한정, 주 1회 6구 구성 + 시즌 스페셜 2구 추가',
+      includes: ['총 4회 배송', '뮤제 플레버 카드 동봉', '7/5부터 순차 배송'],
+      shipping: '7월 1주차',
+    },
+    {
+      id: 'reward-standard',
+      title: '스탠다드 8주 구독',
+      price: 79000,
+      description: '가장 인기 있는 구성, 매달 새로운 시그니처 맛 포함',
+      includes: ['총 8회 배송', '비건 옵션 주 1회 선택 가능', '배송 일정 앱에서 자유 변경'],
+      shipping: '7월 2주차',
+    },
+    {
+      id: 'reward-gift',
+      title: '선물용 4세트 패키지',
+      price: 52000,
+      description: '감사 카드와 보냉 파우치 포함, 원하는 주소로 개별 배송 가능',
+      includes: ['4세트 x 6구 구성', '보냉 파우치 + 메시지 카드', '원하는 날짜 지정 배송'],
+      shipping: '7월 3주차',
+    },
+  ],
+  creator: {
+    name: '브루마카롱 랩',
+    avatar: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=240&h=240&fit=crop',
+    followers: 12840,
+    contact: 'hello@brumacarons.com',
+    sns: '@brumacarons',
+  },
+  faqs: [
+    {
+      question: '보관과 섭취 방법이 궁금해요.',
+      answer:
+        '수령 즉시 냉장 보관 후 20분 정도 실온에 두고 드시면 가장 부드럽습니다. 냉동 보관 시 2주 이내 섭취를 권장합니다.',
+    },
+    {
+      question: '비건 옵션 선택이 가능한가요?',
+      answer: '스탠다드 및 8주 이상 구독 시 주 1회 비건 레시피로 대체가 가능합니다. 배송 3일 전까지 앱에서 변경해주세요.',
+    },
+    {
+      question: '배송 일정은 어떻게 수정하나요?',
+      answer:
+        '마이페이지 > 구독 관리에서 원하는 주차를 선택하거나, 고객센터(카카오톡 채널 @brumacarons)로 문의하면 도와드립니다.',
+    },
+  ],
+};
