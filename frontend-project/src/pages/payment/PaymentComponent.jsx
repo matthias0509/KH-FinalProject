@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CreditCard, Lock } from 'lucide-react';
-import './style/PaymentComponent.css';
-import Header from '../Header';
+import './PaymentComponent.css';
+import Header from '../../components/Header';
 
 const PaymentComponent = () => {
   const [selectedReward, setSelectedReward] = useState({
