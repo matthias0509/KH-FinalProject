@@ -1,10 +1,8 @@
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
-import '../components/Login/LoginPage.css';
+import './Login/Login.css';
 
 function notice(){
-
-
     return (
         <div>
              <Header />
@@ -24,7 +22,7 @@ function notice(){
                         </div>
                     </header>
 
-                    {/* 공지사항 목록 더미*/}
+                    {/* 공지사항 목록 더미 ****** 나중에 컴포넌트로 빼기*/}
                     <div className="notice-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         <div className="notice-card project-card"> 
                             <div className="notice-card__body project-card__body" style={{ padding: '20px' }}>

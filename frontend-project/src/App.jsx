@@ -11,6 +11,7 @@ import ProfileEditPage from './pages/ProfileEditPage';
 
 import './App.css';
 
+
 import FundingHistoryPage from './pages/supporter/FundingHistoryPage';
 import FundingCancelPage from './pages/supporter/FundingCancelPage';
 import FundingDetailPage from './pages/supporter/FundingDetailPage';
@@ -21,10 +22,18 @@ import QnAPage from './pages/supporter/QnAPage';
 
 import LoginPage from './components/Login/LoginPage';
 
+import LoginPage from './pages/Login/LoginPage';
+
+
+
+import Paymentcompotnet from './components/payment/PaymentComponent';
+import CreateMember from './pages/Login/CreateMemberPage';
+
 import Paymentcompotnet from './pages/payment/PaymentComponent';
 import CreateMember from './components/Login/CreateMember';
 import ChangePage from './pages/ChangePage';
 import ChatComponent from './pages/chat/ChatComponent';
+
 
 
 export default function App() {

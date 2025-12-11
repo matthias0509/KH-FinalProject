@@ -1,5 +1,5 @@
 /* 1. 로그인 페이지 컨테이너 스타일 */
-.login-container-wrapper { /* 전체 페이지 레벨 컨테이너 */
+.login-container{
   max-width: 400px;
   margin: 80px auto; 
   padding: 0 24px;
@@ -92,6 +92,11 @@
 
 .link-group .separator {
   color: var(--border); 
+}
+
+.error-message {
+    color: var(--accent-strong, #ef4444);
+    font-size: 12px;
 }
 
 /* 공지사항 css */
