@@ -25,12 +25,12 @@ export default function ProjectsSection({
     return projects.slice(start, start + pageSize);
   }, [projects, page, pageSize]);
 
-  const handlePageChange = (direction) => {
-    setPage((prev) => {
-      if (direction === 'prev') return Math.max(0, prev - 1);
-      if (direction === 'next') return Math.min(totalPages - 1, prev + 1);
-      return prev;
-    });
+  const maxVisiblePages = 5;
+  const startPageIndex = Math.floor(page / maxVisiblePages) * maxVisiblePages;
+  const visiblePageNumbers = Array.from({ length: Math.min(maxVisiblePages, totalPages - startPageIndex) }, (_, index) => startPageIndex + index);
+
+  const goToPage = (target) => {
+    setPage(Math.max(0, Math.min(totalPages - 1, target)));
   };
 
   return (
@@ -57,18 +57,25 @@ export default function ProjectsSection({
           <button
             type="button"
             className="projects-pagination__button"
-            onClick={() => handlePageChange('prev')}
+            onClick={() => goToPage(page - 1)}
             disabled={page === 0}
           >
             이전
           </button>
-          <span className="projects-pagination__status">
-            {page + 1} / {totalPages}
-          </span>
+          {visiblePageNumbers.map((pageNumber) => (
+            <button
+              key={`page-${pageNumber}`}
+              type="button"
+              className={`projects-pagination__button${pageNumber === page ? ' is-active' : ''}`}
+              onClick={() => goToPage(pageNumber)}
+            >
+              {pageNumber + 1}
+            </button>
+          ))}
           <button
             type="button"
             className="projects-pagination__button"
-            onClick={() => handlePageChange('next')}
+            onClick={() => goToPage(page + 1)}
             disabled={page === totalPages - 1}
           >
             다음

@@ -421,18 +421,25 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 8px;
 }
 
 .projects-pagination__button {
   border: 1px solid var(--accent);
   background: #fff;
   border-radius: 999px;
-  padding: 8px 16px;
-  font-weight: 600;
+  padding: 8px 14px;
+  font-weight: 500;
   color: var(--accent);
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.projects-pagination__button.is-active {
+  background-color: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 6px 14px rgba(15, 118, 110, 0.25);
 }
 
 .projects-pagination__button:disabled {
@@ -444,10 +451,7 @@
   background-color: rgba(15, 118, 110, 0.08);
 }
 
-.projects-pagination__status {
-  font-weight: 600;
-  color: #4b5563;
-}
+/* status span removed */
 
 .project-card {
   background-color: var(--surface);
@@ -548,6 +552,7 @@
 
 .project-card__title {
   font-size: 16px;
+  line-height: 1.4;
   color: var(--text);
   margin: 0;
   display: -webkit-box;
@@ -555,10 +560,12 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: 44px;
 }
 
 .project-card--compact .project-card__title {
   font-size: 14px;
+  min-height: 38px;
 }
 
 .project-card__progress {

@@ -4,7 +4,6 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
 import Header from '../components/Header';
-import AppFooter from '../components/AppFooter';
 import TextAlignExtension from '../utils/textAlignExtension';
 
 const CustomImage = Image.extend({
@@ -383,7 +382,8 @@ export default function CreateProjectPage() {
                 type="text"
                 value={formData.title}
                 onChange={updateField}
-                placeholder="프리미엄 수제 마카롱 정기구독"
+                placeholder="25자 이내"
+                maxLength={25}
                 required
               />
             </div>
@@ -395,7 +395,8 @@ export default function CreateProjectPage() {
                 type="text"
                 value={formData.subtitle}
                 onChange={updateField}
-                placeholder="매주 갓 만든 프리미엄 마카롱을 문 앞에서 만나요"
+                maxLength={80}
+                placeholder="80자 이내"
                 required
               />
               <p className="form-help">상세 페이지와 프로젝트 카드에 함께 노출되는 짧은 설명입니다.</p>

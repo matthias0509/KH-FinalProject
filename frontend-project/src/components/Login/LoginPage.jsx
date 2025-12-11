@@ -59,7 +59,7 @@ function LoginPage() {
           </form>
           {/* 기타 이동 링크 그룹 */}
           <div className="link-group">
-            <Link to="/signup" className="link">회원가입</Link>
+            <Link to="/createmember" className="link">회원가입</Link>
             <span className="separator">|</span>
             <Link to="/find-id" className="link">아이디 찾기</Link>
             <span className="separator">|</span>
