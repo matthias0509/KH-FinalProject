@@ -38,6 +38,27 @@ export default function ProductDetailPage() {
     navigate('/payment')
   }
 
+  const handleOpenChat = () => {
+  const width = 400;
+  const height = 650;
+  const left = window.screen.width - width - 100;
+  const top = (window.screen.height - height) / 2;
+  
+  const chatWindow = window.open(
+    `/chat`,
+    'ChatWindow',
+    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no`
+  );
+  
+  // 창이 로드되면 데이터 전달
+  chatWindow.onload = () => {
+    chatWindow.postMessage({
+      type: 'CREATOR_DATA',
+      creator: project.creator
+    }, window.location.origin);
+  };
+};
+
   return (
     <div className="app">
       <Header />
@@ -175,7 +196,7 @@ export default function ProductDetailPage() {
                 >
                   {isFollowing ? '팔로잉' : '팔로우'}
                 </button>
-                <button type="button" className="detail-cta detail-cta--chat">
+                <button type="button" className="detail-cta detail-cta--chat" onClick={handleOpenChat}>
                   1:1 문의하기
                 </button>
               </div>

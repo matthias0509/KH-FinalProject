@@ -2,18 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Paperclip, Smile } from 'lucide-react';
 import './ChatComponent.css';
 
-const ChatPage = () => {
-  // URL에서 creatorId 가져오기
-  const urlParams = new URLSearchParams(window.location.search);
-  const creatorId = urlParams.get('creatorId');
-
-  // 실제로는 creatorId로 데이터를 fetch 해야 하지만, 여기서는 하드코딩
-  const creator = {
-    id: creatorId,
-    name: '브루마카롱 랩',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop'
-  };
-
+const ChatComponent = () => {
+  // creator 상태 추가
+  const [creator, setCreator] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
     {
@@ -24,6 +15,27 @@ const ChatPage = () => {
     }
   ]);
   const messagesEndRef = useRef(null);
+
+  // 부모 창으로부터 creator 데이터 받기
+  useEffect(() => {
+    const handleMessage = (event) => {
+      // 보안: 같은 origin에서 온 메시지만 처리
+      if (event.origin !== window.location.origin) return;
+      
+      if (event.data.type === 'CREATOR_DATA') {
+        setCreator(event.data.creator);
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    
+    // 부모 창에 준비됐다고 알림
+    if (window.opener) {
+      window.opener.postMessage({ type: 'CHAT_READY' }, window.location.origin);
+    }
+    
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -76,8 +88,20 @@ const ChatPage = () => {
     window.close();
   };
 
+  // creator 데이터 로딩 중
+  if (!creator) {
+    return (
+      <div className="chat-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', color: '#6b7280' }}>
+          <div style={{ fontSize: '14px' }}>로딩 중...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="chat-page">
+      {/* 나머지 코드는 동일... */}
       {/* Header */}
       <div className="chat-page__header">
         <div className="chat-page__creator">
@@ -147,4 +171,4 @@ const ChatPage = () => {
   );
 };
 
-export default ChatPage;
+export default ChatComponent;

@@ -37,7 +37,7 @@ export default function HeroSlider({ slides, interval = 5000 }) {
             onClick={() => setCurrent((current - 1 + slides.length) % slides.length)}
             aria-label="이전 슬라이드"
           >
-            <ChevronLeft size={24} color="#111827" />
+            <ChevronLeft size={24} color="#ff3700ff" />
           </button>
           <button
             type="button"
@@ -45,7 +45,7 @@ export default function HeroSlider({ slides, interval = 5000 }) {
             onClick={() => setCurrent((current + 1) % slides.length)}
             aria-label="다음 슬라이드"
           >
-            <ChevronRight size={24} color="#111827" />
+            <ChevronRight size={24} color="#ff3700ff" />
           </button>
           <div className="hero__indicators">
             {slides.map((_, idx) => (
