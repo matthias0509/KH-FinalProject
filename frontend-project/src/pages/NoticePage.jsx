@@ -1,6 +1,6 @@
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
-import '../components/Login/LoginPage.css';
+import './Login/Login.css';
 
 function notice(){
     return (
