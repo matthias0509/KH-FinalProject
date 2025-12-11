@@ -36,7 +36,6 @@ export default function HomePage() {
           <div className="home-grid">
             <ProjectsSection
               title="주목할 만한 프로젝트"
-              count={filteredProjects.length}
               projects={filteredProjects}
               variant="featured"
               limit={6}
