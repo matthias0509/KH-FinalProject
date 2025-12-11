@@ -48,6 +48,7 @@ export default function Header() {
             <a href="/" className="header__nav-link">푸슐랭</a>
             <a href="/imbak" className="header__nav-link">마감임박</a>
             <a href="/notice" className="header__nav-link">공지사항</a>
+            <a href="/change" className='header__nav-link'>삭제예정 (메이커 전환)</a>
           </nav>
         </div>
         <div className="header__actions">

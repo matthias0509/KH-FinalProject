@@ -4,7 +4,9 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
 import Header from '../components/Header';
+import AppFooter from '../components/AppFooter';
 import TextAlignExtension from '../utils/textAlignExtension';
+import { categories } from '../data/content';
 
 const CustomImage = Image.extend({
   addAttributes() {
@@ -80,6 +82,7 @@ export default function CreateProjectPage() {
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
+    category: categories[1]?.name ?? '',
     heroImage: '',
     heroImageName: '',
     storyHtml: STORY_GUIDE,
@@ -311,6 +314,7 @@ export default function CreateProjectPage() {
     const payload = {
       title: formData.title.trim(),
       subtitle: formData.subtitle.trim(),
+      category: formData.category,
       heroImage: formData.heroImage,
       heroImageName: formData.heroImageName,
       storyHtml: editor?.getHTML() ?? '',
@@ -400,6 +404,24 @@ export default function CreateProjectPage() {
                 required
               />
               <p className="form-help">상세 페이지와 프로젝트 카드에 함께 노출되는 짧은 설명입니다.</p>
+            </div>
+            <div className="form-group">
+              <label htmlFor="project-category">카테고리</label>
+              <select
+                id="project-category"
+                name="category"
+                value={formData.category}
+                onChange={updateField}
+                required
+              >
+                {categories
+                  .filter((category) => category.name !== '전체')
+                  .map((category) => (
+                    <option key={category.name} value={category.name}>
+                      {category.name}
+                    </option>
+                  ))}
+              </select>
             </div>
             <div className="form-group">
               <label htmlFor="project-hero">대표 이미지 (썸네일)</label>

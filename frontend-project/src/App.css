@@ -520,6 +520,215 @@
   border-color: rgba(79, 70, 229, 0.2);
 }
 
+.change-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 64px 24px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.change-page__hero {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 32px;
+  align-items: stretch;
+}
+
+.change-page__badge {
+  display: inline-flex;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background-color: rgba(15, 118, 110, 0.1);
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.change-page__hero h1 {
+  font-size: 36px;
+  margin: 0 0 16px;
+}
+
+.change-page__hero p {
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.change-page__hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.change-page__cta {
+  border-radius: 12px;
+  border: none;
+  padding: 14px 24px;
+  font-weight: 600;
+  cursor: pointer;
+  background-image: linear-gradient(to right, var(--accent), var(--accent-strong));
+  color: #fff;
+}
+
+.change-page__cta--ghost {
+  background: transparent;
+  border: 1px solid rgba(15, 118, 110, 0.4);
+  color: var(--accent);
+}
+
+.change-page__hero-card {
+  background-color: #fff;
+  border-radius: 24px;
+  padding: 28px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 20px 50px rgba(17, 24, 39, 0.08);
+}
+
+.change-page__hero-card h3 {
+  margin: 0 0 16px;
+}
+
+.change-page__hero-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.change-page__hero-card li {
+  padding-left: 14px;
+  border-left: 3px solid rgba(15, 118, 110, 0.3);
+}
+
+.change-page__hero-card strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.change-page__section {
+  background-color: #fff;
+  padding: 32px;
+  border-radius: 24px;
+  border: 1px solid #eef2ff;
+  box-shadow: 0 12px 40px rgba(79, 70, 229, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.change-page__section-header h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.change-page__section-header p {
+  color: #6b7280;
+  margin: 8px 0 0;
+}
+
+.change-page__requirements {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.change-page__requirements li {
+  padding: 16px;
+  border-radius: 12px;
+  background-color: rgba(249, 250, 251, 0.9);
+  border: 1px dashed rgba(107, 114, 128, 0.4);
+}
+
+.change-page__benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.change-page__benefits article {
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  background-color: rgba(15, 118, 110, 0.04);
+}
+
+.change-page__form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.change-page__form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.change-page__form label,
+.change-page__textarea {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.change-page__form input,
+.change-page__form textarea,
+.change-page__upload input {
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  background-color: #f9fafb;
+  font-family: inherit;
+}
+
+.change-page__upload {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.change-page__upload span {
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.change-page__submit {
+  align-self: flex-start;
+  padding: 14px 28px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  background-image: linear-gradient(to right, var(--accent), var(--accent-strong));
+  color: #fff;
+  cursor: pointer;
+}
+
+.change-page__submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.change-page__success {
+  color: #0f766e;
+  font-weight: 600;
+}
+
+@media (max-width: 960px) {
+  .change-page__hero {
+    grid-template-columns: 1fr;
+  }
+}
+
 .project-card__body {
   padding: 20px;
   display: flex;
@@ -1199,8 +1408,8 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
-  max-width: 960px;
-  padding: 80px 64px 120px 32px;
+  max-width: 1040px;
+  padding: 80px 72px 120px 40px;
 }
 
 .create-project__intro {
