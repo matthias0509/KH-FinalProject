@@ -1,0 +1,111 @@
+/* =========================================
+   [Q&A 게시판 스타일 - 버튼 위치 수정본]
+   파일명: src/styles/QnA.css
+   ========================================= */
+
+/* 페이지 제목 */
+.page-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 30px; /* 제목과 필터 사이 간격 */
+}
+
+/* [NEW] 필터와 버튼을 감싸는 컨테이너 (양 끝 정렬) */
+.filter-container {
+    display: flex;
+    justify-content: space-between; /* 탭은 왼쪽, 버튼은 오른쪽 */
+    align-items: center;
+    margin-bottom: 20px; /* 리스트와의 간격 */
+}
+
+/* 필터 탭 (마진 제거) */
+.filter-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 0; /* 컨테이너가 간격을 담당하므로 0으로 변경 */
+}
+
+/* 문의하기 버튼 */
+.write-btn {
+    background-color: #b91c1c;
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.write-btn:hover {
+    background-color: #991b1b;
+}
+
+/* 리스트 컨테이너 */
+.qna-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* 문의 아이템 박스 */
+.qna-item {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.qna-item:hover {
+    border-color: #f97316;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* 아이템 헤더 */
+.qna-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #868e96;
+    margin-bottom: 8px;
+}
+.qna-meta { display: flex; gap: 8px; }
+.qna-type { color: #f97316; font-weight: bold; }
+
+/* 아이템 본문 */
+.qna-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.qna-title {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.qna-title .lock-icon { font-size: 12px; }
+
+/* 상태 뱃지 */
+.qna-status {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+.qna-status.wait { background-color: #f1f3f5; color: #868e96; }
+.qna-status.done { background-color: #fee2e2; color: #b91c1c; }
+
+/* 빈 상태 */
+.empty-state {
+    text-align: center;
+    padding: 80px 0;
+    color: #adb5bd;
+    border: 1px dashed #dee2e6;
+    border-radius: 8px;
+    background-color: #fff;
+}

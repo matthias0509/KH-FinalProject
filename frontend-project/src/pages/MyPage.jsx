@@ -1,0 +1,150 @@
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
+import AppFooter from '../components/AppFooter';
+import Sidebar from '../components/Sidebar';
+
+import '../styles/MyPageLayout.css'; // 공통 레이아웃
+import '../styles/MyPage.css';       // 대시보드 및 리스트 스타일
+
+const MyPage = () => {
+    const navigate = useNavigate();
+
+    // 유스케이스: [내 정보 조회] 가상 데이터 + role(권한)
+    const userInfo = {
+        name: '푸딩러버',
+        profileImg: '🍮',
+        role: 'maker', // 권한 예시
+        
+        // ★ 배너에 표시할 활동 카운트 정보
+        stats: {
+            fundingCount: 12, // 후원 참여 수
+            followingCount: 5, // 팔로우한 메이커 수
+            likedCount: 8      // 좋아요한 프로젝트 수
+        }
+    };
+
+    // 유스케이스: [후원 내역 조회] 데이터
+    const fundingHistory = [
+        {
+            id: 101,
+            title: '입안에서 사르르 녹는 수제 커스터드 푸딩',
+            status: '결제완료',
+            amount: 25000,
+            date: '2025.10.24',
+            img: 'https://via.placeholder.com/100'
+        },
+    ];
+
+    // 유스케이스: [좋아요한 프로젝트 목록] 데이터
+    const likedProjects = [
+        { id: 1, title: '초코 듬뿍 브라우니', percent: 120, img: 'https://via.placeholder.com/150' },
+        { id: 2, title: '제주 말차 라떼 키트', percent: 85, img: 'https://via.placeholder.com/150' },
+        { id: 3, title: '비건 쌀 쿠키', percent: 240, img: 'https://via.placeholder.com/150' },
+    ];
+
+    // 메이커 버튼 클릭 핸들러 (권한 체크)
+    const handleMakerClick = () => {
+        if (userInfo.role !== 'maker') {
+            const confirmRequest = window.confirm("메이커 권한이 없습니다.\n관리자에게 권한을 신청하시겠습니까?");
+            if (confirmRequest) {
+                alert("관리자에게 메이커 권한을 요청했습니다! (승인 대기 중)");
+            }
+        } else {
+            navigate('/maker');
+        }
+    };
+
+    return (
+        <div className="page-wrapper">
+            <Header />
+            <div className="mypage-container">
+                <Sidebar userInfo={userInfo} />
+
+                {/* --- 메인 콘텐츠 (Dashboard) --- */}
+                <main className="main-content">
+                    <h2 className="greeting">{userInfo.name}님 반가워요! 👋</h2>
+
+                    {/* ★ [수정됨] 활동 현황 배너 (포인트 카드 대신) */}
+                    <div className="activity-banner">
+                        <div className="activity-item">
+                            <span className="icon">🎁</span>
+                            <span className="label">후원 참여</span>
+                            <span className="value">{userInfo.stats.fundingCount}</span>
+                        </div>
+                        <div className="divider-vertical"></div>
+                        <div className="activity-item">
+                            <span className="icon">❤️</span>
+                            <span className="label">좋아요</span>
+                            <span className="value">{userInfo.stats.likedCount}</span>
+                        </div>
+                        <div className="divider-vertical"></div>
+                        <div className="activity-item">
+                            <span className="icon">👀</span>
+                            <span className="label">팔로잉</span>
+                            <span className="value">{userInfo.stats.followingCount}</span>
+                        </div>
+                    </div>
+
+                    {/* 최근 후원 내역 섹션 */}
+                    <section className="section-block">
+                        <div className="section-header">
+                            <h3>최근 후원 내역</h3>
+                            <Link to="/history" className="more-link">더보기 &gt;</Link>
+                        </div>
+                        
+                        {fundingHistory.length > 0 ? (
+                            <div className="funding-list">
+                                {fundingHistory.map(item => (
+                                    <div key={item.id} className="funding-item">
+                                        <img src={item.img} alt="썸네일" className="thumb" />
+                                        <div className="info">
+                                            <div className="status-row">
+                                                <span className="date">{item.date}</span>
+                                                <span className={`status-badge ${item.status === '결제완료' ? 'done' : ''}`}>
+                                                    {item.status}
+                                                </span>
+                                            </div>
+                                            <p className="title">{item.title}</p>
+                                            <p className="amount">{item.amount.toLocaleString()}원</p>
+                                        </div>
+                                        <Link to={`/history/${item.id}`} className="detail-btn">상세 보기</Link>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="empty-box">
+                                <p>아직 후원한 내역이 없습니다.</p>
+                            </div>
+                        )}
+                    </section>
+
+                    {/* 좋아요한 프로젝트 섹션 */}
+                    <section className="section-block">
+                        <div className="section-header">
+                            <h3>좋아요한 프로젝트 ❤️</h3>
+                            <Link to="/like" className="more-link">전체보기 &gt;</Link>
+                        </div>
+                        <div className="card-list">
+                            {likedProjects.map((item) => (
+                                <div key={item.id} className="product-card">
+                                    <div className="img-wrapper">
+                                        <img src={item.img} alt={item.title} />
+                                        <button className="heart-btn active">♥</button>
+                                    </div>
+                                    <div className="card-info">
+                                        <p className="percent">{item.percent}% 달성</p>
+                                        <p className="title">{item.title}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                </main>
+            </div>
+            <AppFooter />
+        </div>
+    );
+};
+
+export default MyPage;
