@@ -1384,8 +1384,8 @@
 }
 
 .footer__logo {
-  height: 32px;
-  margin-bottom: 16px;
+  height: 140px;
+  margin: auto;
   filter: brightness(0) invert(1);
 }
 

@@ -43,13 +43,31 @@ export default function Header() {
     <header className="app-header">
       <div className="header__inner">
         <div className="header__brand">
+          <Link to="/">
           <img src={logo} alt="Foodding" className="header__logo" />
+          </Link>
           <nav className="header__nav">
-            <a href="/" className="header__nav-link">푸슐랭</a>
-            <a href="/imbak" className="header__nav-link">마감임박</a>
-            <a href="/notice" className="header__nav-link">공지사항</a>
-            <a href="/change" className='header__nav-link'>(메이커 전환)</a>
-            <a href="/login" className='header__nav-link'>(로그인)</a>
+            
+            <Link to = "/" > 
+              <a className="header__nav-link">푸슐랭</a>
+            </Link>
+
+            <Link to="/imbak">
+              <a className="header__nav-link">마감임박</a>
+            </Link>
+
+            <Link to="/notice">
+              <a className="header__nav-link">공지사항</a>
+            </Link>
+           
+            <Link to="/change">
+              <a className='header__nav-link'>(메이커 전환)</a>
+            </Link>
+            
+            <Link to="login">
+              <a className='header__nav-link'>(로그인)</a>
+            </Link>
+           
           </nav>
         </div>
         <div className="header__actions">
