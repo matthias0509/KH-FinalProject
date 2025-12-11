@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -52,10 +52,35 @@ const BLOCK_OPTIONS = [
   { label: '소제목', value: 'heading-4' },
 ];
 
+const formatDateForInput = (date) => {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().split('T')[0];
+};
+
+const addMonths = (date, months) => {
+  const result = new Date(date);
+  result.setMonth(result.getMonth() + months);
+  return result;
+};
+
+const addDays = (date, days) => {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+};
+
+const parseDateInput = (value) => (value ? new Date(`${value}T00:00:00`) : null);
+
 export default function CreateProjectPage() {
   const storyImageInputRef = useRef(null);
+  const basicsRef = useRef(null);
+  const storyRef = useRef(null);
+  const scheduleRef = useRef(null);
+  const rewardSectionRef = useRef(null);
+  const rewardListEndRef = useRef(null);
   const [formData, setFormData] = useState({
     title: '',
+    subtitle: '',
     heroImage: '',
     heroImageName: '',
     storyHtml: STORY_GUIDE,
@@ -80,6 +105,10 @@ export default function CreateProjectPage() {
   });
 
   const editorReady = Boolean(editor);
+  const minStartDateValue = useMemo(() => formatDateForInput(addDays(new Date(), 7)), []);
+  const startDateValue = parseDateInput(formData.openStart);
+  const endDateMin = startDateValue ? formData.openStart : minStartDateValue;
+  const endDateMax = formatDateForInput(addMonths(startDateValue ?? addDays(new Date(), 7), 2));
 
   const activeBlock = (() => {
     if (!editor) return 'paragraph';
@@ -231,8 +260,15 @@ export default function CreateProjectPage() {
     }));
   };
 
+  const scrollToSection = (sectionRef) => {
+    sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const addReward = () => {
     setFormData((prev) => ({ ...prev, rewards: [...prev.rewards, { ...emptyReward }] }));
+    window.setTimeout(() => {
+      rewardListEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 0);
   };
 
   const removeReward = (index) => {
@@ -252,8 +288,30 @@ export default function CreateProjectPage() {
       return;
     }
 
+    const minStartDate = addDays(new Date(), 7);
+    minStartDate.setHours(0, 0, 0, 0);
+    const startDateValue = parseDateInput(formData.openStart);
+    const endDateValue = parseDateInput(formData.openEnd);
+
+    if (!startDateValue || startDateValue < minStartDate) {
+      window.alert('오픈 시작일은 오늘 기준 7일 이후로 설정해 주세요.');
+      return;
+    }
+
+    if (!endDateValue || endDateValue < startDateValue) {
+      window.alert('오픈 종료일은 시작일 이후로 설정해 주세요.');
+      return;
+    }
+
+    const maxEndDate = addMonths(startDateValue, 2);
+    if (endDateValue > maxEndDate) {
+      window.alert('프로젝트 기간은 최대 2개월까지만 설정할 수 있습니다.');
+      return;
+    }
+
     const payload = {
       title: formData.title.trim(),
+      subtitle: formData.subtitle.trim(),
       heroImage: formData.heroImage,
       heroImageName: formData.heroImageName,
       storyHtml: editor?.getHTML() ?? '',
@@ -276,24 +334,47 @@ export default function CreateProjectPage() {
     alert('임시 저장 기능은 준비 중입니다. DB 연결 후 제공될 예정입니다.');
   };
 
+  const sidebarSections = [
+    { id: 'basics', label: '기본 정보', ref: basicsRef },
+    { id: 'story', label: '스토리 작성', ref: storyRef },
+    { id: 'schedule', label: '오픈 기간 & 목표', ref: scheduleRef },
+    { id: 'rewards', label: '리워드 구성', ref: rewardSectionRef },
+  ];
+
   return (
     <div className="app">
       <Header />
-      <main className="main-content create-project">
-        <div className="create-project__intro">
-          <h1 className="section-title">프로젝트 올리기</h1>
-          <p className="create-project__description">
-            프로젝트 제목, 대표 썸네일(파일 업로드), Tiptap 리치 텍스트 스토리, 오픈 기간, 목표 금액,
-            리워드를 입력하여 상세 페이지 데이터를 준비하세요. 업로드된 이미지는 브라우저에 임시 저장됩니다.
-          </p>
-        </div>
+      <main className="create-project-layout">
+        <aside className="create-project__sidebar">
+          <div className="create-project__nav">
+            {sidebarSections.map((section) => (
+              <button
+                key={section.id}
+                type="button"
+                className="create-project__nav-button"
+                onClick={() => scrollToSection(section.ref)}
+              >
+                {section.label}
+              </button>
+            ))}
+          </div>
+        </aside>
 
-        <form className="create-project__form" onSubmit={handleSubmit}>
-          <section className="create-project__section">
-            <div className="create-project__section-header">
-              <h2>기본 정보</h2>
-              <p>프로젝트 카드와 상세 페이지 상단에 노출됩니다.</p>
-            </div>
+        <div className="create-project">
+          <div className="create-project__intro">
+            <h1 className="section-title">프로젝트 올리기</h1>
+            <p className="create-project__description">
+              프로젝트 제목, 대표 썸네일(파일 업로드),프로젝트 스토리, 오픈 기간, 목표 금액,
+              리워드를 입력하여 상세 페이지 데이터를 준비하세요.
+            </p>
+          </div>
+
+          <form className="create-project__form" onSubmit={handleSubmit}>
+            <section className="create-project__section" ref={basicsRef} id="basics">
+              <div className="create-project__section-header">
+                <h2>기본 정보</h2>
+                <p>프로젝트 카드와 상세 페이지 상단에 노출됩니다.</p>
+              </div>
             <div className="form-group">
               <label htmlFor="project-title">프로젝트 제목</label>
               <input
@@ -305,6 +386,19 @@ export default function CreateProjectPage() {
                 placeholder="프리미엄 수제 마카롱 정기구독"
                 required
               />
+            </div>
+            <div className="form-group">
+              <label htmlFor="project-subtitle">프로젝트 한 줄 설명</label>
+              <input
+                id="project-subtitle"
+                name="subtitle"
+                type="text"
+                value={formData.subtitle}
+                onChange={updateField}
+                placeholder="매주 갓 만든 프리미엄 마카롱을 문 앞에서 만나요"
+                required
+              />
+              <p className="form-help">상세 페이지와 프로젝트 카드에 함께 노출되는 짧은 설명입니다.</p>
             </div>
             <div className="form-group">
               <label htmlFor="project-hero">대표 이미지 (썸네일)</label>
@@ -325,14 +419,14 @@ export default function CreateProjectPage() {
               )}
               {imageError && <p className="form-help form-help--error">{imageError}</p>}
             </div>
-          </section>
+            </section>
 
-          <section className="create-project__section">
-            <div className="create-project__section-header">
-              <h2>프로젝트 스토리</h2>
-              <p>문단 스타일, 정렬, 이미지 업로드 등 다양한 서식을 사용할 수 있어요.</p>
-            </div>
-            <div className="rich-editor">
+            <section className="create-project__section" ref={storyRef} id="story">
+              <div className="create-project__section-header">
+                <h2>프로젝트 스토리</h2>
+                <p>문단 스타일, 정렬, 이미지 업로드 등 다양한 서식을 사용할 수 있어요.</p>
+              </div>
+              <div className="rich-editor">
               <div className="rich-editor__toolbar">
                 <select value={activeBlock} onChange={handleBlockChange} disabled={!editorReady}>
                   {BLOCK_OPTIONS.map((option) => (
@@ -413,14 +507,14 @@ export default function CreateProjectPage() {
               </div>
               <EditorContent editor={editor} className="tiptap-editor" />
             </div>
-          </section>
+            </section>
 
-          <section className="create-project__section">
-            <div className="create-project__section-header">
-              <h2>오픈 기간 & 목표</h2>
-              <p>상세 상단 진행 영역과 연결됩니다.</p>
-            </div>
-            <div className="form-grid">
+            <section className="create-project__section" ref={scheduleRef} id="schedule">
+              <div className="create-project__section-header">
+                <h2>오픈 기간 & 목표</h2>
+                <p>상세 상단 진행 영역과 연결됩니다.</p>
+              </div>
+              <div className="form-grid">
               <div className="form-group">
                 <label htmlFor="project-open-start">오픈 시작일</label>
                 <input
@@ -429,6 +523,7 @@ export default function CreateProjectPage() {
                   type="date"
                   value={formData.openStart}
                   onChange={updateField}
+                  min={minStartDateValue}
                   required
                 />
               </div>
@@ -440,6 +535,8 @@ export default function CreateProjectPage() {
                   type="date"
                   value={formData.openEnd}
                   onChange={updateField}
+                  min={endDateMin}
+                  max={endDateMax}
                   required
                 />
               </div>
@@ -449,7 +546,7 @@ export default function CreateProjectPage() {
                   id="project-goal"
                   name="goal"
                   type="number"
-                  min="100000"
+                  min="1000000"
                   step="10000"
                   value={formData.goal}
                   onChange={updateField}
@@ -457,81 +554,82 @@ export default function CreateProjectPage() {
                 />
               </div>
             </div>
-          </section>
+            </section>
 
-          <section className="create-project__section">
-            <div className="create-project__section-header">
-              <h2>리워드 구성</h2>
-              <p>리워드 선택 영역에 표시될 옵션을 추가하세요.</p>
-            </div>
-            {formData.rewards.map((reward, index) => (
-              <div key={`reward-${index}`} className="array-card">
-                <div className="form-grid">
+            <section className="create-project__section" ref={rewardSectionRef} id="rewards">
+              <div className="create-project__section-header">
+                <h2>리워드 구성</h2>
+                <p>리워드 선택 영역에 표시될 옵션을 추가하세요.</p>
+              </div>
+              {formData.rewards.map((reward, index) => (
+                <div key={`reward-${index}`} className="array-card">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>리워드명</label>
+                      <input
+                        type="text"
+                        value={reward.title}
+                        onChange={(event) => updateReward(index, 'title', event.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label>금액 (원)</label>
+                      <input
+                        type="number"
+                        min="10000"
+                        step="500"
+                        value={reward.price}
+                        onChange={(event) => updateReward(index, 'price', event.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
                   <div className="form-group">
-                    <label>리워드명</label>
+                    <label>설명</label>
+                    <textarea
+                      rows={2}
+                      value={reward.description}
+                      onChange={(event) => updateReward(index, 'description', event.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>배송 예정</label>
                     <input
                       type="text"
-                      value={reward.title}
-                      onChange={(event) => updateReward(index, 'title', event.target.value)}
+                      value={reward.shipping}
+                      placeholder="예) 7월 1주차"
+                      onChange={(event) => updateReward(index, 'shipping', event.target.value)}
                       required
                     />
                   </div>
-                  <div className="form-group">
-                    <label>금액 (원)</label>
-                    <input
-                      type="number"
-                      min="1000"
-                      step="500"
-                      value={reward.price}
-                      onChange={(event) => updateReward(index, 'price', event.target.value)}
-                      required
-                    />
-                  </div>
+                  <button
+                    type="button"
+                    className="array-card__remove"
+                    onClick={() => removeReward(index)}
+                  >
+                    리워드 삭제
+                  </button>
                 </div>
-                <div className="form-group">
-                  <label>설명</label>
-                  <textarea
-                    rows={2}
-                    value={reward.description}
-                    onChange={(event) => updateReward(index, 'description', event.target.value)}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>배송 예정</label>
-                  <input
-                    type="text"
-                    value={reward.shipping}
-                    placeholder="예) 7월 1주차"
-                    onChange={(event) => updateReward(index, 'shipping', event.target.value)}
-                    required
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="array-card__remove"
-                  onClick={() => removeReward(index)}
-                >
-                  리워드 삭제
-                </button>
-              </div>
-            ))}
-            <button type="button" className="array-field__add" onClick={addReward}>
-              리워드 추가
-            </button>
-          </section>
+              ))}
+              <div ref={rewardListEndRef} />
+              <button type="button" className="array-field__add" onClick={addReward}>
+                리워드 추가
+              </button>
+            </section>
 
-          <div className="create-project__actions">
-            <button type="button" className="header__cta create-project__submit" onClick={handleSaveDraft}>
-              임시 저장
-            </button>
-            <button type="submit" className="header__cta create-project__submit">
-              프로젝트 생성
-            </button>
-          </div>
-        </form>
+            <div className="create-project__actions">
+              <button type="button" className="header__cta create-project__submit" onClick={handleSaveDraft}>
+                임시 저장
+              </button>
+              <button type="submit" className="header__cta create-project__submit">
+                프로젝트 생성
+              </button>
+            </div>
+          </form>
+        </div>
       </main>
-      <AppFooter />
     </div>
   );
 }
