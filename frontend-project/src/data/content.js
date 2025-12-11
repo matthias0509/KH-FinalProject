@@ -12,7 +12,6 @@ export const categories = [
   { name: '간식/스낵', icon: '🍿' },
   { name: '지역/로컬', icon: '🏞️' },
   { name: '반려동물 간식', icon: '🐾' },
-  { name: '도구/키친웨어', icon: '🧂' },
 ];
 
 export const projects = [
