@@ -21,6 +21,8 @@ import FollowProjectPage from './pages/supporter/FollowProjectPage'
 import ChatHistoryPage from './pages/supporter/ChatHistoryPage'
 import QnAPage from './pages/supporter/QnAPage'
 
+import ChatComponent from './pages/chat/ChatComponent';
+
 
 
 export default function App() {
@@ -45,7 +47,8 @@ export default function App() {
       <Route path="/detail" element={<FundingDetailPage />} />
       <Route path="/like" element={<LikeProjectPage />} />
       <Route path="/follow" element={<FollowProjectPage />} />
-      <Route path="/chat" element={<ChatHistoryPage />} />
+      <Route path="/chat-history" element={<ChatHistoryPage />} />
+      <Route path="/chat" element={<ChatComponent />} />
       <Route path="/qna" element={<QnAPage />} />
     </Routes>
   );
