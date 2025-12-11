@@ -22,6 +22,7 @@ import ChatHistoryPage from './pages/supporter/ChatHistoryPage'
 import QnAPage from './pages/supporter/QnAPage'
 
 import ChatComponent from './pages/chat/ChatComponent';
+import PaymentComponent from './pages/payment/PaymentComponent'
 
 
 
@@ -50,6 +51,8 @@ export default function App() {
       <Route path="/chat-history" element={<ChatHistoryPage />} />
       <Route path="/chat" element={<ChatComponent />} />
       <Route path="/qna" element={<QnAPage />} />
+
+      <Route path='/payment' element={<PaymentComponent/>}/>
     </Routes>
   );
 }
