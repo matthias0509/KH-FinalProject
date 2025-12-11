@@ -29,6 +29,7 @@ export default function HomePage() {
         selectedCategory={selectedCategory}
         onSelect={setSelectedCategory}
       />
+      
       {isAllCategory && <HeroSlider slides={slides} />}
 
       <main className="main-content">

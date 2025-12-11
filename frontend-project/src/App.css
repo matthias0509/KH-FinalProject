@@ -1,5 +1,5 @@
 :root {
-  --app-bg: #f9fafb;
+  --app-bg: #ffffff;
   --surface: #ffffff;
   --surface-dark: #111827;
   --border: #e5e7eb;
@@ -185,7 +185,6 @@
 
 .category-bar {
   background-color: var(--surface);
-  border-bottom: 1px solid var(--border);
 }
 
 .category-bar__inner {
