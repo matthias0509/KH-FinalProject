@@ -13,7 +13,6 @@ import ChangePage from './pages/ChangePage';
 // 박성진
 import LoginPage from './pages/Login/LoginPage';
 import CreateMember from './pages/Login/CreateMemberPage';
-import ChangePage from './pages/ChangePage';
 import PaymentComponent from './pages/Payment/PaymentComponent';
 import MyPage from './pages/MyPage'
 import ProfileEditPage from './pages/ProfileEditPage'

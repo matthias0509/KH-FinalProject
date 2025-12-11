@@ -229,4 +229,30 @@ export const premiumMacaronDetail = {
         '마이페이지 > 구독 관리에서 원하는 주차를 선택하거나, 고객센터(카카오톡 채널 @brumacarons)로 문의하면 도와드립니다.',
     },
   ],
+  reviews: [
+    {
+      id: 'review-1',
+      author: 'sweet tooth',
+      rating: 5,
+      date: '2025.04.03',
+      title: '하루가 행복해지는 디저트',
+      body: '달지 않고 입안 가득 풍미가 넘쳐요. 배송 상태도 완벽했고 매주 새로운 맛을 기다리는 재미가 있어요.',
+    },
+    {
+      id: 'review-2',
+      author: '케이크러버',
+      rating: 4,
+      date: '2025.03.27',
+      title: '친구 선물용으로 강추',
+      body: '포장이 정말 고급스럽고, 선물 받은 친구가 너무 좋아했어요. 배송 일정만 조금 더 다양하면 좋겠네요.',
+    },
+    {
+      id: 'review-3',
+      author: 'vegan life',
+      rating: 5,
+      date: '2025.03.11',
+      title: '비건 옵션도 완벽!',
+      body: '비건 디저트 찾기 힘든데 재료와 맛 모두 잡았어요. 커뮤니티에서 다음 맛 투표하는 것도 참여감이 높아서 좋습니다.',
+    },
+  ],
 };
