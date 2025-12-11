@@ -8,9 +8,10 @@ import ProductDetailPage from './pages/ProductDetailPage';
 import './App.css';
 import LoginPage from './components/Login/LoginPage';
 
-import Paymentcompotnet from './components/payment/PaymentComponent';
+import Paymentcompotnet from './pages/payment/PaymentComponent';
 import CreateMember from './components/Login/CreateMember';
 import ChangePage from './pages/ChangePage';
+import ChatComponent from './pages/chat/ChatComponent';
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
       <Route path="/payment" element={<Paymentcompotnet />} />
       {/* path="/projects/:slug 예정 각 상품별 상세페이지 */}
       <Route path='/change' element={<ChangePage/>}/>
+      <Route path='/chat' element={<ChatComponent />}/>
     </Routes>
   );
 }
