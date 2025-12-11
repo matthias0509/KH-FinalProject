@@ -1,3 +1,5 @@
+import macaronImage from '../assets/마카롱.png';
+
 export const categories = [
   { name: '전체', icon: '🍽️' },
   { name: '베이커리', icon: '🥐' },
@@ -101,9 +103,9 @@ export const projects = [
 export const slides = [
   {
     id: 1,
-    title: '스토어 12월 신상 입점',
-    subtitle: '집주 애썸스무디 알리GO까지',
-    image: 'https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?w=1200&h=500&fit=crop',
+    title: '나랑 마카롱 먹으러 갈래?',
+    subtitle: '성수동 수제 마카롱',
+    image: macaronImage,
   },
   {
     id: 2,

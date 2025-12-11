@@ -357,10 +357,12 @@
 
 .hero__control--prev {
   left: 16px;
+  background-color: transparent;
 }
 
 .hero__control--next {
   right: 16px;
+  background-color: transparent;
 }
 
 .hero__control:hover {
