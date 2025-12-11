@@ -12,7 +12,7 @@ export default function AppFooter() {
             <h3 className="footer__heading">서비스</h3>
             <div className="footer__links">
               <a href="/" className="footer__link">푸슐랭</a>
-              <a href="/imbak" className="footer__link">마감입박</a>
+              <a href="/imbak" className="footer__link">마감임박</a>
 
             </div>
           </div>

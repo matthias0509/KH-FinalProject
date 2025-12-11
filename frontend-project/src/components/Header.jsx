@@ -64,7 +64,7 @@ export default function Header() {
               <a className='header__nav-link'>(메이커 전환)</a>
             </Link>
             
-            <Link to="login">
+            <Link to="/login">
               <a className='header__nav-link'>(로그인)</a>
             </Link>
            
