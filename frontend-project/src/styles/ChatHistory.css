@@ -1,0 +1,102 @@
+/* =========================================
+   [1:1 채팅 내역 페이지 스타일]
+   파일명: src/styles/ChatHistory.css
+   ========================================= */
+
+.chat-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* 채팅방 아이템 (카드) */
+.chat-item {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.chat-item:hover {
+    border-color: #f97316; /* 호버 시 오렌지 테두리 */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+}
+
+/* 프로필 이미지 */
+.chat-avatar-wrapper {
+    margin-right: 20px;
+}
+
+.chat-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+    background-color: #f9fafb;
+}
+
+/* 채팅 내용 영역 */
+.chat-content {
+    flex: 1;
+    overflow: hidden; /* 긴 텍스트 말줄임 처리를 위해 */
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.maker-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.chat-date {
+    font-size: 12px;
+    color: #adb5bd;
+}
+
+.last-message {
+    font-size: 14px;
+    color: #868e96;
+    white-space: nowrap;      /* 한 줄로 표시 */
+    overflow: hidden;         /* 넘치는 내용 숨김 */
+    text-overflow: ellipsis;  /* 말줄임표(...) */
+    max-width: 90%;
+}
+
+/* 안 읽은 메시지 뱃지 (빨강) */
+.unread-badge {
+    background-color: #b91c1c;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 15px;
+    padding: 0 6px;
+}
+
+/* 대화가 없을 때 */
+.empty-state {
+    text-align: center;
+    padding: 80px 0;
+    color: #adb5bd;
+    border: 1px dashed #dee2e6;
+    border-radius: 8px;
+    background-color: #fff;
+}

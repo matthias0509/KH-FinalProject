@@ -1,0 +1,102 @@
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import Header from '../../components/Header';
+import AppFooter from '../../components/AppFooter';
+import Sidebar from '../../components/Sidebar';
+// 스타일
+import '../../styles/MyPageLayout.css';
+import '../../styles/LikeFollow.css'; // 새로 만든 CSS
+
+const LikeProjectsPage = () => {
+    const navigate = useNavigate();
+
+    // 유저 정보
+    const userInfo = {
+        name: '푸딩러버',
+        profileImg: '🍮',
+        role: 'supporter'
+    };
+
+    // 가상 데이터: 좋아요한 프로젝트
+    const likedProjects = [
+        {
+            id: 1,
+            title: '10분 완성! 초간단 홈베이킹 키트',
+            maker: '베이킹마스터',
+            percent: 350,
+            img: 'https://via.placeholder.com/260'
+        },
+        {
+            id: 2,
+            title: '입안에서 녹는 수제 생초콜릿',
+            maker: '초코공방',
+            percent: 120,
+            img: 'https://via.placeholder.com/260'
+        },
+        {
+            id: 3,
+            title: '제주 유기농 말차 라떼',
+            maker: '제주티룸',
+            percent: 85,
+            img: 'https://via.placeholder.com/260'
+        },
+        {
+            id: 4,
+            title: '친환경 대나무 칫솔 & 고체 치약',
+            maker: '에코라이프',
+            percent: 2100,
+            img: 'https://via.placeholder.com/260'
+        }
+    ];
+
+    // 메이커 버튼 핸들러 (공통)
+    const handleMakerClick = () => {
+        if (userInfo.role !== 'maker') {
+            if (window.confirm("메이커 권한이 없습니다.\n신청하시겠습니까?")) {
+                alert("요청되었습니다!");
+            }
+        } else {
+            navigate('/maker');
+        }
+    };
+
+    return (
+        <div className="page-wrapper">
+            <Header />
+            <div className="mypage-container">
+                {/* --- 사이드바 --- */}
+               <Sidebar userInfo={userInfo} />
+
+                {/* --- 메인 콘텐츠 --- */}
+                <main className="main-content">
+                    <h2 className="page-title">좋아요한 프로젝트 ❤️</h2>
+
+                    {likedProjects.length > 0 ? (
+                        <div className="grid-container">
+                            {likedProjects.map((item) => (
+                                <div key={item.id} className="like-card">
+                                    <div className="like-img-wrapper">
+                                        <img src={item.img} alt={item.title} />
+                                        <button className="card-heart-btn">♥</button>
+                                    </div>
+                                    <div className="like-card-info">
+                                        <p className="like-percent">{item.percent}% 달성</p>
+                                        <h3 className="like-title">{item.title}</h3>
+                                        <p className="like-maker">{item.maker}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="empty-state">
+                            <p>좋아요한 프로젝트가 없습니다.</p>
+                        </div>
+                    )}
+                </main>
+            </div>
+            <AppFooter />
+        </div>
+    );
+};
+
+export default LikeProjectsPage;

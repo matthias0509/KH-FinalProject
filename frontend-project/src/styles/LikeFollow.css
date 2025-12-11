@@ -1,0 +1,177 @@
+/* =========================================
+   [좋아요 & 팔로우 페이지 전용 스타일]
+   파일명: src/styles/LikeFollow.css
+   ========================================= */
+
+/* --- 공통 그리드 레이아웃 --- */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* 반응형 그리드 */
+    gap: 24px;
+    margin-top: 20px;
+}
+
+/* --- [1] 좋아요 프로젝트 카드 스타일 --- */
+.like-card {
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    position: relative;
+}
+
+.like-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: #f97316; /* 오렌지 테두리 */
+}
+
+.like-img-wrapper {
+    width: 100%;
+    height: 160px;
+    background-color: #eee;
+    position: relative;
+}
+
+.like-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 하트 버튼 (카드 위) */
+.card-heart-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #eee;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #b91c1c; /* 빨강 하트 */
+    transition: all 0.2s;
+}
+
+.card-heart-btn:hover {
+    transform: scale(1.1);
+}
+
+.like-card-info {
+    padding: 16px;
+}
+
+.like-percent {
+    font-size: 13px;
+    font-weight: bold;
+    color: #f97316; /* 오렌지 */
+    margin-bottom: 4px;
+}
+
+.like-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    height: 44px; /* 2줄 제한 */
+    overflow: hidden;
+    display: -webkit-box;
+    /* -webkit-line-clamp: 2; */
+    -webkit-box-orient: vertical;
+}
+
+.like-maker {
+    font-size: 12px;
+    color: #868e96;
+}
+
+/* --- [2] 팔로우 리스트 스타일 --- */
+.follow-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.follow-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.follow-info-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.maker-profile-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #fee2e2; /* 연한 핑크 배경 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    border: 1px solid #fce7f3;
+}
+
+.maker-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.maker-name {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.maker-bio {
+    font-size: 13px;
+    color: #868e96;
+}
+
+/* 팔로잉 버튼 (토글) */
+.following-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* 팔로우 중일 때 (회색/흰색 - 차분하게) */
+.following-btn.active {
+    background-color: #f1f3f5;
+    border: 1px solid #dee2e6;
+    color: #495057;
+}
+
+.following-btn.active:hover {
+    background-color: #fee2e2; /* 호버 시 경고 느낌(언팔로우) */
+    color: #b91c1c;
+    border-color: #b91c1c;
+    content: "언팔로우"; /* CSS로 텍스트 변경 가능하지만 여기선 JS로 처리 권장 */
+}
+
+/* 빈 상태 */
+.empty-state {
+    text-align: center;
+    padding: 80px 0;
+    color: #adb5bd;
+}
