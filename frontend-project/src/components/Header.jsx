@@ -89,7 +89,7 @@ export default function Header() {
           <button type="button" className="icon-button" aria-label="관심 프로젝트">
             <Heart size={20} color="#6b7280" />
           </button>
-          <Link to ="/login">
+          <Link to ="">
             <button type="button" className="icon-button" aria-label="마이 페이지">
               <User size={20} color="#6b7280" />
             </button>
