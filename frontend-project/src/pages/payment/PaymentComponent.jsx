@@ -43,6 +43,25 @@ const PaymentComponent = () => {
     }));
   };
 
+  const formatPhoneNumber = (value) => {
+    const numbers = value.replace(/[^0-9]/g, '');
+    
+    if (numbers.length <= 3) {
+      return numbers;
+    } else if (numbers.length <= 7) {
+      return `${numbers.slice(0, 3)}-${numbers.slice(3)}`;
+    } else if (numbers.length <= 11) {
+      return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7)}`;
+    } else {
+      return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`;
+    }
+  };
+
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhoneNumber(e.target.value);
+    setFormData(prev => ({ ...prev, phone: formatted }));
+  };
+
   const deliveryFee = 3000;
   const totalAmount = (selectedReward.amount * selectedReward.quantity) + deliveryFee;
 
@@ -69,6 +88,9 @@ const PaymentComponent = () => {
       // 주문 ID 생성 (실제로는 서버에서 생성하는 것이 권장됩니다)
       const orderId = `order_${Date.now()}`;
 
+      // 전화번호에서 하이픈 제거 (숫자만 전송)
+      const phoneNumberOnly = formData.phone.replace(/[^0-9]/g, '');
+
       // 결제 요청
       await tossPayments.requestPayment('카드', {
         amount: totalAmount,
@@ -76,7 +98,7 @@ const PaymentComponent = () => {
         orderName: selectedReward.title,
         customerName: formData.name,
         customerEmail: formData.email,
-        customerMobilePhone: formData.phone,
+        customerMobilePhone: phoneNumberOnly, // 하이픈 제거된 번호 전송
         successUrl: `${window.location.origin}/payment/success`,
         failUrl: `${window.location.origin}/payment/fail`,
       });
@@ -192,8 +214,9 @@ const PaymentComponent = () => {
                       type="tel"
                       name="phone"
                       value={formData.phone}
-                      onChange={handleInputChange}
-                      placeholder="01012345678"
+                      onChange={handlePhoneChange}
+                      placeholder="010-1234-5678"
+                      maxLength="13"
                       className="form-field__input"
                     />
                   </div>
