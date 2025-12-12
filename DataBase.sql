@@ -1,6 +1,3 @@
--- 관리자 계정으로 먼저 계정 생성할 것
-CREATE USER FOODDING IDENTIFIED BY FOODDING;
-GRANT CONNECT, RESOURCE TO FOODDING;
 -- 여기까지 실행 후 왼쪽 접속 탭에서 + 버튼으로 계정 추가
 
 DROP TABLE MESSAGE;
