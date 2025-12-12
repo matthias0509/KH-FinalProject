@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { loadTossPayments } from '@tosspayments/payment-sdk';
 import { CreditCard, Lock } from 'lucide-react';
 import './PaymentComponent.css';
 import Header from '../../components/Header';
 
 const PaymentComponent = () => {
+  const [tossPayments, setTossPayments] = useState(null);
   const [selectedReward, setSelectedReward] = useState({
     id: 1,
     title: '얼리버드 특가 세트',
@@ -17,11 +19,21 @@ const PaymentComponent = () => {
     email: '',
     phone: '',
     address: '',
-    cardNumber: '',
-    cardExpiry: '',
-    cardCvc: '',
     agreeTerms: false
   });
+
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // 토스페이먼츠 클라이언트 키 (테스트용)
+  const clientKey = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
+  const customerKey = `customer_${Date.now()}`; // 고유한 고객 키 생성
+
+  useEffect(() => {
+    // 토스페이먼츠 SDK 로드
+    loadTossPayments(clientKey).then(payments => {
+      setTossPayments(payments);
+    });
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -31,34 +43,57 @@ const PaymentComponent = () => {
     }));
   };
 
-  const formatCardNumber = (value) => {
-    const v = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
-    const matches = v.match(/\d{4,16}/g);
-    const match = (matches && matches[0]) || '';
-    const parts = [];
-
-    for (let i = 0, len = match.length; i < len; i += 4) {
-      parts.push(match.substring(i, i + 4));
-    }
-
-    if (parts.length) {
-      return parts.join(' ');
-    } else {
-      return value;
-    }
-  };
-
-  const handleCardNumberChange = (e) => {
-    const formatted = formatCardNumber(e.target.value);
-    setFormData(prev => ({ ...prev, cardNumber: formatted }));
-  };
-
   const deliveryFee = 3000;
   const totalAmount = (selectedReward.amount * selectedReward.quantity) + deliveryFee;
 
+  // 결제 처리 함수
+  const handlePayment = async () => {
+    if (!formData.agreeTerms) {
+      alert('약관에 동의해주세요.');
+      return;
+    }
+
+    if (!formData.name || !formData.email || !formData.phone || !formData.address) {
+      alert('모든 필수 정보를 입력해주세요.');
+      return;
+    }
+
+    if (!tossPayments) {
+      alert('결제 시스템을 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      // 주문 ID 생성 (실제로는 서버에서 생성하는 것이 권장됩니다)
+      const orderId = `order_${Date.now()}`;
+
+      // 결제 요청
+      await tossPayments.requestPayment('카드', {
+        amount: totalAmount,
+        orderId: orderId,
+        orderName: selectedReward.title,
+        customerName: formData.name,
+        customerEmail: formData.email,
+        customerMobilePhone: formData.phone,
+        successUrl: `${window.location.origin}/payment/success`,
+        failUrl: `${window.location.origin}/payment/fail`,
+      });
+    } catch (error) {
+      console.error('결제 오류:', error);
+      if (error.code === 'USER_CANCEL') {
+        alert('결제가 취소되었습니다.');
+      } else {
+        alert('결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="checkout-page">
-      { <Header /> }
+      <Header />
       {/* Main Content */}
       <div className="checkout-container">
         <div className="checkout-grid">
@@ -158,7 +193,7 @@ const PaymentComponent = () => {
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="010-1234-5678"
+                      placeholder="01012345678"
                       className="form-field__input"
                     />
                   </div>
@@ -174,60 +209,6 @@ const PaymentComponent = () => {
                     placeholder="서울특별시 강남구 테헤란로 123"
                     className="form-field__input"
                   />
-                </div>
-              </div>
-            </div>
-
-            {/* Step 3: Payment Information */}
-            <div className="checkout-section">
-              <h2 className="checkout-section__title">
-                <span className="checkout-section__badge">3</span>
-                결제 수단
-              </h2>
-
-              <div className="form-fields">
-                <div className="form-field">
-                  <label className="form-field__label">카드 번호 *</label>
-                  <div className="form-field__input-wrapper">
-                    <input
-                      type="text"
-                      name="cardNumber"
-                      value={formData.cardNumber}
-                      onChange={handleCardNumberChange}
-                      placeholder="1234 5678 9012 3456"
-                      maxLength="19"
-                      className="form-field__input form-field__input--card"
-                    />
-                    <CreditCard size={20} className="form-field__icon" />
-                  </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-field">
-                    <label className="form-field__label">유효기간 *</label>
-                    <input
-                      type="text"
-                      name="cardExpiry"
-                      value={formData.cardExpiry}
-                      onChange={handleInputChange}
-                      placeholder="MM/YY"
-                      maxLength="5"
-                      className="form-field__input"
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label className="form-field__label">CVC *</label>
-                    <input
-                      type="text"
-                      name="cardCvc"
-                      value={formData.cardCvc}
-                      onChange={handleInputChange}
-                      placeholder="123"
-                      maxLength="3"
-                      className="form-field__input"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
@@ -280,20 +261,14 @@ const PaymentComponent = () => {
               </div>
 
               <button
-                disabled={!formData.agreeTerms}
-                className={`order-summary__button order-summary__button--primary ${!formData.agreeTerms ? 'is-disabled' : ''}`}
+                onClick={handlePayment}
+                disabled={!formData.agreeTerms || isProcessing}
+                className={`order-summary__button order-summary__button--primary ${
+                  (!formData.agreeTerms || isProcessing) ? 'is-disabled' : ''
+                }`}
               >
-                {totalAmount.toLocaleString()}원 결제하기
+                {isProcessing ? '처리 중...' : `${totalAmount.toLocaleString()}원 결제하기`}
               </button>
-            </div>
-
-            {/* Security Badge */}
-            <div className="security-badge">
-              <Lock size={20} className="security-badge__icon" />
-              <div className="security-badge__text">
-                <strong>안전한 결제</strong>
-                SSL 암호화로 보호됩니다
-              </div>
             </div>
           </div>
         </div>
