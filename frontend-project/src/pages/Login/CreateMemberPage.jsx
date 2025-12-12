@@ -8,6 +8,18 @@ import AuthLayout from '../../components/Login/AuthLayout';
 import InputField from '../../components/Login/InputField';
 import SubmitButton from '../../components/Login/SubmitButton';
 
+
+/* 
+    받아야 할 정보 :
+
+    생년월일
+    성별
+    이메일 (인증방식)
+    핸드폰번호
+    프로필
+    우편번호 기본 상세
+    닉네임
+*/
 function CreateMember() {
 
     return(
