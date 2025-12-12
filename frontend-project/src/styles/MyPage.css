@@ -8,6 +8,7 @@
 .page-wrapper{
     background-color: #ffffff;
 }
+
 /* 활동 배너 (NEW) */
 .activity-banner {
     display: flex; justify-content: space-around; align-items: center;

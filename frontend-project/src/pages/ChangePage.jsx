@@ -17,18 +17,11 @@ const steps = [
   },
 ];
 
-const requirements = [
-  '만 19세 이상의 개인 또는 사업자',
-  '정식 사업자 등록증 또는 영업 신고증 보유',
-  '최근 3개월 내 실제 운영/제조 경험',
-  '푸딩 커뮤니티 운영 정책 준수 동의',
-];
+const requirementsDescription =
+  '만 19세 이상의 개인 또는 사업자이며 정식 사업자 등록증 또는 영업 신고증을 보유하고, 최근 3개월 내 실제 운영/제조 경험이 있으며 푸딩 커뮤니티 운영 정책 준수에 동의해야 전환이 가능합니다.';
 
-const benefits = [
-  { title: '전용 대시보드', detail: '주문, 정산, 스토리 관리 기능 제공' },
-  { title: '프로모션 지원', detail: '홈 메인/뉴스레터 노출 기회 제공' },
-  { title: '세무 가이드', detail: '전문 세무사의 온보딩 자료 제공' },
-];
+const benefitsDescription =
+  '전용 대시보드에서 주문, 정산, 스토리 관리까지 한 번에 처리하고 홈 메인·뉴스레터 노출 등 프로모션 지원과 전문 세무사의 온보딩 가이드까지 제공해 드립니다.';
 
 const initialForm = {
   name: '',
@@ -117,26 +110,16 @@ export default function ChangePage() {
             <h2>자격 요건</h2>
             <p>아래 조건을 모두 충족해야 판매자 전환이 가능합니다.</p>
           </div>
-          <ul className="change-page__requirements">
-            {requirements.map((requirement) => (
-              <li key={requirement}>{requirement}</li>
-            ))}
-          </ul>
+          <p className="change-page__description">{requirementsDescription}</p>
         </section>
 
         <section className="change-page__section">
           <div className="change-page__section-header">
+            <br />
             <h2>전환 혜택</h2>
             <p>전환 승인 즉시 판매자 도구와 각종 지원 프로그램을 이용할 수 있어요.</p>
           </div>
-          <div className="change-page__benefits">
-            {benefits.map((benefit) => (
-              <article key={benefit.title}>
-                <h3>{benefit.title}</h3>
-                <p>{benefit.detail}</p>
-              </article>
-            ))}
-          </div>
+          <p className="change-page__description">{benefitsDescription}</p>
         </section>
 
         <section className="change-page__section" ref={formRef}>
