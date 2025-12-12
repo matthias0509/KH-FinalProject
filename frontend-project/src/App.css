@@ -129,13 +129,7 @@
 }
 
 .search-empty-state {
-  background-color: #fff7ed;
-  border-radius: 16px;
-  padding: 48px 24px;
   text-align: center;
-  margin: 48px auto;
-  max-width: 640px;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
 }
 
 .search-empty-state h2 {

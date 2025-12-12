@@ -48,24 +48,24 @@ export default function Header() {
           </Link>
           <nav className="header__nav">
             
-            <Link to = "/" > 
-              <a className="header__nav-link">푸슐랭</a>
+            <Link to = "/" className="header__nav-link" > 
+              푸슐랭
             </Link>
 
-            <Link to="/imbak">
-              <a className="header__nav-link">마감임박</a>
+            <Link to="/imbak" className="header__nav-link">
+              마감임박
             </Link>
 
-            <Link to="/notice">
-              <a className="header__nav-link">공지사항</a>
+            <Link to="/notice" className="header__nav-link">
+              공지사항
             </Link>
            
-            <Link to="/change">
-              <a className='header__nav-link'>(메이커 전환)</a>
+            <Link to="/change" className='header__nav-link'>
+              (메이커 전환)
             </Link>
             
-            <Link to="/login">
-              <a className='header__nav-link'>(로그인)</a>
+            <Link to="/login" className='header__nav-link'>
+              (로그인)
             </Link>
            
           </nav>
@@ -110,9 +110,9 @@ export default function Header() {
             <Heart size={20} color="#6b7280" />
           </button>
 
-          <a href="/mypage" className="icon-button" aria-label="마이 페이지">
+          <Link to="/mypage" className="icon-button" aria-label="마이 페이지">
             <User size={20} color="#6b7280" />
-          </a>
+          </Link>
 
         
 
