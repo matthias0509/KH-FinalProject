@@ -1,0 +1,103 @@
+/* =========================================
+   AdminPage.css (관리자 전용 스타일)
+   ========================================= */
+.admin-full-page-wrapper {
+    min-height: 100vh;
+    background-color: #f9fafb; 
+    padding-top: 50px   
+}
+
+/* mypage-container는 기존 레이아웃을 사용하되, 상단 패딩을 조정 */
+.admin-container {
+    /* Header가 없으므로 상단에 여백을 더 줍니다. (기존 mypage-container 패딩을 덮어씁니다) */
+    padding-top: 50px !important; 
+}
+
+/* --- 관리자 사이드바 --- */
+.admin-sidebar {
+    width: 250px;
+    padding-right: 40px;
+    flex-shrink: 0;
+}
+
+.admin-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #007bff; /* 관리자 강조 색상 */
+    margin-bottom: 30px;
+    padding-top: 10px; 
+}
+
+.admin-sidebar .menu-group {
+    margin-bottom: 20px;
+}
+
+.admin-sidebar .menu-category {
+    font-size: 13px;
+    color: #6c757d;
+    font-weight: bold;
+    margin-bottom: 8px;
+    padding-left: 10px;
+}
+
+.admin-sidebar .menu-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.admin-sidebar .menu-list li {
+    padding: 0;
+    margin-bottom: 2px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.admin-sidebar .menu-list li a {
+    text-decoration: none;
+    color: #343a40;
+    display: block;
+    padding: 10px;
+    font-size: 14px;
+    transition: color 0.2s;
+}
+
+.admin-sidebar .menu-list li:hover:not(.active-menu) {
+    background-color: #e9ecef;
+    cursor: pointer;
+}
+
+.admin-sidebar .active-menu {
+    background-color: #007bff;
+    font-weight: bold;
+}
+
+.admin-sidebar .active-menu a {
+    color: #fff;
+}
+
+/* --- 메인 콘텐츠 --- */
+.admin-main-content {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.admin-main-content .page-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 10px;
+}
+
+.admin-content-box {
+    margin-top: 30px;
+    border: 1px dashed #ced4da;
+    padding: 20px;
+    min-height: 400px;
+    text-align: center;
+    color: #868e96;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

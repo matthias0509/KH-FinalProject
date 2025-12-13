@@ -1,0 +1,108 @@
+/* MakerPage.css 추가 스타일 (프로젝트 리스트용) */
+
+.project-list-container {
+    padding: 24px 0;
+}
+
+.project-filters {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.project-count {
+    font-size: 14px;
+    color: #495057;
+    font-weight: bold;
+}
+
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #495057;
+}
+
+.project-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* 개별 프로젝트 카드 스타일 (이전에 정의된 .maker-card를 활용) */
+.project-list-item {
+    padding: 20px;
+}
+
+.project-list-item h4 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.project-info-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.project-thumb-small {
+    width: 60px;
+    height: 60px;
+    background-color: #f2f4f6;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.project-details {
+    flex-grow: 1;
+}
+
+.project-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: #868e96;
+    margin-top: 10px;
+}
+
+.project-stats strong {
+    color: #333;
+    font-size: 15px;
+    margin-left: 4px;
+}
+
+.project-actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.action-btn {
+    padding: 8px 15px;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.primary-btn {
+    background-color: #ff7878;
+    color: #fff;
+    border-color: #ff7878;
+}
+
+/* 진행 상태 태그 */
+.list-status-badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+    margin-right: 8px;
+}
+.status-draft { background-color: #f0f0ff; color: #5a5aeb; } /* 작성 중 */
+.status-open { background-color: #e6ffed; color: #28a745; } /* 진행 중 */
+.status-closed { background-color: #f8f9fa; color: #6c757d; } /* 종료 */

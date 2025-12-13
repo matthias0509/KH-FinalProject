@@ -1,0 +1,286 @@
+/* =========================================
+   UserManagement.css (회원 관리 탭 최종 스타일)
+   ========================================= */
+
+.user-management-tab {
+    width: 100%;
+}
+
+.admin-card {
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* --- 상단 제목 및 검색 --- */
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-group.top-search {
+    display: flex;
+    gap: 10px;
+}
+
+.search-input {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    width: 200px;
+}
+
+.btn-search {
+    padding: 8px 15px;
+    background-color: #f8f9fa; /* 흰 배경에 맞게 회색 버튼 */
+    color: #343a40;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+
+/* --- 1. 필터 영역 (검색창 이동 후) --- */
+.filter-area {
+    display: flex;
+    justify-content: flex-start; /* 좌측 정렬 */
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 15px 20px;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 14px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    color: #495057;
+}
+
+.filter-select {
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    appearance: none;
+    background-color: #fff;
+}
+
+
+/* --- 3. 회원 목록 테이블 (Flickspot 스타일 적용) --- */
+.user-list-wrapper {
+    padding: 0; 
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.05); /* 테이블에 은은한 그림자 */
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+}
+
+.user-table th, .user-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* 테이블 헤더 스타일 */
+.user-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #495057;
+    text-transform: uppercase;
+}
+
+.user-table tbody .user-row {
+    cursor: pointer; /* 클릭 가능한 행임을 표시 */
+}
+
+.user-table tbody .user-row:hover {
+    background-color: #f1f3f5;
+}
+
+.user-table .status-deleted {
+    background-color: #f9f9f9;
+    color: #8c8c8c;
+    text-decoration: line-through;
+}
+
+.btn-detail-small {
+    padding: 5px 10px;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* --- 4. 페이지네이션 --- */
+.pagination-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.pagination-area button {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    background-color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* --- 5. 회원 상세 모달 스타일 (모달 겹침 문제 해결) --- */
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75); /* 배경 투명도를 약간 높여 뒤를 더 확실히 가립니다. */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* 💡 Z-INDEX를 매우 높게 설정하여 모든 요소 위에 오도록 합니다. */
+    overflow-y: auto; 
+}
+
+.modal-content.large {
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 800px; 
+    position: relative;
+    /* 💡 모달이 화면 중앙에서 벗어나지 않도록 max-height 설정 */
+    max-height: 90vh; 
+    overflow-y: auto; /* 모달 내용이 길면 스크롤 가능 */
+}
+
+.modal-header {
+    display: block; /* 💡 제목 줄을 블록 요소로 변경 */
+    border-bottom: 2px solid #333; /* 제목 아래 진한 줄 */
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.btn-close {
+    position: absolute; /* 💡 닫기 버튼을 절대 위치로 설정 */
+    top: 20px;
+    right: 30px;
+    background: none;
+    border: none;
+    font-size: 30px; /* 닫기 X 버튼 크게 */
+    cursor: pointer;
+    color: #868e96;
+    line-height: 1;
+}
+
+.modal-body.detail-layout {
+    padding-top: 20px;
+}
+
+.detail-form-grid {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap; /* 반응형 대비 */
+}
+
+.detail-form-grid .column {
+    flex: 1;
+    min-width: 300px; /* 입력 필드가 너무 좁아지는 것 방지 */
+}
+
+.detail-form-grid label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #343a40;
+}
+
+/* 💡 모든 입력 필드의 너비를 100%로 확실히 설정 */
+.detail-form-grid .input-field {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box; /* 패딩이 너비를 초과하지 않도록 */
+    /* Select 태그도 동일하게 적용 */
+    appearance: none; 
+    background-color: #fff;
+}
+
+.detail-form-grid .input-field.read-only {
+    background-color: #f8f9fa;
+    color: #6c757d; 
+}
+
+/* 하단 액션 버튼 그룹 */
+.modal-footer-actions {
+    display: flex;
+    justify-content: flex-end; 
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-save {
+    padding: 10px 20px;
+    background-color: #ff7878;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-action {
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-action.btn-warning {
+    background-color: #ffc107;
+    color: #333;
+    border: 1px solid #ffc107;
+}
+
+.btn-action.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    border: 1px solid #dc3545;
+}
+
+.btn-close-footer {
+    padding: 10px 20px;
+    background-color: #6c757d; /* 회색 버튼 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}

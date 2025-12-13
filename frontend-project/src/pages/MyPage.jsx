@@ -1,30 +1,16 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // useNavigate 삭제 (안 씀)
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
 import Sidebar from '../components/Sidebar';
 
-import '../styles/MyPageLayout.css'; // 공통 레이아웃
-import '../styles/MyPage.css';       // 대시보드 및 리스트 스타일
+import '../styles/MyPageLayout.css';
+import '../styles/MyPage.css';
 
-const MyPage = () => {
-    const navigate = useNavigate();
+// App.js에서 userInfo를 props로 받아옵니다.
+const MyPage = ({ userInfo }) => {
 
-    // 유스케이스: [내 정보 조회] 가상 데이터 + role(권한)
-    const userInfo = {
-        name: '푸딩러버',
-        profileImg: '🍮',
-        role: 'maker', // 권한 예시
-        
-        // ★ 배너에 표시할 활동 카운트 정보
-        stats: {
-            fundingCount: 12, // 후원 참여 수
-            followingCount: 5, // 팔로우한 메이커 수
-            likedCount: 8      // 좋아요한 프로젝트 수
-        }
-    };
-
-    // 유스케이스: [후원 내역 조회] 데이터
+    // --- 가상 데이터 (서버 연동 전까지 사용) ---
     const fundingHistory = [
         {
             id: 101,
@@ -36,36 +22,24 @@ const MyPage = () => {
         },
     ];
 
-    // 유스케이스: [좋아요한 프로젝트 목록] 데이터
     const likedProjects = [
         { id: 1, title: '초코 듬뿍 브라우니', percent: 120, img: 'https://via.placeholder.com/150' },
         { id: 2, title: '제주 말차 라떼 키트', percent: 85, img: 'https://via.placeholder.com/150' },
         { id: 3, title: '비건 쌀 쿠키', percent: 240, img: 'https://via.placeholder.com/150' },
     ];
 
-    // 메이커 버튼 클릭 핸들러 (권한 체크)
-    const handleMakerClick = () => {
-        if (userInfo.role !== 'maker') {
-            const confirmRequest = window.confirm("메이커 권한이 없습니다.\n관리자에게 권한을 신청하시겠습니까?");
-            if (confirmRequest) {
-                alert("관리자에게 메이커 권한을 요청했습니다! (승인 대기 중)");
-            }
-        } else {
-            navigate('/maker');
-        }
-    };
-
     return (
         <div className="page-wrapper">
             <Header />
             <div className="mypage-container">
+                {/* 사이드바에 유저 정보를 전달하면, 알아서 잠금/해제 처리함 */}
                 <Sidebar userInfo={userInfo} />
-
+            
                 {/* --- 메인 콘텐츠 (Dashboard) --- */}
                 <main className="main-content">
                     <h2 className="greeting">{userInfo.name}님 반가워요! 👋</h2>
 
-                    {/* ★ [수정됨] 활동 현황 배너 (포인트 카드 대신) */}
+                    {/* 활동 현황 배너 */}
                     <div className="activity-banner">
                         <div className="activity-item">
                             <span className="icon">🎁</span>
@@ -141,6 +115,7 @@ const MyPage = () => {
                         </div>
                     </section>
                 </main>
+              
             </div>
             <AppFooter />
         </div>

@@ -1,120 +1,401 @@
-
-/* 전체 페이지 배경 */
-.page-wrapper {
-    background-color: #f9fafb; /* 연한 회색 배경 */
+/* =======================================================
+   I. 필수 기본 레이아웃 (2단 구조: Sidebar + Main Content)
+   ======================================================= */
+.mypage-container {
+    display: flex; 
+    max-width: 1280px; 
+    margin: 0 auto; 
+    padding-top: 20px;
+    min-height: calc(100vh - 100px); 
 }
 
-/* 메인 레이아웃 컨테이너 */
-.mypage-container {
+.sidebar-wrapper { 
+    width: 200px; 
+    flex-shrink: 0; 
+}
+
+.main-content {
+    flex-grow: 1; 
+    padding: 0 20px 50px 40px; 
+}
+
+/* Maker Card 기본 스타일 */
+.maker-card {
+    width: 100%;
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: default; /* 카드 전체 커서 기본값 */
+}
+
+/* =======================================================
+   II. 메이커 홈 카드 스타일
+   ======================================================= */
+
+.maker-tabs {
+    margin-bottom: 20px;
+}
+
+/* 1. 작성 중인 프로젝트 카드 (클래스 이름 변경: draft-project-info-card) */
+.draft-project-info-card {
+    border-color: #ddd; 
+    box-shadow: none; 
+}
+
+.card-header {
     display: flex;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    gap: 40px;
-    font-family: 'Pretendard', sans-serif;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.project-type {
+    font-size: 14px;
+    color: #868e96;
+}
+
+.status-badge {
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+.status-draft { 
+    background-color: #f0f0ff; 
+    color: #5a5aeb; 
+} 
+
+.project-draft-content.simplified {
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-start;
+    gap: 20px;
+    padding: 10px 0 20px 0;
+}
+
+.draft-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-grow: 1; 
+    width: 100%;
+}
+
+.project-thumb-large { 
+    width: 80px; 
+    height: 80px;
+    background-color: #f2f4f6;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.project-placeholder {
+    font-size: 18px; 
+    font-weight: bold;
+    color: #333; 
+    margin: 0;
+    cursor: default; 
+}
+
+/* '이어서 작성하기' 텍스트: 커서만 포인터 */
+.continue-link-text { 
+    width: 100%;
+    text-align: center;
+    padding: 12px 0;
+    background-color: #ff7878;
+    color: #fff;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer; /* 요청하신 마우스 커서 이벤트 */
+}
+
+/* 서비스 링크 텍스트 컨테이너 */
+.service-link-wrapper {
+    width: 100%;
+    text-align: right;
+    margin-top: 10px;
+}
+.service-link-text {
+    font-size: 12px;
+    color: #868e96;
+    cursor: default; /* 클릭 이벤트 제거 */
+}
+
+/* 2. 오늘 데이터 카드 (3열 그리드 적용) */
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.card-header-row h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0;
+}
+
+.data-grid {
+    display: flex;
+    margin-top: 15px;
+}
+
+.data-grid-three {
+    justify-content: space-around; 
+}
+
+.data-item {
+    flex: 1; 
+    text-align: center;
+    padding: 0 10px;
+    cursor: default; /* 클릭 이벤트 제거 */
+}
+
+.data-item .label {
+    font-size: 13px;
+    color: #868e96;
+    display: block;
+    margin-bottom: 5px;
+    white-space: nowrap; 
+}
+
+.data-item .value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    display: block;
+}
+
+.data-item.border-left {
+    border-left: 1px solid #e9ecef; 
+}
+
+
+/* 3. 오늘 펀딩 카드 */
+.today-funding-card h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 0 0 20px 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px 0;
+    border: 1px dashed #e9ecef;
+    border-radius: 4px;
+}
+
+.empty-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 5px;
+}
+
+.empty-desc {
+    font-size: 14px;
+    color: #868e96;
+}
+
+/* =======================================================
+   III. 기존에 제공된 나머지 CSS (커서 제거)
+   ======================================================= */
+
+/* 프로젝트 리스트용 */
+.project-list-container {
+    padding: 24px 0;
+}
+
+.project-filters {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.project-count {
+    font-size: 14px;
+    color: #495057;
+    font-weight: bold;
+}
+
+.filter-select {
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #495057;
+    cursor: default;
+}
+
+.project-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.project-list-item {
+    padding: 20px;
+    cursor: default;
+}
+
+.project-list-item h4 {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.project-info-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.project-thumb-small {
+    width: 60px;
+    height: 60px;
+    background-color: #f2f4f6;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.project-details {
+    flex-grow: 1;
+}
+
+.project-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: #868e96;
+    margin-top: 10px;
+}
+
+.project-stats strong {
+    color: #333;
+    font-size: 15px;
+    margin-left: 4px;
+}
+
+.project-actions {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.action-btn {
+    padding: 8px 15px;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: default; 
+}
+
+.primary-btn {
+    background-color: #ff7878;
+    color: #fff;
+    border-color: #ff7878;
+    cursor: default; 
+}
+
+.list-status-badge {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+    margin-right: 8px;
+}
+.status-draft { background-color: #f0f0ff; color: #5a5aeb; } 
+.status-open { background-color: #e6ffed; color: #28a745; } 
+.status-closed { background-color: #f8f9fa; color: #6c757d; } 
+
+/* 정산 페이지용 */
+.settlement-summary-card {
+    display: flex;
+    justify-content: space-around;
+    padding: 30px 20px;
+    margin-bottom: 30px;
+    background-color: #f8f9fa; 
+    border-radius: 12px;
+}
+
+.summary-item {
+    text-align: center;
+    border-right: 1px solid #eee;
+    padding: 0 30px;
+}
+.summary-item:last-child {
+    border-right: none;
+}
+
+.summary-item .label {
+    font-size: 13px;
+    color: #868e96;
+    margin-bottom: 8px;
+}
+
+.summary-item .value {
+    font-size: 24px;
+    font-weight: bold;
     color: #333;
 }
 
-/* ================== 사이드바 ================== */
-.sidebar { width: 250px; flex-shrink: 0; }
+.summary-item .value.primary {
+    color: #ff7878;
+}
 
-/* 모드 전환 스위치 */
-.mode-switch {
+.settlement-list-header {
     display: flex;
-    background-color: #e9ecef;
-    border-radius: 20px;
-    padding: 4px;
-    margin-bottom: 30px;
-}
-.mode-btn {
-    flex: 1; border: none; background: transparent; padding: 8px 0;
-    border-radius: 16px; font-weight: bold; color: #868e96; cursor: pointer;
-    text-align: center; font-size: 14px;
-}
-.mode-btn.active {
-    background-color: #fff; color: #00c4c4; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-.link-btn { text-decoration: none; display: flex; align-items: center; justify-content: center; }
-.link-btn:hover { color: #333; }
-
-/* 프로필 영역 */
-.profile-section { text-align: center; margin-bottom: 30px; }
-.profile-img {
-    width: 80px; height: 80px; background-color: #eee; border-radius: 50%;
-    margin: 0 auto 10px; display: flex; align-items: center; justify-content: center;
-    font-size: 30px; color: #adb5bd;
-}
-.username { font-size: 16px; margin-bottom: 8px; cursor: pointer; }
-.follow-count { font-size: 12px; color: #868e96; }
-
-/* 사이드바 메뉴 */
-.maker-banner-link {
-    background-color: #fff; border: 1px solid #eee; padding: 15px; border-radius: 8px;
-    margin-bottom: 30px; cursor: pointer; position: relative;
-}
-.maker-banner-link p { margin: 0; font-size: 14px; }
-.maker-banner-link .sub { font-size: 12px; color: #868e96; margin-top: 5px; line-height: 1.4; }
-.maker-banner-link .arrow-icon { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #ccc; }
-
-.menu-list ul { list-style: none; padding: 0; margin-bottom: 25px; }
-.menu-category { font-size: 12px; color: #adb5bd; margin-bottom: 10px; }
-.menu-list li { padding: 8px 0; font-size: 14px; color: #495057; cursor: pointer; }
-.menu-list li:hover { color: #00c4c4; }
-.no-category { margin-top: 30px; }
-
-
-/* ================== 메인 콘텐츠 ================== */
-.main-content { flex: 1; }
-
-/* 상단 탭 */
-.maker-tabs { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #eee; }
-.tab-btn {
-    background: none; border: none; font-size: 15px; font-weight: bold; color: #868e96;
-    cursor: pointer; padding: 12px 0; position: relative; margin-right: 10px;
-}
-.tab-btn.active { color: #333; }
-.tab-btn.active::after {
-    content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 2px; background-color: #333;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
-/* 카드 공통 스타일 */
-.maker-card { background: #fff; border: 1px solid #e9ecef; border-radius: 12px; padding: 24px; margin-bottom: 24px; }
-.maker-card h3 { font-size: 18px; margin: 0 0 20px 0; }
-
-/* 1. 프로젝트 카드 */
-.project-card .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
-.project-type { font-size: 13px; font-weight: bold; }
-.status-badge { font-size: 11px; color: #ff7878; background-color: #fff0f0; padding: 2px 6px; border-radius: 4px; }
-.project-content { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
-.project-thumb { width: 48px; height: 48px; background-color: #f2f4f6; border-radius: 4px; }
-.project-placeholder { color: #adb5bd; font-size: 15px; margin: 0; }
-.continue-btn {
-    width: 100%; padding: 12px; border: 1px solid #dee2e6; background-color: #fff;
-    border-radius: 4px; font-size: 14px; color: #495057; cursor: pointer; margin-bottom: 15px;
+.settlement-list-item {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px;
 }
-.service-link {
-    background-color: #f8f9fa; padding: 12px; border-radius: 4px; font-size: 13px;
-    color: #868e96; display: flex; justify-content: space-between; cursor: pointer;
-}
-.service-link .underline { text-decoration: underline; color: #495057; }
 
-/* 2. 데이터 카드 */
-.card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-.card-header-row h3 { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-.minimize-btn { border: none; background: none; font-size: 20px; cursor: pointer; color: #adb5bd; }
-.data-grid { display: flex; justify-content: flex-end; text-align: right; }
-.data-item { padding: 0 30px; display: flex; flex-direction: column; gap: 12px; }
-.data-item.border-left { border-left: 1px solid #eee; }
-.data-item .label { font-size: 13px; color: #adb5bd; }
-.data-item .value { font-size: 18px; color: #adb5bd; font-weight: bold; }
-
-/* 3. 오늘 펀딩 카드 (빈 상태) */
-.today-funding-card .empty-state {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 50px 0;
-    /* 배경에 희미한 이미지 깔기 (예시) */
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect fill="#f2f4f6" width="100" height="100"/><text fill="#adb5bd" font-family="sans-serif" font-size="60" dy="10.5" font-weight="bold" x="50%" y="50%" text-anchor="middle">?</text></svg>');
-    background-repeat: no-repeat; background-position: center; background-size: contain;
+.settlement-project-info {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
-.empty-title { font-size: 16px; font-weight: bold; color: #495057; margin-bottom: 8px; }
-.empty-desc { font-size: 14px; color: #adb5bd; }
+
+.settlement-project-info h4 {
+    font-size: 15px;
+    font-weight: bold;
+    margin: 0 0 5px 0;
+}
+
+.settlement-project-info .date-info {
+    font-size: 12px;
+    color: #adb5bd;
+}
+
+.settlement-status {
+    width: 100px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.status-pending { color: #f0ad4e; } 
+.status-paid { color: #28a745; } 
+.status-canceled { color: #dc3545; } 
+
+.settlement-amount {
+    width: 150px;
+    text-align: right;
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}

@@ -1,44 +1,242 @@
-/* =========================================
-   [3. 회원정보 수정 페이지]
-   파일명: src/styles/ProfileEditPage.css
-   ========================================= */
+/* =======================================================
+   ProfileEditPage.css (필수 추가 및 수정 스타일)
+   ======================================================= */
+
+/* --- 메인 레이아웃 (MyPageLayout.css에 없다고 가정하고 추가) --- */
+.mypage-container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+.sidebar {
+    width: 250px;
+    padding-right: 40px;
+    flex-shrink: 0;
+}
+.main-content {
+    flex-grow: 1;
+}
+
+/* --- 사이드바 스타일 --- */
+.mode-switch {
+    display: flex;
+    margin-bottom: 20px;
+}
+.mode-btn {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    text-decoration: none;
+    color: #888;
+    font-size: 14px;
+}
+.mode-btn.active {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #333;
+}
+.profile-section {
+    padding: 20px 0;
+    text-align: center;
+}
+.profile-img {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+.username {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+.profile-setting-btn {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: default;
+}
+.profile-setting-btn.active {
+    background-color: #eee;
+    font-weight: bold;
+}
+
+/* --- 메인 콘텐츠 스타일 --- */
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
 
 .edit-card {
-    background: #fff; border: 1px solid #e9ecef; border-radius: 12px;
-    overflow: hidden;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    background-color: #fff;
 }
 
+/* 탭 스타일 */
 .card-header-tab {
-    display: flex; border-bottom: 1px solid #eee; padding: 0 24px;
+    display: flex;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0 20px;
 }
 .tab-item {
-    padding: 20px 0; margin-right: 20px; font-size: 15px; cursor: pointer;
-    color: #868e96; font-weight: bold; position: relative;
+    padding: 15px 20px;
+    font-weight: bold;
+    color: #adb5bd;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom 0.2s, color 0.2s;
 }
-.tab-item.active { color: #333; }
-.tab-item.active::after {
-    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #333;
+.tab-item.active {
+    color: #333;
+    border-bottom: 2px solid #ff7878;
 }
 
-.form-container { padding: 30px 24px; max-width: 600px; }
-.form-group { margin-bottom: 30px; }
-.input-label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #333; }
+/* 폼 컨테이너 */
+.form-container {
+    padding: 30px;
+}
+.form-group {
+    margin-bottom: 25px;
+}
 
-/* 인풋 필드 */
+.input-label {
+    display: block;
+    font-size: 14px;
+    font-weight: bold;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
 .input-field {
-    width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px; box-sizing: border-box;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 15px;
+    box-sizing: border-box;
 }
-.input-field:focus { outline: none; border-color: #f97316; } /* 오렌지 포커스 */
-.input-field.read-only { background-color: #f8f9fa; color: #868e96; cursor: default; }
-.textarea-field { resize: none; height: 100px; }
 
-/* 버튼들 */
-.btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+.input-field.read-only {
+    background-color: #f8f9fa;
+    color: #868e96;
+}
+
+.textarea-field {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.input-guide {
+    font-size: 12px;
+    color: #868e96;
+    margin-top: 5px;
+}
+
+/* 프로필 사진 섹션 */
+.photo-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+}
+.photo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.current-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background-color: #f2f4f6;
+    font-size: 40px;
+    text-align: center;
+    line-height: 80px;
+    flex-shrink: 0;
+}
+.photo-buttons button {
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* 버튼 및 구분선 */
+.divider {
+    height: 1px;
+    background-color: #e9ecef;
+    margin: 30px 0;
+}
+
+.input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.input-row .input-field {
+    flex-grow: 1;
+}
+
 .btn-save {
-    flex: 1; padding: 14px; background-color: #b91c1c; color: #fff; border: none;
-    border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer;
+    padding: 10px 20px;
+    background-color: #ff7878;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
 }
 .btn-cancel {
-    flex: 1; padding: 14px; background-color: #fff; color: #333; border: 1px solid #ddd;
-    border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer;
+    padding: 10px 20px;
+    background-color: #fff;
+    color: #6c757d;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.btn-outline, .btn-upload, .btn-delete {
+    padding: 8px 15px;
+    background-color: #fff;
+    color: #6c757d;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.btn-delete {
+    color: #dc3545;
+}
+.btn-group {
+    margin-bottom: 25px;
+}
+.withdrawal-link {
+    font-size: 14px;
+    color: #868e96;
+    cursor: pointer;
+}
+
+/* =======================================================
+   AccountSettingsTab 전용 스타일 (새로 추가)
+   ======================================================= */
+.account-settings-tab .section-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 25px;
+    padding-top: 10px;
+}
+.account-settings-tab .info-text {
+    color: #868e96;
+    font-size: 14px;
+    flex-grow: 1;
+}
+.account-settings-tab .btn-delete {
+    background-color: #dc3545;
+    color: #fff;
+    border-color: #dc3545;
+}
+.withdrawal-group {
+    padding: 15px 0;
+    border-top: 1px solid #e9ecef;
+}
+.withdrawal-group .input-label {
+    color: #dc3545;
 }

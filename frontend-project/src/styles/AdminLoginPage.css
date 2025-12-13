@@ -1,0 +1,84 @@
+/* =========================================
+   AdminLoginPage.css (배경색 하얀색으로 변경)
+   ========================================= */
+
+/* 전체 화면을 채우고 중앙 정렬을 위한 컨테이너 */
+.admin-full-screen-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* 화면 높이 전체 사용 */
+    background-color: #fff; /* 배경색을 하얀색으로 변경 */
+}
+
+/* login-container는 full-screen-wrapper에 흡수되어 이제 필요 없지만, 구조 유지를 위해 설정 */
+.login-container.centered {
+    padding: 0; 
+}
+
+.login-card {
+    background: #fff; /* 이미 흰색 */
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-card h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.login-card p {
+    color: #6c757d;
+    margin-bottom: 30px;
+}
+
+.login-form .form-group {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.login-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* 로그인 버튼 색상을 와디즈 메인 강조 색상(레드 계열)으로 변경하여 하얀 배경과 대비되도록 합니다. */
+.login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #ff7878; /* 와디즈 강조 색상 (빨간색 계열)로 변경 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.login-button:hover {
+    background-color: #f05e5e; /* 호버 시 약간 어두운 빨간색 */
+}
+
+/* (참고: 이전 코드에서 제거되었으나, 원래 login-container에 설정되어 있던 배경색도 흰색으로 설정합니다) */
+/* .login-container {
+    background-color: #fff; 
+    min-height: calc(100vh - 120px); 
+    padding: 50px 0;
+    
+} */
