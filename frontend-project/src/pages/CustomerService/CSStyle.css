@@ -70,6 +70,9 @@
 }
 
 .faq-bottom-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     text-align: center;
     margin-top: 30px;
     padding-top: 20px;
@@ -79,6 +82,11 @@
 /* ---------------------------------- */
 /* 3. 1:1 문의 버튼 (InquiryButton) */
 /* ---------------------------------- */
+.inquiry-button-group {
+    display: flex;
+    gap: 10px; /* 버튼 간격 */
+}
+
 .inquiry-button {
     display: flex;
     align-items: center;
@@ -100,4 +108,179 @@
 
 .inquiry-button svg {
     margin-right: 8px; /* 아이콘과 텍스트 간격 */
+}
+
+.notice-detail-container {
+    padding: 20px 0;
+}
+
+/* ---------------------------------- */
+/* 4. 공지사항 */
+/* ---------------------------------- */
+
+.detail-title {
+    font-size: 24px;
+    font-weight: 700;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--border-strong, #333);
+    margin-bottom: 15px;
+}
+
+.detail-meta {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    font-size: 13px;
+    color: var(--text-muted, #666);
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border, #ccc);
+}
+
+.detail-content {
+    min-height: 200px; /* 내용이 짧아도 최소 높이 유지 */
+    padding: 30px 0;
+    line-height: 1.8;
+    color: var(--text-dark, #333);
+    font-size: 16px;
+    border-bottom: 1px solid var(--border-strong, #333);
+}
+
+.detail-footer {
+    text-align: center;
+    padding-top: 25px;
+}
+
+.list-button {
+    padding: 10px 30px;
+    background-color: var(--text-muted, #f97316);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.2s;
+}
+
+.list-button:hover {
+    background-color: #0056b3;
+}
+
+.cancel-button {
+    padding: 10px 30px;
+    background-color: var(--text-muted, #6c757d); /* 회색 계열 버튼 */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+}
+
+/* ---------------------------------- */
+/* 6. 1:1 문의 폼 (InquiryPage) */
+/* ---------------------------------- */
+
+.inquiry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 20px; /* 폼 내부 여백 */
+}
+
+/* 드롭다운/텍스트 영역 공통 라벨 스타일 */
+.select-label, .textarea-label {
+    font-weight: 600;
+    color: var(--text, #111827);
+    font-size: 14px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* 드롭다운 (select) 스타일 */
+.select-field {
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    appearance: none; /* OS 기본 스타일 제거 */
+    background-color: white;
+}
+
+/* 텍스트 영역 (textarea) 스타일 */
+.textarea-input {
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    resize: vertical; /* 세로 크기 조절만 허용 */
+}
+
+/* ---------------------------------- */
+/* 7. 문의 내역 (InquiryHistoryPage) - 공지사항 테이블 스타일로 변경 */
+/* ---------------------------------- */
+
+.inquiry-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+/* 💡 공지사항과 동일한 헤더/셀 스타일 적용 */
+.inquiry-table th, .inquiry-table td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.inquiry-table th {
+    background-color: #f5f5f5; /* 공지사항 헤더 배경색 */
+    font-weight: bold;
+    color: #333;
+    border-top: 2px solid #ccc;
+}
+
+/* 💡 문의 내역 행 스타일 (클릭 가능) */
+.inquiry-row {
+    cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+/* 💡 공지사항 hover 스타일 대신 밝은 오렌지 계열 hover 유지 */
+.inquiry-row:hover {
+    background-color: #fffaf0; 
+}
+
+/* 💡 제목 셀 스타일 (왼쪽 정렬, 아이콘 정렬) */
+.inquiry-title-cell {
+    display: flex; 
+    align-items: center;
+    text-align: left !important;
+    padding-left: 20px; /* 왼쪽 여백 추가 */
+}
+
+/* 상태 표시 스타일 (오렌지 색상 유지) */
+.status-pending {
+    color: var(--accent-strong, #ef4444); 
+    font-weight: 600;
+}
+.status-complete {
+    color: var(--text-dark, #333); 
+    font-weight: 600;
+}
+
+/* ---------------------------------- */
+/* 8. 공지사항 작성 폼 (NoticeWritePage) */
+/* ---------------------------------- */
+
+.notice-write-form {
+    /* 1:1 문의 폼 스타일과 거의 동일 */
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 20px;
 }

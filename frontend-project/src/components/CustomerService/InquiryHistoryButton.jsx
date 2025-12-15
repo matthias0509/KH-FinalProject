@@ -5,7 +5,7 @@ export default function InquiryButton() {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        navigate('/inquiry'); 
+        navigate('/inquiries'); 
     };
 
     return (
@@ -13,7 +13,7 @@ export default function InquiryButton() {
             onClick={handleClick}
             className="inquiry-button"
         >
-            1:1 문의하기
+            1:1 문의내역
         </button>
     );
 }

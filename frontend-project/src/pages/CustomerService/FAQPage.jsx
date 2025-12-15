@@ -5,6 +5,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import '../../pages/CustomerService/CSStyle.css';
 import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
+import InquiryHisrotyButton from '../../components/CustomerService/InquiryHistoryButton';
 
 const dummyFAQs = [
     { id: 1, question: "결제는 어떻게 하나요?", answer: "신용카드, 계좌이체, 간편결제 등 다양한 방법으로 결제할 수 있습니다. 자세한 내용은 마이페이지 > 결제 관리에서 확인하세요." },
@@ -26,7 +27,10 @@ export default function FAQPage() {
                 <CSLayout title="자주 묻는 질문 (FAQ)">
                     <div className="faq-header"> {/* 💡 클래스 적용 */}
                         <p>궁금한 점을 먼저 확인해 보세요.</p>
-                        <InquiryButton />
+                        <div className='inquiry-button-group'>
+                            <InquiryButton />
+                            <InquiryHisrotyButton />
+                        </div>
                     </div>
 
                     <div className="faq-list"> {/* 💡 클래스 적용 */}

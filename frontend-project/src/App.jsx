@@ -17,6 +17,10 @@ import NoticePage from './pages/NoticePage';
 import FindIdPage from './pages/Login/FindIdPage';
 import ResetPasswordPage from './pages/Login/ResetPasswordPage';
 import FAQPage from './pages/CustomerService/FAQPage';
+import NoticeDetailPage from './pages/CustomerService/NoticeDetailPage';
+import InquiryPage from './pages/CustomerService/InquiryPage';
+import InquiryHistoryPage from './pages/CustomerService/InquiryHistoryPage';
+import NoticeWritePage from './pages/CustomerService/NoticeWritePage';
 
 // 박주현
 import MakerPage from './pages/MakerPage'
@@ -81,6 +85,10 @@ export default function App() {
       <Route path="/findid" element={<FindIdPage />} />
       <Route path="/resetpassword" element={<ResetPasswordPage />} />
       <Route path="/faq" element={<FAQPage />} />
+      <Route path="/notice/:id" element={<NoticeDetailPage />} />
+      <Route path="/inquiry" element={<InquiryPage />} />
+      <Route path="/inquiries" element={<InquiryHistoryPage />} />
+      <Route path="/noticewrite" element={<NoticeWritePage />} />
 
       
       {/* 박주현 */}
