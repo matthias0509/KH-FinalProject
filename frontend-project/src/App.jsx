@@ -14,6 +14,9 @@ import ChangePage from './pages/ChangePage';
 import LoginPage from './pages/Login/LoginPage';
 import CreateMember from './pages/Login/CreateMemberPage';
 import NoticePage from './pages/NoticePage';
+import FindIdPage from './pages/Login/FindIdPage';
+import ResetPasswordPage from './pages/Login/ResetPasswordPage';
+import FAQPage from './pages/CustomerService/FAQPage';
 
 // 박주현
 import MakerPage from './pages/MakerPage'
@@ -30,6 +33,8 @@ import QnAPage from './pages/supporter/QnAPage'
 // 강호형
 import ChatComponent from './pages/chat/ChatComponent';
 import PaymentComponent from './pages/payment/PaymentComponent'
+import PaymentSuccess from './pages/payment/PaymentSuccess';
+import PaymentFail from './pages/payment/PaymentFail';
 import ProjectPage from './pages/maker/ProjectPage';
 import SettlementPage from './pages/maker/SettlementPage';
 import ChatHistoryPage from './pages/maker/ChatHistoryPage';
@@ -60,7 +65,6 @@ export default function App() {
       <Route path="/" element={<HomePage />} />
       <Route path="/create" element={<CreateProjectPage />} />
       <Route path='/imbak' element={<ImbakPage/> }/>
-      <Route path="/createmember" element={<CreateMember />} />
       <Route path="/search" element={<SearchPage />} />
       <Route path="/projects/premium-macarons" element={<ProductDetailPage />} />
       {/* path="/projects/:slug 예정 각 상품별 상세페이지 */}
@@ -75,6 +79,10 @@ export default function App() {
       {/* 박성진 */}
       <Route path="/notice" element={<NoticePage />}/>  
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/createmember" element={<CreateMember />} />
+      <Route path="/findid" element={<FindIdPage />} />
+      <Route path="/resetpassword" element={<ResetPasswordPage />} />
+      <Route path="/faq" element={<FAQPage />} />
 
       
       {/* 박주현 */}
@@ -112,6 +120,8 @@ export default function App() {
 
       <Route path='/payment' element={<PaymentComponent/>}/>
       <Route path="/chat" element={<ChatComponent />} />
+      <Route path="/payment/success" element={<PaymentSuccess />}/>
+      <Route path="/payment/fail" element={<PaymentFail />}/>
     </Routes>
   );
 }

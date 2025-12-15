@@ -8,6 +8,7 @@ import AuthLayout from '../../components/Login/AuthLayout';
 import InputField from '../../components/Login/InputField';
 import SubmitButton from '../../components/Login/SubmitButton';
 import { useNavigate } from "react-router-dom";
+import AddressSearch from "../../components/Login/AddressSearch";
 
 // 해야하는 페이지 : 로그인, 회원가입, 아이디/비번찾기, 공지사항, 공지사항 세부조회, (문의사항, FAQ) 하셔야합니다....  
 // + 공지사항 글 작성 페이지, 문의사항 글 작성 페이지 (질문) + 답변.
@@ -36,7 +37,10 @@ function CreateMember() {
         password: '',
         confirmPassword: '',
         name: '',
-        email: ''
+        email: '',
+        zipcode: '',
+        roadAddress: '',
+        detailAddress: ''
     });
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -44,6 +48,16 @@ function CreateMember() {
     const handleChage = (e) => {
         setForm({...form, [e.target.id]: e.target.value });
     };
+
+    const handleAddressComplete = (addressData) => {
+        setForm(prevForm => ({
+            ...prevForm,
+            zipcode: addressData.zipcode,
+            roadAddress: addressData.roadAddress
+        }));
+        // document.getElementById('detailAddress').focus();
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
@@ -105,6 +119,40 @@ function CreateMember() {
                     onChange={handleChage}
                     placeholder="이메일 주소"
                 />
+                <label style={{ fontWeight: '600', color: 'var(--text)', fontSize: '14px' }}>주소</label>
+                        
+                        {/* 1. 우편번호 및 주소 검색 버튼 */}
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <InputField
+                                label="" // 레이블은 위에 통합했으므로 빈 문자열
+                                id="zipcode"
+                                value={form.zipcode}
+                                onChange={handleChage}
+                                placeholder="우편번호"
+                                readOnly // 사용자가 직접 입력하지 못하게 막음
+                                style={{ flexGrow: 1 }}
+                            />
+                            <AddressSearch onComplete={handleAddressComplete} />
+                        </div>
+                        
+                        {/* 2. 도로명 주소 (자동 입력) */}
+                        <InputField
+                            label=""
+                            id="roadAddress"
+                            value={form.roadAddress}
+                            onChange={handleChage}
+                            placeholder="도로명 주소 (자동 입력)"
+                            readOnly // 사용자가 직접 입력하지 못하게 막음
+                        />
+                        
+                        {/* 3. 상세 주소 (사용자 직접 입력) */}
+                        <InputField
+                            label=""
+                            id="detailAddress"
+                            value={form.detailAddress}
+                            onChange={handleChage}
+                            placeholder="상세 주소를 입력하세요"
+                        />
 
                 <SubmitButton>가입하기</SubmitButton>
                     </form>

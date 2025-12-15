@@ -1,7 +1,13 @@
-import React, { useState } from 'react';
-import AuthLayout from '../components/Auth/AuthLayout';
-import EmailVerificationForm from '../components/Auth/EmailVerificationForm';
-import InputField from '../components/Auth/InputField';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import '../../App.css'
+import '../../pages/Login/Login.css';
+import EmailVerificationForm from '../../components/Login/EmailVerificationForm';
+import InputField from '../../components/Login/InputField';
+import AuthLayout from '../../components/Login/AuthLayout';
+import SubmitButton from '../../components/Login/SubmitButton';
+import Header from '../../components/Header';
+import AppFooter from '../../components/AppFooter';
 
 export default function FindIdPage() {
     const [step, setStep] = useState(0); 
@@ -43,21 +49,25 @@ export default function FindIdPage() {
     );
     
     return (
-        <AuthLayout title="아이디 찾기">
-            {step === 0 && (
-                <form onSubmit={handleInitialSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                    <InputField label="이름" id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="가입 시 등록한 이름" />
-                    <InputField label="이메일" type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="가입 시 등록한 이메일" />
-                    <SubmitButton>인증 코드 받기</SubmitButton>
-                </form>
-            )}
-            {step === 1 && (
-                <EmailVerificationForm 
-                    email={email}
-                    onSuccess={handleVerificationSuccess}
-                />
-            )}
-            {step === 2 && <FindIdResult />}
-        </AuthLayout>
+        <div className="app">
+            <Header />
+                <AuthLayout title="아이디 찾기">
+                    {step === 0 && (
+                        <form onSubmit={handleInitialSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <InputField label="이름" id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="가입 시 등록한 이름" />
+                            <InputField label="이메일" type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="가입 시 등록한 이메일" />
+                            <SubmitButton>인증 코드 받기</SubmitButton>
+                        </form>
+                    )}
+                    {step === 1 && (
+                        <EmailVerificationForm 
+                            email={email}
+                            onSuccess={handleVerificationSuccess}
+                        />
+                    )}
+                    {step === 2 && <FindIdResult />}
+                </AuthLayout>
+            <AppFooter />
+        </div>
     );
 }
