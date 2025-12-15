@@ -34,7 +34,7 @@ export default function AppFooter() {
               <Link to="#" className="footer__link" onClick={scrollToTop}>
                 가이드
               </Link>
-              <Link to="#" className="footer__link" onClick={scrollToTop}>
+              <Link to="/faq" className="footer__link" onClick={scrollToTop}>
                 문의하기
               </Link>
             </div>
