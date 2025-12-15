@@ -8,7 +8,7 @@ import AuthLayout from '../../components/Login/AuthLayout';
 import InputField from '../../components/Login/InputField';
 import SubmitButton from '../../components/Login/SubmitButton';
 import { useNavigate } from "react-router-dom";
-import AddressSearch from "../../components/Login/AddressSearch";
+import PostCode from "../../components/Login/PostCode";
 
 // 해야하는 페이지 : 로그인, 회원가입, 아이디/비번찾기, 공지사항, 공지사항 세부조회, (문의사항, FAQ) 하셔야합니다....  
 // + 공지사항 글 작성 페이지, 문의사항 글 작성 페이지 (질문) + 답변.
@@ -38,8 +38,8 @@ function CreateMember() {
         confirmPassword: '',
         name: '',
         email: '',
-        zipcode: '',
-        roadAddress: '',
+        zonecode: '',
+        address: '',
         detailAddress: ''
     });
     const [isLoading, setIsLoading] = useState(false);
@@ -49,14 +49,15 @@ function CreateMember() {
         setForm({...form, [e.target.id]: e.target.value });
     };
 
-    const handleAddressComplete = (addressData) => {
-        setForm(prevForm => ({
-            ...prevForm,
-            zipcode: addressData.zipcode,
-            roadAddress: addressData.roadAddress
-        }));
-        // document.getElementById('detailAddress').focus();
-    };
+    const handleAddressSelect = (data) => {
+        setForm(prevForm => ({ // 💡 prevForm을 인수로 받아 사용하면 안전합니다.
+            ...prevForm, // 1. 이전 상태를 모두 복사하여 유지합니다.
+            // 2. 주소 관련 필드만 새로운 값으로 덮어씁니다.
+            zonecode: data.zonecode,
+            address: data.address,
+            detailAddress: '' // 새 주소 찾았으므로 상세 주소 초기화
+        }))
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -119,27 +120,27 @@ function CreateMember() {
                     onChange={handleChage}
                     placeholder="이메일 주소"
                 />
-                <label style={{ fontWeight: '600', color: 'var(--text)', fontSize: '14px' }}>주소</label>
+                <label style={{ fontWeight: '600', color: 'var(--text)', fontSize: '14px', marginBottom: '0', display: 'block' }}>주소</label>
                         
                         {/* 1. 우편번호 및 주소 검색 버튼 */}
-                        <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <InputField
                                 label="" // 레이블은 위에 통합했으므로 빈 문자열
-                                id="zipcode"
-                                value={form.zipcode}
+                                id="zonecode"
+                                value={form.zonecode}
                                 onChange={handleChage}
                                 placeholder="우편번호"
                                 readOnly // 사용자가 직접 입력하지 못하게 막음
                                 style={{ flexGrow: 1 }}
                             />
-                            <AddressSearch onComplete={handleAddressComplete} />
+                            <PostCode onComplete={handleAddressSelect}/>
                         </div>
                         
                         {/* 2. 도로명 주소 (자동 입력) */}
                         <InputField
                             label=""
-                            id="roadAddress"
-                            value={form.roadAddress}
+                            id="address"
+                            value={form.address}
                             onChange={handleChage}
                             placeholder="도로명 주소 (자동 입력)"
                             readOnly // 사용자가 직접 입력하지 못하게 막음
@@ -154,7 +155,7 @@ function CreateMember() {
                             placeholder="상세 주소를 입력하세요"
                         />
 
-                <SubmitButton>가입하기</SubmitButton>
+                        <SubmitButton>가입하기</SubmitButton>
                     </form>
                 </AuthLayout>
             <AppFooter />

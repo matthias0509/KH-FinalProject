@@ -64,6 +64,7 @@ export default function LoginPage() {
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder="아이디를 입력하세요"
                         />
+                        <br />
                         <InputField
                             label="비밀번호"
                             type='password'
@@ -72,6 +73,7 @@ export default function LoginPage() {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="비밀번호"
                         />
+                        <br />
                         <SubmitButton isLoading={isLoading}>로그인</SubmitButton>
                     </form>
                     <AuthLinkGroup />
