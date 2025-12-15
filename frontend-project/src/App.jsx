@@ -4,7 +4,7 @@ import './App.css';
 
 // 김동규
 import HomePage from './pages/HomePage';
-import CreateProjectPage from './pages/CreateProjectPage';
+import CreateProjectPage from './pages/CreateProjectPage/CreateProjectPage';
 import ImbakPage from './pages/ImbakPage';
 import SearchPage from './pages/SearchPage';
 import ProductDetailPage from './pages/ProductDetailPage';

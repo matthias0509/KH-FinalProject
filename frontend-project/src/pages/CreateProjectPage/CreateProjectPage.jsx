@@ -3,10 +3,13 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Underline from '@tiptap/extension-underline';
-import Header from '../components/Header';
-import AppFooter from '../components/AppFooter';
-import TextAlignExtension from '../utils/textAlignExtension';
-import { categories } from '../data/content';
+import Header from '../../components/Header';
+import TextAlignExtension from '../../utils/textAlignExtension';
+import { categories } from '../../data/content';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+import insertProjectAxios from "./ProjectApi";
 
 const CustomImage = Image.extend({
   addAttributes() {
@@ -73,7 +76,12 @@ const addDays = (date, days) => {
 
 const parseDateInput = (value) => (value ? new Date(`${value}T00:00:00`) : null);
 
+
+// 함수 내부
 export default function CreateProjectPage() {
+
+
+  const navigate = useNavigate();
   const storyImageInputRef = useRef(null);
   const basicsRef = useRef(null);
   const storyRef = useRef(null);
@@ -86,12 +94,15 @@ export default function CreateProjectPage() {
     category: categories[1]?.name ?? '',
     heroImage: '',
     heroImageName: '',
+    thumbnailFile: null,
     storyHtml: STORY_GUIDE,
     openStart: '',
     openEnd: '',
     goal: '',
     rewards: [{ ...emptyReward }],
   });
+
+
   const [imageError, setImageError] = useState('');
 
   const editor = useEditor({
@@ -172,6 +183,7 @@ export default function CreateProjectPage() {
         ...prev,
         heroImage: typeof reader.result === 'string' ? reader.result : '',
         heroImageName: file.name,
+        thumbnailFile: file,
       }));
       setImageError('');
     };
@@ -340,8 +352,41 @@ export default function CreateProjectPage() {
     alert('프로젝트 데이터가 준비되었습니다. 콘솔을 확인하세요.');
   };
 
-  const handleSaveDraft = () => {
-    alert('임시 저장 기능은 준비 중입니다. DB 연결 후 제공될 예정입니다.');
+
+  // 임시저장 버튼
+  const handleSaveDraft = (e) => {
+    e.preventDefault(); // 기본 이벤트 제거
+
+    const editorHtml = editor?.getHTML() ?? '';
+    const editorJson = editor ? JSON.stringify(editor.getJSON()) : '{}';
+
+    const requestPayload = {
+      title: formData.title.trim(),
+      summary: formData.subtitle.trim(),
+      category: formData.category,
+      targetAmount: Number(formData.goal) || 0,
+      fundStartDate: formData.openStart || null,
+      fundEndDate: formData.openEnd || null,
+      shipStartDate: formData.openEnd || formData.openStart || null,
+      userNo: 1, // TODO: replace with logged-in user info
+      content: {
+        html: editorHtml,
+        json: editorJson,
+      },
+    };
+
+    const api = async () => {
+      try {
+        const msg = await insertProjectAxios(requestPayload);
+        toast.info(msg);
+        navigate("/search");
+      } catch (error) {
+        toast.error('프로젝트 임시저장 실패했습니다.');
+        console.error(error);
+      }
+    };
+
+    api();
   };
 
   const sidebarSections = [
