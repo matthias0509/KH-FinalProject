@@ -74,7 +74,7 @@ export default function Header() {
           <form className="search-container" onSubmit={handleSubmit}>
             <input
               type="text"
-              className="header-search-input"
+              className="search-input"
               value={searchTerm}
               placeholder="검색어를 입력하세요"
               onChange={(event) => setSearchTerm(event.target.value)}
