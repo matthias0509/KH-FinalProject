@@ -37,6 +37,8 @@ import QnAPage from './pages/supporter/QnAPage'
 // 강호형
 import ChatComponent from './pages/chat/ChatComponent';
 import PaymentComponent from './pages/payment/PaymentComponent'
+import PaymentSuccess from './pages/payment/PaymentSuccess';
+import PaymentFail from './pages/payment/PaymentFail';
 import ProjectPage from './pages/maker/ProjectPage';
 import SettlementPage from './pages/maker/SettlementPage';
 import ChatHistoryPage from './pages/maker/ChatHistoryPage';
@@ -126,6 +128,8 @@ export default function App() {
 
       <Route path='/payment' element={<PaymentComponent/>}/>
       <Route path="/chat" element={<ChatComponent />} />
+      <Route path="/payment/success" element={<PaymentSuccess />}/>
+      <Route path="/payment/fail" element={<PaymentFail />}/>
     </Routes>
   );
 }

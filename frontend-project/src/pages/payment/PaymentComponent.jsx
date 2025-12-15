@@ -25,7 +25,7 @@ const PaymentComponent = () => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   // 토스페이먼츠 클라이언트 키 (테스트용)
-  const clientKey = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq';
+  const clientKey = 'test_ck_6BYq7GWPVvNRd1OJ7eqmVNE5vbo1';
   const customerKey = `customer_${Date.now()}`; // 고유한 고객 키 생성
 
   useEffect(() => {
