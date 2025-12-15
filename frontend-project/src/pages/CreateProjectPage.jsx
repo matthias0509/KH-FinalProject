@@ -431,7 +431,7 @@ export default function CreateProjectPage() {
               </select>
             </div>
             <div className="form-group">
-              <label htmlFor="project-hero">대표 이미지 (썸네일)</label>
+              <label htmlFor="project-hero">대표 이미지(썸네일)</label>
               <input
                 id="project-hero"
                 type="file"
