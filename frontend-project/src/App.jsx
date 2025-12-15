@@ -13,15 +13,9 @@ import ChangePage from './pages/ChangePage';
 // 박성진
 import LoginPage from './pages/Login/LoginPage';
 import CreateMember from './pages/Login/CreateMemberPage';
-
-import ChangePage from './pages/ChangePage';
-import MyPage from './pages/MyPage'
-
-
 import NoticePage from './pages/NoticePage';
 
 // 박주현
-import ProfileEditPage from './pages/ProfileEditPage'
 import MakerPage from './pages/MakerPage'
 import MyPage from './pages/MyPage'
 import FundingHistoryPage from './pages/supporter/FundingHistoryPage'
