@@ -57,6 +57,7 @@
             "tailwind-merge": "*",
             "tailwindcss": "*",
             "tiptap-markdown": "^0.9.0",
+            "toast": "^0.5.4",
             "vaul": "^1.1.2"
       },
       "devDependencies": {
