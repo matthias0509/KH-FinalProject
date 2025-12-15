@@ -20,10 +20,36 @@ export default function LoginPage() {
         e.preventDefault();
         setIsLoading(true);
 
-        console.log('로그인 시도:', { username, password });
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/login', { // 💡 백엔드 API 주소
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }), // DTO와 일치하는 데이터 전송
+            });
 
-        setIsLoading(false);
-        navigate('/');
+            // 응답을 JSON 형식으로 변환
+            const data = await response.json(); 
+
+            if (response.ok && data.success) {
+                // 🚀 로그인 성공 처리 
+                alert(`로그인 성공! 환영합니다, ${data.name}님.`);
+                // 토큰 저장 (Local Storage 등)
+                localStorage.setItem('authToken', data.token); 
+                // 메인 페이지로 이동
+                navigate('/main'); 
+            } else {
+                // 🚨 로그인 실패 처리
+                alert(`로그인 실패: ${data.message}`);
+            }
+
+        } catch (error) {
+            alert('서버와 통신하는 중 오류가 발생했습니다.');
+            console.error('Login Error:', error);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
