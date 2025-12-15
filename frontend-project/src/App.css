@@ -77,7 +77,7 @@
   gap: 8px;
 }
 
-.search-input {
+.header-search-input {
   border: none;
   background: transparent;
   outline: none;
@@ -86,7 +86,7 @@
   color: #111827;
 }
 
-.search-input::placeholder {
+.header-search-input::placeholder {
   color: #9ca3af;
 }
 
