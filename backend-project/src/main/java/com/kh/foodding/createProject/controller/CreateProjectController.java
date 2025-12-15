@@ -30,11 +30,7 @@ public class CreateProjectController {
     @Operation(summary="프로젝트 임시 저장 메소드", description="프로젝트 임시 저장 시 임시 테이블에 저장됩니다.")
     @PostMapping("Minsert")
     public String Minsert(@RequestBody CreateProject p) {
-        
-        // int result = createProjectService.MinsertProject(p);
-        
-        int result=0;
-
+        int result = createProjectService.MinsertProject(p);
         return (result>0)? "임시저장 완료했습니다. " : "임시저장 실패했습니다.";
     }
     

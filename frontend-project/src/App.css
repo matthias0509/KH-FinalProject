@@ -265,6 +265,7 @@
 
 .hero {
   background-color: var(--surface);
+  margin-bottom: 32px;
 }
 
 .hero__container {

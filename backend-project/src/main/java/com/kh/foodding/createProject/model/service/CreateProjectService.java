@@ -1,7 +1,9 @@
 package com.kh.foodding.createProject.model.service;
 
-public interface  CreateProjectService{
+import com.kh.foodding.createProject.model.vo.CreateProject;
 
-    int MinsertProject();
+public interface CreateProjectService {
+
+    int MinsertProject(CreateProject project);
 
 }
