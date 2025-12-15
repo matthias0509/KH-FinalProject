@@ -36,4 +36,22 @@ public class ProjectServiceImpl implements ProjectService {
 
         return projectDao.insertProject(sqlSession, p);
     }
+
+    @Transactional
+    @Override
+    public int imsiProject(Project p) {
+        if (p == null) {
+            return 0;
+        }
+
+        if (p.getUserNo() == null) {
+            p.setUserNo(1L); // TODO: replace with actual authenticated user
+        }
+
+        if (p.getShipStartDate() == null) {
+            p.setShipStartDate(p.getFundEndDate());
+        }
+
+        return projectDao.imsiProject(sqlSession, p);
+    }
 }

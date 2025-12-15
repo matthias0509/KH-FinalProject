@@ -9,7 +9,8 @@ import { categories } from '../../data/content';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import insertProjectAxios from "./ProjectApi";
+import {imsiProjectAxios} from "./ProjectApi";
+import { insertProjectAxios } from './ProjectApi';
 
 const CustomImage = Image.extend({
   addAttributes() {
@@ -377,7 +378,7 @@ export default function CreateProjectPage() {
 
     const api = async () => {
       try {
-        const msg = await insertProjectAxios(requestPayload);
+        const msg = await imsiProjectAxios(requestPayload);
         toast.info(msg);
         navigate("/search");
       } catch (error) {
@@ -388,6 +389,44 @@ export default function CreateProjectPage() {
 
     api();
   };
+
+  // 제출하기 버튼
+   const handleCreate = (e) => {
+    
+    e.preventDefault(); // 기본 이벤트 제거
+
+    const editorHtml = editor?.getHTML() ?? '';
+    const editorJson = editor ? JSON.stringify(editor.getJSON()) : '{}';
+
+    const requestPayload = {
+      title: formData.title.trim(),
+      summary: formData.subtitle.trim(),
+      category: formData.category,
+      targetAmount: Number(formData.goal) || 0,
+      fundStartDate: formData.openStart || null,
+      fundEndDate: formData.openEnd || null,
+      shipStartDate: formData.openEnd || formData.openStart || null,
+      userNo: 1, // TODO: replace with logged-in user info
+      content: {
+        html: editorHtml,
+        json: editorJson,
+      },
+    };
+
+    const api = async () => {
+      try {
+        const msg = await insertProjectAxios(requestPayload);
+        toast.info(msg);
+        navigate("/login");
+      } catch (error) {
+        toast.error('프로젝트 제출 실패했습니다.');
+        console.error(error);
+      }
+    };
+
+    api();
+  };
+
 
   const sidebarSections = [
     { id: 'basics', label: '기본 정보', ref: basicsRef },
@@ -706,7 +745,7 @@ export default function CreateProjectPage() {
               <button type="button" className="header__cta create-project__submit" onClick={handleSaveDraft}>
                 임시 저장
               </button>
-              <button type="submit" className="header__cta create-project__submit">
+              <button type="submit" className="header__cta create-project__submit" onClick={handleCreate}>
                 프로젝트 생성
               </button>
             </div>

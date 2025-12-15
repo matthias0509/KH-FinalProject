@@ -6,4 +6,5 @@ public interface ProjectService {
 
     int insertProject(Project p);
 
+    int imsiProject(Project p);
 }
