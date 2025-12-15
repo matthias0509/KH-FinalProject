@@ -43,13 +43,31 @@ export default function Header() {
     <header className="app-header">
       <div className="header__inner">
         <div className="header__brand">
+          <Link to="/">
           <img src={logo} alt="Foodding" className="header__logo" />
+          </Link>
           <nav className="header__nav">
-            <a href="/" className="header__nav-link">푸슐랭</a>
-            <a href="/imbak" className="header__nav-link">마감임박</a>
-            <a href="/notice" className="header__nav-link">공지사항</a>
-            <a href="/change" className='header__nav-link'>(메이커 전환)</a>
-            <a href="/login" className='header__nav-link'>(로그인)</a>
+            
+            <Link to = "/" className="header__nav-link" > 
+              푸슐랭
+            </Link>
+
+            <Link to="/imbak" className="header__nav-link">
+              마감임박
+            </Link>
+
+            <Link to="/notice" className="header__nav-link">
+              공지사항
+            </Link>
+           
+            <Link to="/change" className='header__nav-link'>
+              (메이커 전환)
+            </Link>
+            
+            <Link to="/login" className='header__nav-link'>
+              (로그인)
+            </Link>
+           
           </nav>
         </div>
         <div className="header__actions">
@@ -92,9 +110,9 @@ export default function Header() {
             <Heart size={20} color="#6b7280" />
           </button>
 
-          <a href="/mypage" className="icon-button" aria-label="마이 페이지">
+          <Link to="/mypage" className="icon-button" aria-label="마이 페이지">
             <User size={20} color="#6b7280" />
-          </a>
+          </Link>
 
         
 
