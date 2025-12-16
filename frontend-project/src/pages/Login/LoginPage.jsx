@@ -1,5 +1,4 @@
-import {useState} from 'react';
-import { Link } from 'react-router-dom';
+import {useState, useEffect} from 'react';
 import '../../App.css';
 import './Login.css';
 import Header from '../../components/Header';
@@ -9,77 +8,108 @@ import InputField from '../../components/Login/InputField';
 import AuthLinkGroup from '../../components/Login/AuthLinkGroup';
 import SubmitButton from '../../components/Login/SubmitButton';
 import { useNavigate } from 'react-router-dom';
+import * as AuthService from './LoginService';
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    
+    // 로그인 상태는 컴포넌트 내부에서 State로 관리 (sessionStorage의 JWT 상태)
+    const [currentUser, setCurrentUser] = useState(AuthService.getCurrentUser()); 
+    
+    const [user, setUser] = useState({ userId: "", userPwd: "" }); // 사용자 입력 State
     const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
+    // 💡 1. 컴포넌트가 마운트되거나 상태가 변경될 때 로그인 상태 확인
+    useEffect(() => {
+        if (currentUser) {
+            // 로그인 상태라면 메인 화면으로 이동
+            navigate('/', { replace: true }); 
+        }
+    }, [currentUser, navigate]);
+
+    // 💡 2. 입력 핸들러 (Index.jsx의 handleChange와 동일)
+    const handleChange = e => {
+        const {name, value} = e.target;
+        setUser(prev => ({...prev, [name]: value}));
+    };
+
+    // 💡 3. 로그인 처리 함수 (Index.jsx의 loginAxios 로직 통합)
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setMessage('');
         setIsLoading(true);
 
         try {
-            const response = await fetch('http://localhost:8080/api/auth/login', { // 💡 백엔드 API 주소
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password }), // DTO와 일치하는 데이터 전송
-            });
-
-            // 응답을 JSON 형식으로 변환
-            const data = await response.json(); 
-
-            if (response.ok && data.success) {
-                // 🚀 로그인 성공 처리 
-                alert(`로그인 성공! 환영합니다, ${data.name}님.`);
-                // 토큰 저장 (Local Storage 등)
-                localStorage.setItem('authToken', data.token); 
-                // 메인 페이지로 이동
-                navigate('/main'); 
+            // LoginService를 통해 로그인 요청
+            const jwtToken = await AuthService.login(user.userId, user.userPwd); // 💡 jwtToken이 순수 문자열로 반환됨
+            
+            if (jwtToken) { // JWT 문자열이 있으면 성공으로 판단
+                toast.info("로그인에 성공했습니다!");
+                
+                // 💡 State 업데이트: 순수 토큰 문자열을 setCurrentUser에 전달
+                setCurrentUser(jwtToken);
             } else {
-                // 🚨 로그인 실패 처리
-                alert(`로그인 실패: ${data.message}`);
+                setMessage("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
+                toast.info("로그인에 실패했습니다.");
             }
-
+            
         } catch (error) {
-            alert('서버와 통신하는 중 오류가 발생했습니다.');
-            console.error('Login Error:', error);
+            setMessage("서버와 통신 중 오류가 발생했습니다.");
+            console.error("로그인 실패:", error);
         } finally {
             setIsLoading(false);
         }
-    }
-
+    };
+    
+    // 💡 4. 로그아웃 기능 (다른 컴포넌트에서 AuthService.logout()을 직접 호출하도록 분리)
+    // 이 페이지는 로그인 폼만 보여주므로, 로그아웃 버튼은 제거합니다.
+    
+    // 💡 5. 렌더링 분기 (이미 로그인된 경우, useEffect에서 리디렉션하므로 폼만 렌더링)
+    
+    // currentUser가 null이 아니면 useEffect에서 이미 '/'로 리디렉션하므로,
+    // 이 컴포넌트가 렌더링되는 것은 '로그인 전' 상태일 때 뿐입니다.
+    
     return (
         <div className='app'>
             <Header />
-                <AuthLayout title="로그인">
-                    <form>
-                        <InputField
-                            label="아이디"
-                            id="username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            placeholder="아이디를 입력하세요"
-                        />
-                        <br />
-                        <InputField
-                            label="비밀번호"
-                            type='password'
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="비밀번호"
-                        />
-                        <br />
-                        <SubmitButton isLoading={isLoading}>로그인</SubmitButton>
-                    </form>
-                    <AuthLinkGroup />
-                </AuthLayout>
+            <AuthLayout title="로그인">
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px'}}>
+                    
+                    <InputField
+                        label="아이디"
+                        id="userId"
+                        name="userId" // name 속성 추가 (handleChange를 위해 필요)
+                        value={user.userId}
+                        onChange={handleChange}
+                        placeholder="아이디를 입력하세요"
+                        required
+                    />
+                    <br />
+                    <InputField
+                        label="비밀번호"
+                        type='password'
+                        id="userPwd"
+                        name="userPwd" // name 속성 추가 (handleChange를 위해 필요)
+                        value={user.userPwd}
+                        onChange={handleChange}
+                        placeholder="비밀번호"
+                        required
+                    />
+                    
+                    {message && (
+                        <div className="alert-error" style={{ color: 'red', textAlign: 'center' }}>
+                            {message}
+                        </div>
+                    )}
+                    <br />
+                    <SubmitButton isLoading={isLoading}>로그인</SubmitButton>
+                </form>
+                {/* 💡 AuthLinkGroup을 유지할지 여부는 프로젝트 구조에 따라 결정 */}
+                <AuthLinkGroup /> 
+            </AuthLayout>
             <AppFooter />
         </div>
     );
-
 }

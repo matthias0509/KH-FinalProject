@@ -14,6 +14,7 @@
             - package 태그 내에 name 속성값에 베이스 패키지명 (처음 프로젝트 생성 시 셋팅한 3단계의 패키지 구조) 을 적게 되면
               내부적으로 com.kh.backend 패키지 (베이스 패키지) 안에 있는 모든 클래스들을 자동으로 Type Alias 로 등록하겠다.
               라고 설정이 잡히게 됨!! (단, @Alias 어노테이션이 붙은 클래스에 한해서)
+              
          -->
     </typeAliases>
 </configuration>

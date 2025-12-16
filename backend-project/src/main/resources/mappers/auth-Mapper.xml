@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="authMapper">
+    
+    <resultMap id="memberResultSet" type="member">
+        <id property="userNo" column="USER_NO"/> 
+        
+        <result property="userId" column="USER_ID"/>
+        <result property="userPwd" column="USER_PWD"/>
+        <result property="userName" column="USER_NAME"/>
+        <result property="nickname" column="NICKNAME"/>
+        <result property="birthDate" column="BIRTH_DATE"/>
+        <result property="gender" column="GENDER"/>
+        <result property="email" column="EMAIL"/>
+        <result property="phone" column="PHONE"/>
+        <result property="originProfile" column="ORIGIN_PROFILE"/>
+        <result property="modifyProfile" column="MODIFY_PROFILE"/>
+        <result property="postcode" column="POSTCODE"/>
+        <result property="mainAddress" column="MAIN_ADDRESS"/>
+        <result property="detailAddress" column="DETAIL_ADDRESS"/>
+        <result property="enrollDate" column="ENROLL_DATE"/>
+        <result property="userYn" column="USER_YN"/>
+        <result property="userRole" column="USER_ROLE"/>
+        </resultMap>
+    
+    <select id="selectMemberForLogin" parameterType="string" resultMap="memberResultSet">
+        SELECT USER_ID, USER_PWD, USER_NAME, USER_ROLE, NICKNAME 
+        FROM TB_USER
+        WHERE 
+            USER_ID = #{userId}
+            AND USER_YN = 'Y' 
+    </select>
+</mapper>
