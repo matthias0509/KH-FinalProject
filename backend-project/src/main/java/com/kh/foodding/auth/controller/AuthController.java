@@ -49,6 +49,8 @@ public class AuthController {
 	
 		Member loginUser = authService.login(m.getUserId());
 	
+		System.out.println("사용자 입력 비밀번호 (평문): " + m.getUserPwd());
+	    System.out.println("DB 해시 비밀번호: " + loginUser.getUserPwd());
 	
 		if ((loginUser != null)
 	

@@ -29,6 +29,41 @@
         FROM TB_USER
         WHERE 
             USER_ID = #{userId}
-            AND USER_YN = 'Y' 
+            AND USER_YN = 'N' 
     </select>
+    
+    <insert id="insertMember" parameterType="member">
+        INSERT INTO TB_USER (
+            USER_NO,
+            USER_ID,
+            USER_PWD,
+            USER_NAME,
+            NICKNAME,
+            BIRTH_DATE,
+            GENDER,
+            EMAIL,
+            PHONE,
+            ORIGIN_PROFILE,
+            MODIFY_PROFILE,
+            POSTCODE,
+            MAIN_ADDRESS,
+            DETAIL_ADDRESS,
+            ENROLL_DATE,  USER_YN,      USER_ROLE
+        ) VALUES (
+            SEQ_TB_USER_NO.NEXTVAL,  #{userId},
+            #{userPwd},
+            #{userName},
+            #{nickname},
+            #{birthDate},
+            #{gender},
+            #{email},
+            #{phone},
+            #{originProfile},
+            #{modifyProfile},
+            #{postcode},
+            #{mainAddress},
+            #{detailAddress},
+            SYSDATE,           'N',               #{userRole}
+        )
+    </insert>
 </mapper>
