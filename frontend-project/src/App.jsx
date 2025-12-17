@@ -4,7 +4,9 @@ import './App.css';
 
 // 김동규
 import HomePage from './pages/HomePage';
+import CreateProjectLandingPage from './pages/CreateProjectPage/CreateProjectLandingPage';
 import CreateProjectPage from './pages/CreateProjectPage/CreateProjectPage';
+import CreateProjectSuccessPage from './pages/CreateProjectPage/CreateProjectSuccessPage';
 import ImbakPage from './pages/ImbakPage';
 import SearchPage from './pages/SearchPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -67,7 +69,9 @@ export default function App() {
     <Routes>
       {/* 김동규 */}
       <Route path="/" element={<HomePage />} />
-      <Route path="/create" element={<CreateProjectPage />} />
+      <Route path="/create" element={<CreateProjectLandingPage />} />
+      <Route path="/create/new" element={<CreateProjectPage />} />
+      <Route path="/create/success" element={<CreateProjectSuccessPage />} />
       <Route path='/imbak' element={<ImbakPage/> }/>
       <Route path="/search" element={<SearchPage />} />
       <Route path="/projects/premium-macarons" element={<ProductDetailPage />} />

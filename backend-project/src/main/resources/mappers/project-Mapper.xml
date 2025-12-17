@@ -4,55 +4,69 @@
 
 
 
-<!-- 임시저장 쿼리문 -->
-<insert id = "insertProject" parameterType="project">
-    INSERT INTO TEMPORARY (
-        PRODUCT_NO,
-        PRODUCT_TITLE,
-        PRODUCT_DESC,
-        TARGET_AMOUNT,
-        FUND_START_DATE,
-        FUND_END_DATE,
-        CATEGORY,
-        SHIP_START_DATE,
-        USER_NO
-    )
-    VALUES (
-        SEQ_PRODUCT_NO.NEXTVAL,
-        #{title},
-        #{summary},
-        #{targetAmount},
-        #{fundStartDate},
-        #{fundEndDate},
-        #{category},
-        #{shipStartDate},
-        #{userNo}
-    )
-</insert>
+            <!-- 프로젝트 제출 (심의받기) -->
+            <insert id="insertProject" parameterType="project">
+                    INSERT INTO PRODUCT (
+                        PRODUCT_NO,
+                        PRODUCT_TITLE,
+                        PRODUCT_DESC,
+                        TARGET_AMOUNT,
+                        CURRENT_AMOUNT,
+                        FUND_START_DATE,
+                        FUND_END_DATE,
+                        CATEGORY,
+                        ORIGIN_THUMBNAIL,
+                        SELLER_NO
+                    ) VALUES (
+                        SEQ_PRODUCT_NO.NEXTVAL,
+                        #{title},
+                        #{summary},
+                        #{targetAmount},
+                        NVL(#{currentAmount}, 0),
+                        #{fundStartDate},
+                        #{fundEndDate},
+                        #{category},
+                        NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
+                        (
+                            SELECT SELLER_NO
+                            FROM SELLER_PROFILE
+                            WHERE USER_NO = #{userNo}
+                        )
+                    )
+            </insert>
 
-<!-- 프로젝트 제출 (심의받기) -->
-<insert id = "imsiProject" parameterType="project">
-    INSERT INTO TEMPORARY (
-        TEMP_NO,
-        TEMP_TITLE,
-        TEMP_DESC,
-        TARGET_AMOUNT,
-        FUND_START_DATE,
-        FUND_END_DATE,
-        CATEGORY,
-        SHIP_START_DATE,
-        USER_NO
-    )
-    VALUES (
-        SEQ_TEMP_NO.NEXTVAL,
-        #{title},
-        #{summary},
-        #{targetAmount},
-        #{fundStartDate},
-        #{fundEndDate},
-        #{category},
-        #{shipStartDate},
-        #{userNo}
-    )
-</insert>
+
+            <!-- 임시저장 -->
+            <insert id = "imsiProject" parameterType="project">
+                INSERT INTO TEMPORARY (
+                    TEMP_NO,
+                    TEMP_TITLE,
+                    TEMP_DESC,
+                    TARGET_AMOUNT,
+                    FUND_START_DATE,
+                    FUND_END_DATE,
+                    CATEGORY,
+                    ORIGIN_THUMBNAIL,
+                    SHIP_START_DATE,
+                    SELLER_NO
+                )
+                VALUES (
+                    SEQ_TEMP_NO.NEXTVAL,
+                    #{title},
+                    #{summary},
+                    #{targetAmount},
+                    #{fundStartDate},
+                    #{fundEndDate},
+                    #{category},
+                    NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
+                    #{shipStartDate},
+                    (
+                        SELECT SELLER_NO
+                        FROM SELLER_PROFILE
+                        WHERE USER_NO = #{userNo}
+                    )
+                )
+            </insert>
+
+
 </mapper>

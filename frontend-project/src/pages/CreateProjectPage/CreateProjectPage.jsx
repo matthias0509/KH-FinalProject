@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 
 import {imsiProjectAxios} from "./ProjectApi";
 import { insertProjectAxios } from './ProjectApi';
+import DatePickerField from '../../components/DatePickerField';
 
 const CustomImage = Image.extend({
   addAttributes() {
@@ -350,7 +351,7 @@ export default function CreateProjectPage() {
     };
 
     console.log('제출 데이터', payload);
-    alert('프로젝트 데이터가 준비되었습니다. 콘솔을 확인하세요.');
+    // alert('프로젝트 데이터가 준비되었습니다. 콘솔을 확인하세요.');
   };
 
 
@@ -393,7 +394,6 @@ export default function CreateProjectPage() {
   // 제출하기 버튼
    const handleCreate = (e) => {
     
-    e.preventDefault(); // 기본 이벤트 제거
 
     const editorHtml = editor?.getHTML() ?? '';
     const editorJson = editor ? JSON.stringify(editor.getJSON()) : '{}';
@@ -417,7 +417,7 @@ export default function CreateProjectPage() {
       try {
         const msg = await insertProjectAxios(requestPayload);
         toast.info(msg);
-        navigate("/login");
+        navigate('/create/success');
       } catch (error) {
         toast.error('프로젝트 제출 실패했습니다.');
         console.error(error);
@@ -630,27 +630,28 @@ export default function CreateProjectPage() {
               </div>
               <div className="form-grid">
               <div className="form-group">
-                <label htmlFor="project-open-start">오픈 시작일</label>
-                <input
+                <DatePickerField
                   id="project-open-start"
                   name="openStart"
-                  type="date"
+                  label="오픈 시작일"
                   value={formData.openStart}
                   onChange={updateField}
                   min={minStartDateValue}
+                  max={formData.openEnd || endDateMax}
+                  helperText="오늘 기준 7일 이후로 설정"
                   required
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="project-open-end">오픈 종료일</label>
-                <input
+                <DatePickerField
                   id="project-open-end"
                   name="openEnd"
-                  type="date"
+                  label="오픈 종료일"
                   value={formData.openEnd}
                   onChange={updateField}
                   min={endDateMin}
                   max={endDateMax}
+                  helperText="최대 2개월 범위"
                   required
                 />
               </div>

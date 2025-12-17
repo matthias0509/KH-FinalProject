@@ -12,3 +12,14 @@ INSERT INTO TB_USER (
     '00000', '서울시', '어딘가 101',
     SYSDATE, 'Y', 'USER'
 );
+
+-- 테스트 유저용 판매자 프로필 더미 데이터
+INSERT INTO SELLER_PROFILE (
+    SELLER_NO,
+    INTRODUCTION,
+    USER_NO
+) VALUES (
+    SEQ_SELLER_PROFILE_NO.NEXTVAL,
+    '테스트 셀러 프로필',
+    1
+);
