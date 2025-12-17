@@ -1,106 +1,162 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import ProjectCard from '../../components/ProjectCard';
 import AppFooter from '../../components/AppFooter';
 import draftPlaceholder from '../../assets/기본이미지.jpg';
-
-const dummyDrafts = [
-  {
-    id: 'temp-101',
-    title: '여름 제철 과일청 프로젝트',
-    category: '푸드 > 음료',
-    updatedAt: '2025-01-12 14:30',
-    progress: 65,
-  },
-  {
-    id: 'temp-097',
-    title: '친환경 콤부차 키트',
-    category: '푸드 > 디저트',
-    updatedAt: '2025-01-05 10:15',
-    progress: 30,
-  },
-];
+import { fetchImsiAxios } from './ProjectApi';
 
 export default function CreateProjectLandingPage() {
   const navigate = useNavigate();
-  const drafts = useMemo(() => dummyDrafts, []);
+  const [drafts, setDrafts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadDrafts() {
+      try {
+        const data = await fetchImsiAxios(1); // TODO: 실제 사용자 번호로 교체
+        setDrafts(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error('임시저장 목록 불러오기 실패', error);
+        setDrafts([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDrafts();
+  }, []);
+
+  const stats = useMemo(() => {
+    const toNumber = (value) => {
+      if (typeof value === 'number') return value;
+      if (typeof value === 'string') {
+        const parsed = Number(value.replace(/,/g, ''));
+        return Number.isNaN(parsed) ? 0 : parsed;
+      }
+      return 0;
+    };
+
+    const totalTarget = drafts.reduce((sum, draft) => sum + toNumber(draft.targetAmount), 0);
+    return {
+      count: drafts.length,
+      totalTarget,
+    };
+  }, [drafts]);
+
+  const goToNewProject = () => navigate('/create/new');
+  const goToMakerDashboard = () => navigate('/maker/project');
+  const handleContinueDraft = (draft) => {
+    if (!draft?.tempNo) return;
+    navigate(`/create/new?draft=${draft.tempNo}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="app create-landing">
+        <Header />
+        <main className="create-landing__body">
+          <section className="create-landing__loading">불러오는 중...</section>
+        </main>
+        <AppFooter />
+      </div>
+    );
+  }
+
+  const hasDrafts = stats.count > 0;
 
   return (
     <div className="app create-landing">
       <Header />
       <main className="create-landing__body">
         <section className="create-landing__hero">
-          <p className="create-landing__eyebrow">project onboarding</p>
-          <h1>새로운 푸딩 프로젝트를 시작해 볼까요?</h1>
+          <p className="create-landing__eyebrow">Maker Studio</p>
+          <h1>새로운 프로젝트를 시작해 보세요</h1>
           <p>
-            임시저장된 드래프트를 불러오거나, 새 프로젝트를 만들어주세요. 심의 가이드와 템플릿도
-            이곳에서 확인할 수 있어요.
+            아이디어 스케치부터 심의 제출까지 한 곳에서 관리할 수 있어요. 임시 저장한 초안을 이어서
+            수정하고 마무리해 공개 일정을 잡아보세요.
           </p>
           <div className="create-landing__cta">
-            <button type="button" className="btn btn--primary" onClick={() => navigate('/create/new')}>
+            <button type="button" className="btn btn--primary" onClick={goToNewProject}>
               새 프로젝트 만들기
             </button>
-            <button type="button" className="btn" onClick={() => navigate('/maker/project')}>
-              메이커 센터로 이동
+            <button type="button" className="btn btn--ghost" onClick={goToMakerDashboard}>
+              프로젝트 관리로 이동
             </button>
           </div>
+          {hasDrafts && (
+            <span className="create-landing__hint">임시 저장된 프로젝트 {stats.count}개가 대기 중입니다.</span>
+          )}
         </section>
 
-        <section>
+        <section className="create-landing__panel">
           <div className="create-landing__header">
-            <h2>임시저장 프로젝트</h2>
-            <span>총 {drafts.length}건</span>
+            <div>
+              <p className="create-landing__eyebrow">임시저장</p>
+              <h2>이어쓰기 가능한 프로젝트</h2>
+            </div>
+            <div className="create-landing__stats">
+              <div className="create-landing__stat">
+                <p className="create-landing__stat-label">임시저장 수</p>
+                <p className="create-landing__stat-value">{stats.count}건</p>
+              </div>
+            </div>
           </div>
 
-          {drafts.length === 0 && (
-            <div className="create-landing__empty">
-              <p>아직 임시저장한 프로젝트가 없어요.</p>
-              <button type="button" className="btn btn--primary" onClick={() => navigate('/create/new')}>
-                첫 프로젝트 만들기
-              </button>
-            </div>
-          )}
-
-          {drafts.length > 0 && (
-              <div className="create-landing__grid project-grid">
-                {drafts.map((draft) => (
-                  <div key={draft.id} className="create-landing__card">
+          {hasDrafts ? (
+            <div className="create-landing__grid project-grid">
+              {drafts.map((draft) => {
+                const current = Number(draft.currentAmount ?? 0);
+                const goal = Number(draft.targetAmount ?? 1) || 1;
+                return (
+                  <div key={draft.tempNo || draft.id || draft.title} className="create-landing__card">
                     <ProjectCard
                       project={{
-                        title: draft.title,
-                        category: draft.category,
-                        current: draft.progress * 10000,
-                        goal: 1000000,
+                        title: draft.title || '제목 미정',
+                        category: draft.category || '카테고리 미정',
+                        current,
+                        goal,
                         daysLeft: 30,
-                        image: draft.thumbnail || draftPlaceholder,
+                        image: draft.thumbnailUrl || draftPlaceholder,
+                        detailPath: draft.tempNo ? `/create/new?draft=${draft.tempNo}` : undefined,
                       }}
                       hideWish
                       hideProgress
                       hideMeta
                     />
-                  <div className="create-landing__card-footer">
-                    <p className="create-landing__updated">최근 저장 {draft.updatedAt}</p>
-                    <div className="create-landing__actions">
-                      <button
-                        type="button"
-                        className="btn btn--primary"
-                        onClick={() => navigate(`/create/new?draftId=${draft.id}`)}
-                      >
-                        이어서 작성
-                      </button>
-                      <button type="button" className="btn btn--ghost">
-                        삭제
-                      </button>
+                    <div className="create-landing__card-footer">
+                      <div>
+                        <p className="create-landing__updated">임시저장 번호 {draft.tempNo || '-'}</p>
+                        <p className="create-landing__updated create-landing__updated--muted">
+                          목표 금액 {goal.toLocaleString()}원
+                        </p>
+                      </div>
+                      <div className="create-landing__actions">
+                        <button
+                          type="button"
+                          className="btn btn--small btn--primary"
+                          onClick={() => handleContinueDraft(draft)}
+                        >
+                          이어서 작성
+                        </button>
+                        <button type="button" className="btn btn--small btn--ghost">
+                          삭제
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
+            </div>
+          ) : (
+            <div className="create-landing__empty">
+              <p>아직 임시저장한 프로젝트가 없어요.</p>
+              <p>아이디어가 떠오른다면 바로 임시저장해두고, 나중에 이어서 완성해보세요.</p>
             </div>
           )}
         </section>
       </main>
-      <AppFooter/>
+      <AppFooter />
     </div>
   );
 }

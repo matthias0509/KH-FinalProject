@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -6,11 +6,10 @@ import Underline from '@tiptap/extension-underline';
 import Header from '../../components/Header';
 import TextAlignExtension from '../../utils/textAlignExtension';
 import { categories } from '../../data/content';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import {imsiProjectAxios} from "./ProjectApi";
-import { insertProjectAxios } from './ProjectApi';
+import { imsiProjectAxios, insertProjectAxios, fetchDraftDetailAxios } from './ProjectApi';
 import DatePickerField from '../../components/DatePickerField';
 
 const CustomImage = Image.extend({
@@ -84,6 +83,8 @@ export default function CreateProjectPage() {
 
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get('draft');
   const storyImageInputRef = useRef(null);
   const basicsRef = useRef(null);
   const storyRef = useRef(null);
@@ -106,6 +107,9 @@ export default function CreateProjectPage() {
 
 
   const [imageError, setImageError] = useState('');
+  const [draftStatus, setDraftStatus] = useState({ loading: false, error: null, applied: false });
+  const [draftPrefill, setDraftPrefill] = useState(null);
+  const [activeDraftId, setActiveDraftId] = useState(null);
 
   const editor = useEditor({
     extensions: [
@@ -151,6 +155,68 @@ export default function CreateProjectPage() {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+    if (!draftId) {
+      setActiveDraftId(null);
+      setDraftPrefill(null);
+      setDraftStatus({ loading: false, error: null, applied: false });
+      return;
+    }
+
+    let cancelled = false;
+    const loadDraft = async () => {
+      setDraftStatus({ loading: true, error: null, applied: false });
+      try {
+        const draft = await fetchDraftDetailAxios({ userNo: 1, tempNo: draftId });
+        if (cancelled) return;
+        setDraftPrefill(draft || null);
+        setActiveDraftId(draft?.tempNo ? String(draft.tempNo) : draftId);
+        setDraftStatus({ loading: false, error: null, applied: false });
+      } catch (error) {
+        if (cancelled) return;
+        console.error('임시저장 불러오기 실패', error);
+        setDraftPrefill(null);
+        setActiveDraftId(null);
+        setDraftStatus({ loading: false, error: '임시저장 불러오기 실패', applied: false });
+      }
+    };
+
+    loadDraft();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [draftId]);
+
+  useEffect(() => {
+    if (!draftPrefill) {
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      title: draftPrefill.title ?? prev.title,
+      subtitle: draftPrefill.summary ?? prev.subtitle,
+      category: draftPrefill.category ?? prev.category,
+      openStart: draftPrefill.fundStartDate ?? prev.openStart,
+      openEnd: draftPrefill.fundEndDate ?? prev.openEnd,
+      goal:
+        draftPrefill.targetAmount !== undefined && draftPrefill.targetAmount !== null
+          ? String(draftPrefill.targetAmount)
+          : prev.goal,
+    }));
+
+    setDraftStatus((prev) => ({ ...prev, applied: true }));
+  }, [draftPrefill]);
+
+  useEffect(() => {
+    if (!draftPrefill || !editor || !draftPrefill.content?.html) {
+      return;
+    }
+
+    editor.commands.setContent(draftPrefill.content.html);
+  }, [draftPrefill, editor]);
 
   const getCurrentImageCount = () => {
     let count = 0;
@@ -305,6 +371,7 @@ export default function CreateProjectPage() {
   };
 
   const handleSubmit = (event) => {
+    
     event.preventDefault();
     if (!formData.heroImage) {
       setImageError('대표 이미지를 업로드해 주세요.');
@@ -371,6 +438,7 @@ export default function CreateProjectPage() {
       fundEndDate: formData.openEnd || null,
       shipStartDate: formData.openEnd || formData.openStart || null,
       userNo: 1, // TODO: replace with logged-in user info
+      tempNo: activeDraftId,
       content: {
         html: editorHtml,
         json: editorJson,
@@ -455,6 +523,17 @@ export default function CreateProjectPage() {
         </aside>
 
         <div className="create-project">
+          {draftId && (
+            <div
+              className={`create-project__draft-alert${
+                draftStatus.error ? ' create-project__draft-alert--error' : ''
+              }`}
+            >
+              {draftStatus.loading
+                ? '임시저장을 불러오는 중입니다...'
+                : draftStatus.error || '임시저장 내용을 불러왔습니다. 계속 이어서 작성해 보세요.'}
+            </div>
+          )}
           <div className="create-project__intro">
             <h1 className="section-title">프로젝트 올리기</h1>
             <p className="create-project__description">

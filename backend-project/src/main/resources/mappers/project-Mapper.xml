@@ -68,5 +68,58 @@
                 )
             </insert>
 
+           <select id="selectProject" parameterType="map" resultType="project">
+                    SELECT
+                        TEMP_NO      AS tempNo,
+                        TEMP_TITLE   AS title,
+                        TEMP_DESC    AS summary,
+                        TARGET_AMOUNT,
+                        FUND_START_DATE,
+                        FUND_END_DATE,
+                        CATEGORY,
+                        ORIGIN_THUMBNAIL AS thumbnailUrl,
+                        SHIP_START_DATE
+                    FROM TEMPORARY
+                    WHERE SELLER_NO = (
+                        SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
+                    )
+                    ORDER BY TEMP_NO DESC
+           </select>
 
+           <select id="selectProjectById" parameterType="map" resultType="project">
+                SELECT
+                    TEMP_NO      AS tempNo,
+                    TEMP_TITLE   AS title,
+                    TEMP_DESC    AS summary,
+                    TARGET_AMOUNT,
+                    FUND_START_DATE,
+                    FUND_END_DATE,
+                    CATEGORY,
+                    ORIGIN_THUMBNAIL AS thumbnailUrl,
+                    SHIP_START_DATE
+                FROM TEMPORARY
+                WHERE TEMP_NO = #{tempNo}
+                    AND SELLER_NO = (
+                    SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
+                    )
+            </select>
+
+           <update id="updateDraft" parameterType="project">
+                    UPDATE TEMPORARY
+                        SET TEMP_TITLE = #{title},
+                            TEMP_DESC = #{summary},
+                            TARGET_AMOUNT = #{targetAmount},
+                            FUND_START_DATE = #{fundStartDate},
+                            FUND_END_DATE = #{fundEndDate},
+                            CATEGORY = #{category},
+                            ORIGIN_THUMBNAIL = NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
+                            SHIP_START_DATE = #{shipStartDate},
+                            UPDATE_DATE = SYSDATE
+                    WHERE TEMP_NO = #{tempNo}
+                        AND SELLER_NO = (
+                            SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
+                        )
+            </update>
+
+            
 </mapper>

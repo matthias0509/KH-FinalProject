@@ -1,9 +1,14 @@
 package com.kh.foodding.createProject.controller;
 
+import java.util.ArrayList;
+
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.foodding.createProject.model.service.ProjectService;
@@ -47,5 +52,17 @@ public class ProjectController {
         return (result>0)? "임시저장 완료했습니다. " : "임시저장 실패했습니다.";
     }
     
+
+    @GetMapping("drafts")
+    public ArrayList<Project> selectProject(@RequestParam int userNo){
+
+        return ProjectService.selectProject(userNo);
+    } 
+
+    @GetMapping("drafts/{tempNo}")
+    public Project selectProjectDetail(@PathVariable long tempNo, @RequestParam int userNo){
+
+        return ProjectService.selectProjectById(userNo, tempNo);
+    }
     
 }
