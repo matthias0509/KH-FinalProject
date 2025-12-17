@@ -9,6 +9,7 @@ import InputField from '../../components/Login/InputField';
 import SubmitButton from '../../components/Login/SubmitButton';
 import PostCode from "../../components/Login/PostCode";
 import axios from "axios";
+import EmailVerificationForm from "../../components/Login/EmailVerificationForm";
 
 function CreateMember() {
     const [form, setForm] = useState({
@@ -31,6 +32,7 @@ function CreateMember() {
     
     // 프로필파일 객체
     const [profileFile, setProfileFile] = useState(null);
+    const [emailVerified, setEmailVerified] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -54,65 +56,58 @@ function CreateMember() {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsLoading(true);
+    e.preventDefault();
+    if (!emailVerified) {
+        alert("이메일 인증을 완료해주세요.");
+        return;
+    }
+    setIsLoading(true);
 
-        if (form.userPwd !== form.confirmPassword) {
-            alert('비밀번호가 일치하지 않습니다.');
-            setIsLoading(false);
-            return;
+    // 1. 비밀번호 일치 확인
+    if (form.userPwd !== form.confirmPassword) {
+        alert('비밀번호가 일치하지 않습니다.');
+        setIsLoading(false);
+        return;
+    }
+
+    // 💡 핵심: 새로운 FormData 생성
+    const formData = new FormData();
+
+    // 2. 텍스트 필드 전부 추가 (birthDate 포함)
+    Object.keys(form).forEach(key => {
+        if (key !== 'confirmPassword') { // 확인용 필드 제외
+            formData.append(key, form[key]);
         }
-        
-        // 💡 서버로 전송할 최종 회원가입 데이터
-        const formData = new FormData();
-        
-        // 텍스트 데이터 추가
-        formData.append('userId', form.userId);
-        formData.append('userPwd', form.userPwd);
-        formData.append('userName', form.userName);
-        formData.append('nickname', form.nickname);
-        formData.append('birthDate', form.birthDate);
-        formData.append('gender', form.gender);
-        formData.append('email', form.email);
-        formData.append('phone', form.phone);
-        formData.append('postcode', form.postcode);
-        formData.append('mainAddress', form.mainAddress);
-        formData.append('detailAddress', form.detailAddress);
+    });
 
-        try {
-            const API_URL = "http://localhost:8001/foodding"; // 💡 백엔드 URL
-            
-            // 💡 이 부분이 API 요청을 수행하는 코드입니다.
-            await axios.post(`${API_URL}/member/insert`, formData); 
-            
-            alert('회원가입이 성공적으로 완료되었습니다. 로그인 페이지로 이동합니다.');
-            navigate('/login');
-            
-        } catch (error) {
-            // 💡 서버 응답 에러 처리 구체화
-            console.error('회원가입 실패 상세 정보:', error); 
-            
-            let errorMessage = '회원가입 처리 중 알 수 없는 오류가 발생했습니다.';
-            
-            // 400 Bad Request (잘못된 데이터 형식, 예: 중복된 아이디)
-            if (error.response && error.response.status === 400) {
-                // 서버에서 보낸 구체적인 에러 메시지가 있다면 사용
-                errorMessage = error.response.data.message || '입력된 데이터에 문제가 있습니다. (아이디 중복 등)';
-            } 
-            // 500 Internal Server Error (서버 로직, DB 오류 등)
-            else if (error.response && error.response.status === 500) {
-                 errorMessage = '서버 내부에서 처리 오류가 발생했습니다. (관리자에게 문의)';
-            } 
-            // 네트워크 오류 (서버 연결 불가, CORS 등)
-            else if (error.code === 'ERR_NETWORK') {
-                errorMessage = '서버 연결에 실패했습니다. (서버 상태 확인 필요)';
+    // 3. 파일 객체 추가 (가장 중요!)
+    // 여기서 'upfile'이라는 이름은 Java의 @RequestPart("upfile") 또는 매개변수 이름과 일치해야 합니다.
+    if (profileFile) {
+        formData.append('upfile', profileFile); 
+        console.log("파일 첨부됨:", profileFile.name);
+    } else {
+        console.log("파일이 선택되지 않았습니다.");
+    }
+
+    try {
+        const API_URL = "http://localhost:8001/foodding";
+        
+        // 4. 전송 시 헤더 설정 (Axios는 FormData 전송 시 자동으로 설정해주지만 명시하면 더 안전함)
+        await axios.post(`${API_URL}/member/insert`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
             }
-            
-            alert(errorMessage);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        });
+
+        alert('회원가입이 완료되었습니다.');
+        navigate('/login');
+    } catch (error) {
+        console.error('회원가입 실패:', error);
+        alert('회원가입 중 오류가 발생했습니다.');
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     return(
         <div className="app">
@@ -211,14 +206,10 @@ function CreateMember() {
                     </div>
                     
                     {/* 8. 이메일 (EMAIL) */}
-                    <InputField
-                        label="이메일"
-                        type="email"
-                        name="email"
-                        value={form.email}
+                    <EmailVerificationForm
+                        email={form.email}
                         onChange={handleChange}
-                        placeholder="이메일 주소 (인증 필요)"
-                        required
+                        onVerified={(val) => setEmailVerified(val)}
                     />
                     
                     {/* 9. 전화번호 (PHONE) */}

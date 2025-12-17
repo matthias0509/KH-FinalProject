@@ -15,27 +15,30 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 	
 	private final MemberDao memberDao;
-    private final String savePath = "D:/fooding/profile_images/"; // 파일 저장 경로를 상수로 관리
+    private final String savePath = "D:/foodding/profile_images/"; // 파일 저장 경로를 상수로 관리
 
     public int insertMember(Member m, MultipartFile upfile) {
+    	System.out.println("전달된 upfile: " + (upfile != null ? upfile.getOriginalFilename() : "NULL"));
+    	// 💡 저장 경로 폴더가 없으면 생성하는 코드 추가
+        File folder = new File(savePath);
+        if (!folder.exists()) {
+            folder.mkdirs(); // d:/fooding/profile_images/ 폴더를 생성함
+        }
         
         if (upfile != null && !upfile.isEmpty()) {
             // 💡 파일 첨부가 있을 경우
             String originFileName = upfile.getOriginalFilename();
             m.setOriginProfile(originFileName);
             
-            // 1. 확장자 추출
-            String ext = originFileName.substring(originFileName.lastIndexOf("."));
-            
-            // 2. 수정 파일명 생성 (밀리초 기반 + 5자리 랜덤 숫자)
+            // 1. 수정 파일명 생성 (밀리초 기반 + 5자리 랜덤 숫자)
             long timeMillis = System.currentTimeMillis(); // 현재 시각 (밀리초)
             int randomNumber = (int)(Math.random() * 90000 + 10000); // 5자리 랜덤 숫자 (10000 ~ 99999)
             
             // 최종 수정 파일명: 예) 1734567890123_45678.png
-            String changeFileName = timeMillis + "_" + randomNumber + ext; 
+            String changeFileName = timeMillis + "_" + randomNumber + originFileName; 
             m.setModifyProfile(changeFileName); 
             
-            // 3. 파일을 지정된 경로에 실제로 저장
+            // 2. 파일을 지정된 경로에 실제로 저장
             try {
                 upfile.transferTo(new File(savePath + changeFileName));
             } catch (Exception e) {
