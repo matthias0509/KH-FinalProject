@@ -9,6 +9,7 @@ import InputField from '../../components/Login/InputField';
 import SubmitButton from '../../components/Login/SubmitButton';
 import PostCode from "../../components/Login/PostCode";
 import axios from "axios";
+import EmailVerificationForm from "../../components/Login/EmailVerificationForm";
 
 function CreateMember() {
     const [form, setForm] = useState({
@@ -31,6 +32,7 @@ function CreateMember() {
     
     // 프로필파일 객체
     const [profileFile, setProfileFile] = useState(null);
+    const [emailVerified, setEmailVerified] = useState(false);
 
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -55,6 +57,10 @@ function CreateMember() {
 
     const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!emailVerified) {
+        alert("이메일 인증을 완료해주세요.");
+        return;
+    }
     setIsLoading(true);
 
     // 1. 비밀번호 일치 확인
@@ -200,14 +206,10 @@ function CreateMember() {
                     </div>
                     
                     {/* 8. 이메일 (EMAIL) */}
-                    <InputField
-                        label="이메일"
-                        type="email"
-                        name="email"
-                        value={form.email}
+                    <EmailVerificationForm
+                        email={form.email}
                         onChange={handleChange}
-                        placeholder="이메일 주소 (인증 필요)"
-                        required
+                        onVerified={(val) => setEmailVerified(val)}
                     />
                     
                     {/* 9. 전화번호 (PHONE) */}

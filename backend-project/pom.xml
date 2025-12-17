@@ -136,6 +136,10 @@
             - logback 라이브러리는 스프링부트 기본 포함 라이브러리이기 때문에
               pom.xml 에서 별도의 dependency 구문을 쓸 필요가 없다. (프로젝트 생성 시 기본적으로 딸려 옴)
         -->
+        <dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
     </dependencies>
     <build>
         <plugins>
