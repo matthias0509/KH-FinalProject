@@ -449,7 +449,7 @@ export default function CreateProjectPage() {
       try {
         const msg = await imsiProjectAxios(requestPayload);
         toast.info(msg);
-        navigate("/search");
+        navigate("/create");
       } catch (error) {
         toast.error('프로젝트 임시저장 실패했습니다.');
         console.error(error);
