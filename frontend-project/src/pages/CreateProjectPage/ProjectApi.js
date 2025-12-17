@@ -61,6 +61,25 @@ export const fetchImsiAxios = async (userNo) => {
     }
   };
 
+  export const uploadThumbnailAxios = async (file) => {
+    const url = `${commonUrl}thumbnail`;
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await axios({
+        url,
+        method: 'post',
+        data: formData,
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('썸네일 업로드 실패!', error);
+      throw error;
+    }
+  };
+
   export const fetchDraftDetailAxios = async ({ userNo, tempNo }) => {
     const url = `${commonUrl}drafts/${tempNo}`;
 
@@ -77,5 +96,4 @@ export const fetchImsiAxios = async (userNo) => {
       throw error;
     }
   };
-
 

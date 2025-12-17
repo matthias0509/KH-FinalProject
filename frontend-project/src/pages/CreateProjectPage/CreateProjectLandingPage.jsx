@@ -6,6 +6,21 @@ import AppFooter from '../../components/AppFooter';
 import draftPlaceholder from '../../assets/기본이미지.jpg';
 import { fetchImsiAxios } from './ProjectApi';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/foodding';
+
+const resolveAssetUrl = (path) => {
+  if (!path || path === 'DEFAULT_THUMBNAIL.png') {
+    return '';
+  }
+  if (path.startsWith('http')) {
+    return path;
+  }
+  if (path.startsWith('/')) {
+    return `${API_BASE_URL}${path}`;
+  }
+  return `${API_BASE_URL}/${path}`;
+};
+
 export default function CreateProjectLandingPage() {
   const navigate = useNavigate();
   const [drafts, setDrafts] = useState([]);
@@ -112,6 +127,7 @@ export default function CreateProjectLandingPage() {
               {drafts.map((draft) => {
                 const current = Number(draft.currentAmount ?? 0);
                 const goal = Number(draft.targetAmount ?? 1) || 1;
+                const imageSrc = resolveAssetUrl(draft.thumbnailUrl) || draftPlaceholder;
                 return (
                   <div key={draft.tempNo || draft.id || draft.title} className="create-landing__card">
                     <ProjectCard
@@ -121,7 +137,7 @@ export default function CreateProjectLandingPage() {
                         current,
                         goal,
                         daysLeft: 30,
-                        image: draft.thumbnailUrl || draftPlaceholder,
+                        image: imageSrc,
                         detailPath: draft.tempNo ? `/create/new?draft=${draft.tempNo}` : undefined,
                       }}
                       hideWish

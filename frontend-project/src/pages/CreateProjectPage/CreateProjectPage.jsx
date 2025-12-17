@@ -9,7 +9,7 @@ import { categories } from '../../data/content';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
-import { imsiProjectAxios, insertProjectAxios, fetchDraftDetailAxios } from './ProjectApi';
+import { imsiProjectAxios, insertProjectAxios, fetchDraftDetailAxios, uploadThumbnailAxios } from './ProjectApi';
 import DatePickerField from '../../components/DatePickerField';
 
 const CustomImage = Image.extend({
@@ -77,6 +77,21 @@ const addDays = (date, days) => {
 
 const parseDateInput = (value) => (value ? new Date(`${value}T00:00:00`) : null);
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/foodding';
+
+const resolveAssetUrl = (path) => {
+  if (!path || path === 'DEFAULT_THUMBNAIL.png') {
+    return '';
+  }
+  if (path.startsWith('http')) {
+    return path;
+  }
+  if (path.startsWith('/')) {
+    return `${API_BASE_URL}${path}`;
+  }
+  return `${API_BASE_URL}/${path}`;
+};
+
 
 // 함수 내부
 export default function CreateProjectPage() {
@@ -98,6 +113,7 @@ export default function CreateProjectPage() {
     heroImage: '',
     heroImageName: '',
     thumbnailFile: null,
+    thumbnailUrl: '',
     storyHtml: STORY_GUIDE,
     openStart: '',
     openEnd: '',
@@ -107,6 +123,8 @@ export default function CreateProjectPage() {
 
 
   const [imageError, setImageError] = useState('');
+  const [thumbnailUploadError, setThumbnailUploadError] = useState(null);
+  const [isThumbnailUploading, setIsThumbnailUploading] = useState(false);
   const [draftStatus, setDraftStatus] = useState({ loading: false, error: null, applied: false });
   const [draftPrefill, setDraftPrefill] = useState(null);
   const [activeDraftId, setActiveDraftId] = useState(null);
@@ -194,6 +212,7 @@ export default function CreateProjectPage() {
       return;
     }
 
+    const resolvedThumbnail = resolveAssetUrl(draftPrefill.thumbnailUrl);
     setFormData((prev) => ({
       ...prev,
       title: draftPrefill.title ?? prev.title,
@@ -205,6 +224,9 @@ export default function CreateProjectPage() {
         draftPrefill.targetAmount !== undefined && draftPrefill.targetAmount !== null
           ? String(draftPrefill.targetAmount)
           : prev.goal,
+      heroImage: resolvedThumbnail || prev.heroImage,
+      heroImageName: resolvedThumbnail ? '등록된 썸네일' : prev.heroImageName,
+      thumbnailUrl: draftPrefill.thumbnailUrl ?? prev.thumbnailUrl,
     }));
 
     setDraftStatus((prev) => ({ ...prev, applied: true }));
@@ -237,6 +259,24 @@ export default function CreateProjectPage() {
     editor.chain().focus().setImage({ src: url, width: '50%', align: 'center' }).run();
   };
 
+  const uploadSelectedThumbnail = async (file) => {
+    setThumbnailUploadError(null);
+    setIsThumbnailUploading(true);
+    try {
+      const { path, url } = await uploadThumbnailAxios(file);
+      setFormData((prev) => ({
+        ...prev,
+        thumbnailUrl: path || url || prev.thumbnailUrl,
+        heroImage: url || resolveAssetUrl(path) || prev.heroImage,
+      }));
+    } catch (error) {
+      console.error('썸네일 업로드 실패', error);
+      setThumbnailUploadError('썸네일 업로드에 실패했습니다. 다시 시도해 주세요.');
+    } finally {
+      setIsThumbnailUploading(false);
+    }
+  };
+
   const handleImageChange = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -254,6 +294,7 @@ export default function CreateProjectPage() {
         thumbnailFile: file,
       }));
       setImageError('');
+      uploadSelectedThumbnail(file);
     };
     reader.onerror = () => {
       setImageError('이미지 로딩 중 오류가 발생했습니다. 다시 시도해 주세요.');
@@ -439,6 +480,7 @@ export default function CreateProjectPage() {
       shipStartDate: formData.openEnd || formData.openStart || null,
       userNo: 1, // TODO: replace with logged-in user info
       tempNo: activeDraftId,
+      thumbnailUrl: formData.thumbnailUrl,
       content: {
         html: editorHtml,
         json: editorJson,
@@ -460,11 +502,16 @@ export default function CreateProjectPage() {
   };
 
   // 제출하기 버튼
-   const handleCreate = (e) => {
-    
+  const handleCreate = (e) => {
+
 
     const editorHtml = editor?.getHTML() ?? '';
     const editorJson = editor ? JSON.stringify(editor.getJSON()) : '{}';
+
+    if (!formData.thumbnailUrl) {
+      toast.error('썸네일을 업로드해 주세요.');
+      return;
+    }
 
     const requestPayload = {
       title: formData.title.trim(),
@@ -475,6 +522,7 @@ export default function CreateProjectPage() {
       fundEndDate: formData.openEnd || null,
       shipStartDate: formData.openEnd || formData.openStart || null,
       userNo: 1, // TODO: replace with logged-in user info
+      thumbnailUrl: formData.thumbnailUrl,
       content: {
         html: editorHtml,
         json: editorJson,
@@ -610,7 +658,9 @@ export default function CreateProjectPage() {
               ) : (
                 <p className="form-help">썸네일로 사용할 이미지를 업로드하세요.</p>
               )}
+              {isThumbnailUploading && <p className="form-help">썸네일을 업로드하는 중입니다...</p>}
               {imageError && <p className="form-help form-help--error">{imageError}</p>}
+              {thumbnailUploadError && <p className="form-help form-help--error">{thumbnailUploadError}</p>}
             </div>
             </section>
 

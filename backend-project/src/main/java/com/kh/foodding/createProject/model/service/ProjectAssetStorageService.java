@@ -52,6 +52,6 @@ public class ProjectAssetStorageService {
             throw new RuntimeException("썸네일 저장 중 오류가 발생했습니다.", e);
         }
 
-        return target.toString();
+        return "/uploads/thumbnails/" + filename;
     }
 }
