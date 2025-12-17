@@ -1,5 +1,7 @@
 package com.kh.foodding.createProject.model.service;
 
+import java.util.ArrayList;
+
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,6 +54,24 @@ public class ProjectServiceImpl implements ProjectService {
             p.setShipStartDate(p.getFundEndDate());
         }
 
+        boolean hasTempNo = p.getTempNo() != null && !p.getTempNo().isBlank();
+
+        if (hasTempNo) {
+            return projectDao.updateDraft(sqlSession, p);
+        }
+
         return projectDao.imsiProject(sqlSession, p);
+    }
+
+    @Transactional
+    @Override
+    public ArrayList<Project> selectProject(int userNo){
+        return projectDao.selectProject(sqlSession, userNo);
+    }
+
+    @Transactional
+    @Override
+    public Project selectProjectById(int userNo, long tempNo) {
+        return projectDao.selectProjectById(sqlSession, userNo, tempNo);
     }
 }
