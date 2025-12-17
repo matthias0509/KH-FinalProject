@@ -51,6 +51,10 @@ export default function CreateProjectLandingPage() {
     navigate(`/create/new?draft=${draft.tempNo}`);
   };
 
+  // const deleteProject = () => {
+    // 삭제 추가 예정
+  // }
+
   if (loading) {
     return (
       <div className="app create-landing">
@@ -139,7 +143,7 @@ export default function CreateProjectLandingPage() {
                         >
                           이어서 작성
                         </button>
-                        <button type="button" className="btn btn--small btn--ghost">
+                        <button type="button" className="btn btn--small btn--ghost" >
                           삭제
                         </button>
                       </div>
