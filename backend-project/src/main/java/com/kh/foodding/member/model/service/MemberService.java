@@ -30,18 +30,15 @@ public class MemberService {
             String originFileName = upfile.getOriginalFilename();
             m.setOriginProfile(originFileName);
             
-            // 1. 확장자 추출
-            String ext = originFileName.substring(originFileName.lastIndexOf("."));
-            
-            // 2. 수정 파일명 생성 (밀리초 기반 + 5자리 랜덤 숫자)
+            // 1. 수정 파일명 생성 (밀리초 기반 + 5자리 랜덤 숫자)
             long timeMillis = System.currentTimeMillis(); // 현재 시각 (밀리초)
             int randomNumber = (int)(Math.random() * 90000 + 10000); // 5자리 랜덤 숫자 (10000 ~ 99999)
             
             // 최종 수정 파일명: 예) 1734567890123_45678.png
-            String changeFileName = timeMillis + "_" + randomNumber + ext; 
+            String changeFileName = timeMillis + "_" + randomNumber + originFileName; 
             m.setModifyProfile(changeFileName); 
             
-            // 3. 파일을 지정된 경로에 실제로 저장
+            // 2. 파일을 지정된 경로에 실제로 저장
             try {
                 upfile.transferTo(new File(savePath + changeFileName));
             } catch (Exception e) {
