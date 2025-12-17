@@ -34,8 +34,8 @@ public class Project {
     private String title;               // 프로젝트 제목
     private String summary;             // 프로젝트 한 줄 요약
     private String category;            // 프로젝트 카테고리
-    private String thumbnailUrl;            //프로젝트 썸네일
-
+    private String thumbnailUrl;            // 프로젝트 썸네일명
+    private String thumbnailPath;           // 업로드된 썸네일 URL
 
     private LocalDate fundStartDate;        // 프로젝트 시작일
     private LocalDate fundEndDate;          // 프로젝트 마감일

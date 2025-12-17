@@ -2,6 +2,9 @@ package com.kh.foodding.createProject.controller;
 
 import java.util.ArrayList;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -10,7 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.kh.foodding.createProject.model.service.ProjectAssetStorageService;
 import com.kh.foodding.createProject.model.service.ProjectService;
 import com.kh.foodding.createProject.model.vo.Project;
 
@@ -30,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ProjectController {
     
     private final ProjectService ProjectService;
+    private final ProjectAssetStorageService projectAssetStorageService;
 
 
 
@@ -63,6 +71,20 @@ public class ProjectController {
     public Project selectProjectDetail(@PathVariable long tempNo, @RequestParam int userNo){
 
         return ProjectService.selectProjectById(userNo, tempNo);
+    }
+
+    @PostMapping("thumbnail")
+    public Map<String, String> uploadThumbnail(@RequestPart("file") MultipartFile file) {
+
+        String relativePath = projectAssetStorageService.storeThumbnail(file);
+        String publicUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(relativePath)
+                .toUriString();
+
+        Map<String, String> response = new HashMap<>();
+        response.put("path", relativePath);
+        response.put("url", publicUrl);
+        return response;
     }
     
 }
