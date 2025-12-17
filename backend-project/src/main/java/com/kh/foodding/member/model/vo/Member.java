@@ -1,6 +1,7 @@
 package com.kh.foodding.member.model.vo;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import org.apache.ibatis.type.Alias;
 
@@ -36,7 +37,8 @@ public class Member {
     private String nickname;    // NICKNAME VARCHAR2(24 BYTE) 
     
     @Schema(description="생년월일", example="1990-01-01")
-    private Date birthDate;     // BIRTH_DATE DATE
+    // 💡 @DateTimeFormat 어노테이션은 이제 필요 없습니다. (LocalDate가 자동 처리)
+    private LocalDate birthDate;
     
     @Schema(description="성별", example="M")
     private String gender;      // GENDER VARCHAR2(1 BYTE)

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import '../../App.css';
 import './Login.css';
 import Header from '../../components/Header';
@@ -7,161 +7,297 @@ import AppFooter from '../../components/AppFooter';
 import AuthLayout from '../../components/Login/AuthLayout';
 import InputField from '../../components/Login/InputField';
 import SubmitButton from '../../components/Login/SubmitButton';
-import { useNavigate } from "react-router-dom";
 import PostCode from "../../components/Login/PostCode";
-
-// 해야하는 페이지 : 로그인, 회원가입, 아이디/비번찾기, 공지사항, 공지사항 세부조회, (문의사항, FAQ) 하셔야합니다....  
-// + 공지사항 글 작성 페이지, 문의사항 글 작성 페이지 (질문) + 답변.
-// 기능으로 회원가입, 로그인 (JWT), 아이디 비번찾기, 회원탈퇴, 비밀번호 변경 등등,,,,,
-
-/* 
-    받아야 할 정보 :
-
-    아이디 - 중복검사
-    생년월일
-    성별
-    이메일 (인증방식) - 인증버튼
-    핸드폰번호
-    프로필
-    우편번호 기본 - 상세 ---> 다음 도로명 주소 api 쓰세요
-    닉네임
-*/
-
-// 공지사항 밑에 페이징 처리 페이지당 8개. 8개 넘기면 페이징 처리 1 2 3 4..... 이전 다음 버튼
-
-//* 혹시 과제 진행하면서 어려운 부분이 있으면 혼자 부담하지 말고 말씀해 주세요. 
+import axios from "axios";
 
 function CreateMember() {
     const [form, setForm] = useState({
-        username: '',
-        password: '',
-        confirmPassword: '',
-        name: '',
-        email: '',
-        zonecode: '',
-        address: '',
-        detailAddress: ''
+        // 1. 필수 입력 필드
+        userId: '',            // USER_ID
+        userPwd: '',           // USER_PWD
+        confirmPassword: '',   // 비밀번호 확인 (프론트엔드용)
+        userName: '',          // USER_NAME
+        nickname: '',          // NICKNAME
+        birthDate: '',         // BIRTH_DATE
+        gender: 'M',           // GENDER (기본값 설정)
+        email: '',             // EMAIL
+        phone: '',             // PHONE
+        
+        // 2. 주소 필드
+        postcode: '',          // POSTCODE
+        mainAddress: '',       // MAIN_ADDRESS
+        detailAddress: ''      // DETAIL_ADDRESS
     });
+    
+    // 프로필파일 객체
+    const [profileFile, setProfileFile] = useState(null);
+
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleChage = (e) => {
-        setForm({...form, [e.target.id]: e.target.value });
+    // 파일 선택시 실행될 핸들러
+    const handleFileChange = (e) => {
+        setProfileFile(e.target.files[0]);
+    };
+
+    const handleChange = (e) => {
+        setForm({...form, [e.target.name]: e.target.value });
     };
 
     const handleAddressSelect = (data) => {
-        setForm(prevForm => ({ // 💡 prevForm을 인수로 받아 사용하면 안전합니다.
-            ...prevForm, // 1. 이전 상태를 모두 복사하여 유지합니다.
-            // 2. 주소 관련 필드만 새로운 값으로 덮어씁니다.
-            zonecode: data.zonecode,
-            address: data.address,
-            detailAddress: '' // 새 주소 찾았으므로 상세 주소 초기화
-        }))
-    }
+        setForm(prevForm => ({
+            ...prevForm,
+            postcode: data.zonecode,
+            mainAddress: data.address,
+            detailAddress: '' // 새 주소 검색 시 상세 주소 초기화
+        }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
-        // TODO: 회원가입 로직 구현
-
-        if (form.password !== form.confirmPassword) {
+        if (form.userPwd !== form.confirmPassword) {
             alert('비밀번호가 일치하지 않습니다.');
             setIsLoading(false);
             return;
         }
-        console.log('회원가입 시도:', form);
+        
+        // 💡 서버로 전송할 최종 회원가입 데이터
+        const formData = new FormData();
+        
+        // 텍스트 데이터 추가
+        formData.append('userId', form.userId);
+        formData.append('userPwd', form.userPwd);
+        formData.append('userName', form.userName);
+        formData.append('nickname', form.nickname);
+        formData.append('birthDate', form.birthDate);
+        formData.append('gender', form.gender);
+        formData.append('email', form.email);
+        formData.append('phone', form.phone);
+        formData.append('postcode', form.postcode);
+        formData.append('mainAddress', form.mainAddress);
+        formData.append('detailAddress', form.detailAddress);
 
-        setIsLoading(false);
-        navigate('/login');
+        try {
+            const API_URL = "http://localhost:8001/foodding"; // 💡 백엔드 URL
+            
+            // 💡 이 부분이 API 요청을 수행하는 코드입니다.
+            await axios.post(`${API_URL}/member/insert`, formData); 
+            
+            alert('회원가입이 성공적으로 완료되었습니다. 로그인 페이지로 이동합니다.');
+            navigate('/login');
+            
+        } catch (error) {
+            // 💡 서버 응답 에러 처리 구체화
+            console.error('회원가입 실패 상세 정보:', error); 
+            
+            let errorMessage = '회원가입 처리 중 알 수 없는 오류가 발생했습니다.';
+            
+            // 400 Bad Request (잘못된 데이터 형식, 예: 중복된 아이디)
+            if (error.response && error.response.status === 400) {
+                // 서버에서 보낸 구체적인 에러 메시지가 있다면 사용
+                errorMessage = error.response.data.message || '입력된 데이터에 문제가 있습니다. (아이디 중복 등)';
+            } 
+            // 500 Internal Server Error (서버 로직, DB 오류 등)
+            else if (error.response && error.response.status === 500) {
+                 errorMessage = '서버 내부에서 처리 오류가 발생했습니다. (관리자에게 문의)';
+            } 
+            // 네트워크 오류 (서버 연결 불가, CORS 등)
+            else if (error.code === 'ERR_NETWORK') {
+                errorMessage = '서버 연결에 실패했습니다. (서버 상태 확인 필요)';
+            }
+            
+            alert(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return(
         <div className="app">
             <Header />
-                <AuthLayout title="회원가입">
-                    <form style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
-                        <InputField
-                    label="아이디"
-                    id="username"
-                    value={form.username}
-                    onChange={handleChage}
-                    placeholder="아이디를 입력하세요"
-                />
-                <InputField
-                    label="비밀번호"
-                    type="password"
-                    id="password"
-                    value={form.password}
-                    onChange={handleChage}
-                    placeholder="비밀번호 (8자 이상)"
-                />
-                <InputField
-                    label="비밀번호 확인"
-                    type="password"
-                    id="confirmPassword"
-                    value={form.confirmPassword}
-                    onChange={handleChage}
-                    error={form.password !== form.confirmPassword && form.confirmPassord ? "비밀번호가 일치하지 않습니다." : null}
-                    placeholder="비밀번호를 다시 입력하세요"
-                />
-                 <InputField
-                    label="이름"
-                    id="name"
-                    value={form.name}
-                    onChange={handleChage}
-                    placeholder="이름을 입력하세요"
-                />
-                <InputField
-                    label="이메일"
-                    type="email"
-                    id="email"
-                    value={form.email}
-                    onChange={handleChage}
-                    placeholder="이메일 주소"
-                />
-                <label style={{ fontWeight: '600', color: 'var(--text)', fontSize: '14px', marginBottom: '0', display: 'block' }}>주소</label>
-                        
-                        {/* 1. 우편번호 및 주소 검색 버튼 */}
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                            <InputField
-                                label="" // 레이블은 위에 통합했으므로 빈 문자열
-                                id="zonecode"
-                                value={form.zonecode}
-                                onChange={handleChage}
-                                placeholder="우편번호"
-                                readOnly // 사용자가 직접 입력하지 못하게 막음
-                                style={{ flexGrow: 1 }}
-                            />
-                            <PostCode onComplete={handleAddressSelect}/>
-                        </div>
-                        
-                        {/* 2. 도로명 주소 (자동 입력) */}
-                        <InputField
-                            label=""
-                            id="address"
-                            value={form.address}
-                            onChange={handleChage}
-                            placeholder="도로명 주소 (자동 입력)"
-                            readOnly // 사용자가 직접 입력하지 못하게 막음
-                        />
-                        
-                        {/* 3. 상세 주소 (사용자 직접 입력) */}
-                        <InputField
-                            label=""
-                            id="detailAddress"
-                            value={form.detailAddress}
-                            onChange={handleChage}
-                            placeholder="상세 주소를 입력하세요"
-                        />
+            <AuthLayout title="회원가입">
+                <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'16px' }}>
+                    
+                    {/* 1. 아이디 (USER_ID) */}
+                    <InputField
+                        label="아이디"
+                        name="userId" 
+                        value={form.userId}
+                        onChange={handleChange}
+                        placeholder="아이디를 입력하세요 (중복검사 필요)"
+                        required
+                    />
+                    
+                    {/* 2. 비밀번호 (USER_PWD) */}
+                    <InputField
+                        label="비밀번호"
+                        type="password"
+                        name="userPwd"
+                        value={form.userPwd}
+                        onChange={handleChange}
+                        placeholder="비밀번호 (8자 이상)"
+                        required
+                    />
+                    
+                    {/* 3. 비밀번호 확인 (confirmPassword) */}
+                    <InputField
+                        label="비밀번호 확인"
+                        type="password"
+                        name="confirmPassword"
+                        value={form.confirmPassword}
+                        onChange={handleChange}
+                        error={form.userPwd && form.confirmPassword && form.userPwd !== form.confirmPassword ? "비밀번호가 일치하지 않습니다." : null}
+                        placeholder="비밀번호를 다시 입력하세요"
+                        required
+                    />
+                    
+                    {/* 4. 회원 이름 (USER_NAME) */}
+                    <InputField
+                        label="이름"
+                        name="userName"
+                        value={form.userName}
+                        onChange={handleChange}
+                        placeholder="이름을 입력하세요"
+                        required
+                    />
+                    
+                    {/* 5. 닉네임 (NICKNAME) 💡 추가된 부분 */}
+                    <InputField
+                        label="닉네임"
+                        name="nickname"
+                        value={form.nickname}
+                        onChange={handleChange}
+                        placeholder="닉네임을 입력하세요 (중복검사 필요)"
+                        required
+                    />
 
-                        <SubmitButton>가입하기</SubmitButton>
-                    </form>
-                </AuthLayout>
+                    {/* 6. 생년월일 (BIRTH_DATE) */}
+                    <InputField
+                        label="생년월일"
+                        type="date" 
+                        name="birthDate"
+                        value={form.birthDate}
+                        onChange={handleChange}
+                        required
+                    />
+                    
+                    {/* 7. 성별 (GENDER) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{ fontWeight: '600', color: 'var(--text)', fontSize: '14px' }}>성별</label>
+                        <div style={{ display: 'flex', gap: '20px' }}>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="M"
+                                    checked={form.gender === 'M'}
+                                    onChange={handleChange}
+                                    required
+                                /> 남성
+                            </label>
+                            <label>
+                                <input
+                                    type="radio"
+                                    name="gender"
+                                    value="F"
+                                    checked={form.gender === 'F'}
+                                    onChange={handleChange}
+                                    required
+                                /> 여성
+                            </label>
+                        </div>
+                    </div>
+                    
+                    {/* 8. 이메일 (EMAIL) */}
+                    <InputField
+                        label="이메일"
+                        type="email"
+                        name="email"
+                        value={form.email}
+                        onChange={handleChange}
+                        placeholder="이메일 주소 (인증 필요)"
+                        required
+                    />
+                    
+                    {/* 9. 전화번호 (PHONE) */}
+                    <InputField
+                        label="전화번호"
+                        type="tel" 
+                        name="phone"
+                        value={form.phone}
+                        onChange={handleChange}
+                        placeholder="010-XXXX-XXXX 형식"
+                        required
+                    />
+
+                    {/* 10. 주소 섹션 (POSTCODE, MAIN_ADDRESS, DETAIL_ADDRESS) */}
+                    <label style={{ fontWeight: '600', color: 'var(--text)', fontSize: '14px', marginBottom: '0', display: 'block' }}>주소</label>
+                    
+                    {/* 10-1. 우편번호 및 주소 검색 버튼 */}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <InputField
+                            label="" 
+                            name="postcode"
+                            value={form.postcode}
+                            onChange={handleChange}
+                            placeholder="우편번호"
+                            readOnly 
+                            style={{ flexGrow: 1 }}
+                            required
+                        />
+                        <PostCode onComplete={handleAddressSelect}/>
+                    </div>
+                    
+                    {/* 10-2. 도로명 주소 (MAIN_ADDRESS) */}
+                    <InputField
+                        label=""
+                        name="mainAddress"
+                        value={form.mainAddress}
+                        onChange={handleChange}
+                        placeholder="기본 주소 (자동 입력)"
+                        readOnly 
+                        required
+                    />
+                    
+                    {/* 10-3. 상세 주소 (DETAIL_ADDRESS) */}
+                    <InputField
+                        label=""
+                        name="detailAddress"
+                        value={form.detailAddress}
+                        onChange={handleChange}
+                        placeholder="상세 주소를 입력하세요"
+                        required
+                    />
+
+                    {/* 11. 프로필 사진 (ORIGIN_PROFILE, MODIFY_PROFILE) 💡 추가된 부분 */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <label style={{ fontWeight: '600', color: 'var(--text)', fontSize: '14px' }}>프로필 사진 (선택)</label>
+                        <input
+                            type="file"
+                            name="upfile" // 서버에서 파일을 받는 이름
+                            accept="image/*" // 이미지 파일만 선택 가능하도록 제한
+                            onChange={handleFileChange}
+                        />
+                        {profileFile && (
+                            <p style={{ fontSize: '12px', color: 'gray' }}>선택된 파일: {profileFile.name}</p>
+                        )}
+                    </div>
+
+                    <SubmitButton isLoading={isLoading}>가입하기</SubmitButton>
+                    
+                    <div style={{textAlign: 'center', marginTop: '10px'}}>
+                        <Link to="/login" style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '14px' }}>
+                            이미 계정이 있으신가요? 로그인
+                        </Link>
+                    </div>
+
+                </form>
+            </AuthLayout>
             <AppFooter />
         </div>
-    )
-
+    );
 }
 
 export default CreateMember;
