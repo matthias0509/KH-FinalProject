@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import ProjectCard from '../../components/ProjectCard';
 import AppFooter from '../../components/AppFooter';
+import draftPlaceholder from '../../assets/기본이미지.jpg';
 
 const dummyDrafts = [
   {
@@ -72,12 +73,12 @@ export default function CreateProjectLandingPage() {
                         current: draft.progress * 10000,
                         goal: 1000000,
                         daysLeft: 30,
-                        image: '',
-                    }}
-                    hideWish
-                    hideProgress
-                    hideMeta
-                  />
+                        image: draft.thumbnail || draftPlaceholder,
+                      }}
+                      hideWish
+                      hideProgress
+                      hideMeta
+                    />
                   <div className="create-landing__card-footer">
                     <p className="create-landing__updated">최근 저장 {draft.updatedAt}</p>
                     <div className="create-landing__actions">
