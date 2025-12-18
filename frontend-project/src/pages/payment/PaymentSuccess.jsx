@@ -16,8 +16,20 @@ const PaymentSuccess = () => {
       const paymentKey = searchParams.get('paymentKey');
       const orderId = searchParams.get('orderId');
       const amount = searchParams.get('amount');
+      const postcode = searchParams.get('postcode');
+      const address = searchParams.get('address');
+      const quantity = searchParams.get('quantity');
+      const optionNo = searchParams.get('optionNo');
 
-      console.log('결제 승인 시작:', { paymentKey, orderId, amount });
+      console.log('결제 승인 시작:', { 
+        paymentKey, 
+        orderId, 
+        amount, 
+        postcode, 
+        address, 
+        quantity, 
+        optionNo 
+      });
 
       if (!paymentKey || !orderId || !amount) {
         setError('결제 정보가 올바르지 않습니다.');
@@ -27,16 +39,21 @@ const PaymentSuccess = () => {
 
       try {
         const response = await fetch('http://localhost:8001/foodding/api/payment/confirm', {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ 
-              paymentKey, 
-              orderId, 
-              amount: Number(amount)
-            })
-          });
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            paymentKey, 
+            orderId, 
+            amount: Number(amount),
+            postcode: postcode || '00000',
+            address: address || '주소 미입력',
+            quantity: Number(quantity) || 1,
+            optionNo: Number(optionNo) || 1,
+            userNo: 1  // TODO: 실제 로그인한 사용자 번호로 변경
+          })
+        });
 
         console.log('응답 상태:', response.status);
         const result = await response.json();

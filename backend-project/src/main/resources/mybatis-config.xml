@@ -5,7 +5,6 @@
         <setting name="jdbcTypeForNull" value="NULL" />
     </settings>
     <typeAliases>
-        <package name="com.kh.foodding" />
         <!--
             - 기존에는 typeAlias 라는 단수 태그 안에 일일이 어느 클래스를 어느 별칭으로 부를건지
               1 : 1 로 매칭 정보를 다 적어줬었음!!
@@ -16,5 +15,11 @@
               라고 설정이 잡히게 됨!! (단, @Alias 어노테이션이 붙은 클래스에 한해서)
               
          -->
+         
+        <typeAlias type="com.kh.foodding.payment.model.vo.Orders" alias="Orders"/>
+        <typeAlias type="com.kh.foodding.payment.model.vo.OrderDetail" alias="OrderDetail"/>
+        
+        <package name="com.kh.foodding" />
+        
     </typeAliases>
 </configuration>

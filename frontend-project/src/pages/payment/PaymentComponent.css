@@ -547,3 +547,38 @@
   font-size: 14px;
   color: #6c757d;
 }
+
+/* 주소 검색 버튼 */
+.address-search {
+  display: flex;
+  gap: 8px;
+}
+
+.address-search .form-field__input {
+  flex: 1;
+}
+
+.address-search__button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  background: #f89b00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.address-search__button:hover {
+  background: #ff7f00;
+  transform: translateY(-1px);
+}
+
+.address-search__button:active {
+  transform: translateY(0);
+}
