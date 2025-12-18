@@ -229,6 +229,19 @@ export default function CreateProjectPage() {
       heroImage: resolvedThumbnail || prev.heroImage,
       heroImageName: resolvedThumbnail ? '등록된 썸네일' : prev.heroImageName,
       thumbnailUrl: draftPrefill.thumbnailUrl ?? prev.thumbnailUrl,
+      rewards:
+        draftPrefill.rewards?.length > 0
+          ? draftPrefill.rewards.map((reward) => ({
+              title: reward?.title ?? '',
+              price:
+                reward?.price !== undefined && reward?.price !== null
+                  ? String(reward.price)
+                  : '',
+              description: reward?.description ?? '',
+            }))
+          : prev.rewards?.length > 0
+            ? prev.rewards
+            : [{ ...emptyReward }],
     }));
 
     setDraftStatus((prev) => ({ ...prev, applied: true }));
@@ -480,13 +493,20 @@ export default function CreateProjectPage() {
       fundStartDate: formData.openStart || null,
       fundEndDate: formData.openEnd || null,
       shipStartDate: formData.shippingDate || formData.openEnd || formData.openStart || null,
-      userNo: 1, // TODO: replace with logged-in user info
+      userNo: 1, // 유저 넘버로 변경해야함
       tempNo: activeDraftId,
       thumbnailUrl: formData.thumbnailUrl,
       content: {
         html: editorHtml,
         json: editorJson,
       },
+
+      rewards: formData.rewards.map((reward) => ({
+      title: reward.title,
+      price: Number(reward.price) || 0,
+      description: reward.description,
+      })),
+
     };
 
     const api = async () => {
@@ -505,7 +525,7 @@ export default function CreateProjectPage() {
 
   // 제출하기 버튼
   const handleCreate = (e) => {
-
+    e.preventDefault();
 
     const editorHtml = editor?.getHTML() ?? '';
     const editorJson = editor ? JSON.stringify(editor.getJSON()) : '{}';
@@ -524,11 +544,19 @@ export default function CreateProjectPage() {
       fundEndDate: formData.openEnd || null,
       shipStartDate: formData.shippingDate || formData.openEnd || formData.openStart || null,
       userNo: 1, // TODO: replace with logged-in user info
+      tempNo: activeDraftId,
       thumbnailUrl: formData.thumbnailUrl,
       content: {
         html: editorHtml,
         json: editorJson,
       },
+
+      rewards: formData.rewards.map((reward) => ({
+      title: reward.title,
+      price: Number(reward.price) || 0,
+      description: reward.description,
+      })),
+      
     };
 
     const api = async () => {

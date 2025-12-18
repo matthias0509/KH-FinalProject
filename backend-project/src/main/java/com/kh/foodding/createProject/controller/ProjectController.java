@@ -89,11 +89,12 @@ public class ProjectController {
     
 
     // 삭제 기능
-    @PatchMapping("delete/{tempNo}")
+    @PatchMapping("drafts/{tempNo}")
     public String deleteProject(@PathVariable long tempNo, @RequestParam int userNo) {
         int result = ProjectService.deleteProject(userNo, tempNo);
 
         return (result>0)?"프로젝트 삭제 성공" : "프로젝트 삭제 실패";
     }
+
     
 }

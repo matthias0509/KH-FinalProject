@@ -99,7 +99,7 @@ export const fetchImsiAxios = async (userNo) => {
 
 
 export const deleteProjectAxios = async ({ userNo, tempNo }) => {
-  const url = `${commonUrl}delete/${tempNo}`;
+  const url = `${commonUrl}drafts/${tempNo}`;
 
   try {
     const response = await axios({
