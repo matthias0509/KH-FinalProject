@@ -16,6 +16,7 @@ import com.kh.foodding.member.model.service.EmailService;
 import com.kh.foodding.member.model.service.MemberService;
 import com.kh.foodding.member.model.vo.Member;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 
 
@@ -64,15 +65,26 @@ public class MemberController {
     }
     
     @PostMapping("/emailCheck")
-    public String findId(@RequestBody Member m) {
+    public String emailCheck(@RequestBody Member m) {
     	int count = memberService.emailCheck(m);
     	
     	if(count>0) {
     		String code = emailService.createCode();
-    		emailService.sendEmail(m.getEmail(), code);
+    		try {
+				emailService.sendEmail(m.getEmail(), code);
+			} catch (MessagingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
     		return "MATCH";
     	}else {
     		return "FAIL";
     	}
+    }
+    
+    @GetMapping("/findId")
+    public String findId(String email) {
+    	String userId = memberService.findId(email);
+    	return userId;
     }
 }

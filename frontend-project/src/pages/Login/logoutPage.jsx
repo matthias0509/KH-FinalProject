@@ -10,7 +10,5 @@ export default function LogoutPage() {
         navigate('/');
     }, [navigate]);
 
-    return (
-        <div>Logging out...</div>
-    );
+    return null;
 }
