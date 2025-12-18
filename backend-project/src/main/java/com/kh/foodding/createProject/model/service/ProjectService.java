@@ -13,4 +13,6 @@ public interface ProjectService {
     ArrayList<Project> selectProject(int userNo);
 
     Project selectProjectById(int userNo, long tempNo);
+
+    int deleteProject(int userNo, long tempNo);
 }

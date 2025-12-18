@@ -2,21 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace = "projectMapper">
 
-    <resultMap id="draftResultMap" type="project">
-        <result property="tempNo" column="TEMP_NO" />
-        <result property="title" column="TEMP_TITLE" />
-        <result property="summary" column="TEMP_DESC" />
-        <result property="targetAmount" column="TARGET_AMOUNT" />
-        <result property="fundStartDate" column="FUND_START_DATE" />
-        <result property="fundEndDate" column="FUND_END_DATE" />
-        <result property="category" column="CATEGORY" />
-        <result property="thumbnailUrl" column="ORIGIN_THUMBNAIL" />
-        <result property="shipStartDate" column="SHIP_START_DATE" />
-        <association property="content" javaType="com.kh.foodding.createProject.model.vo.EditorContent">
-            <result property="html" column="TEMP_STORY_HTML" />
-            <result property="json" column="TEMP_STORY_JSON" />
-        </association>
-    </resultMap>
 
 
             <!-- 프로젝트 제출 (심의받기) -->
@@ -25,12 +10,11 @@
                         PRODUCT_NO,
                         PRODUCT_TITLE,
                         PRODUCT_DESC,
-                        STORY_HTML,
-                        STORY_JSON,
                         TARGET_AMOUNT,
                         CURRENT_AMOUNT,
                         FUND_START_DATE,
                         FUND_END_DATE,
+                        SHIP_START_DATE,
                         CATEGORY,
                         ORIGIN_THUMBNAIL,
                         SELLER_NO
@@ -38,12 +22,11 @@
                         SEQ_PRODUCT_NO.NEXTVAL,
                         #{title},
                         #{summary},
-                        #{content.html},
-                        #{content.json},
                         #{targetAmount},
                         NVL(#{currentAmount}, 0),
                         #{fundStartDate},
                         #{fundEndDate},
+                        #{shipStartDate}
                         #{category},
                         NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
                         (
@@ -56,7 +39,7 @@
 
 
             <!-- 임시저장 -->
-            <insert id = "imsiProject" parameterType="project">
+             <insert id="imsiProject" parameterType="project">
                 INSERT INTO TEMPORARY (
                     TEMP_NO,
                     TEMP_TITLE,
@@ -64,72 +47,64 @@
                     TARGET_AMOUNT,
                     FUND_START_DATE,
                     FUND_END_DATE,
+                    SHIP_START_DATE,
                     CATEGORY,
                     ORIGIN_THUMBNAIL,
-                    SHIP_START_DATE,
                     TEMP_STORY_HTML,
                     TEMP_STORY_JSON,
                     SELLER_NO
-                )
-                VALUES (
+                ) VALUES (
                     SEQ_TEMP_NO.NEXTVAL,
                     #{title},
                     #{summary},
                     #{targetAmount},
                     #{fundStartDate},
                     #{fundEndDate},
+                    #{shipStartDate},
                     #{category},
                     NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
-                    #{shipStartDate},
                     #{content.html},
                     #{content.json},
-                    (
-                        SELECT SELLER_NO
-                        FROM SELLER_PROFILE
-                        WHERE USER_NO = #{userNo}
-                    )
+                    (SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo})
                 )
             </insert>
 
-           <select id="selectProject" parameterType="map" resultMap="draftResultMap">
+           <select id="selectProject" parameterType="map" resultType="project">
                     SELECT
-                        TEMP_NO,
-                        TEMP_TITLE,
-                        TEMP_DESC,
+                        TEMP_NO      AS tempNo,
+                        TEMP_TITLE   AS title,
+                        TEMP_DESC    AS summary,
                         TARGET_AMOUNT,
                         FUND_START_DATE,
                         FUND_END_DATE,
                         CATEGORY,
-                        ORIGIN_THUMBNAIL,
-                        SHIP_START_DATE,
-                        TEMP_STORY_HTML,
-                        TEMP_STORY_JSON
+                        ORIGIN_THUMBNAIL AS thumbnailUrl,
+                        SHIP_START_DATE
                     FROM TEMPORARY
-                    WHERE SELLER_NO = (
+                    WHERE TEMP_STATUS = 'Y' 
+                        AND SELLER_NO = (
                         SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
                     )
                     ORDER BY TEMP_NO DESC
            </select>
 
-           <select id="selectProjectById" parameterType="map" resultMap="draftResultMap">
+           <select id="selectProjectById" parameterType="map" resultType="project">
                 SELECT
-                    TEMP_NO,
-                    TEMP_TITLE,
-                    TEMP_DESC,
+                    TEMP_NO      AS tempNo,
+                    TEMP_TITLE   AS title,
+                    TEMP_DESC    AS summary,
                     TARGET_AMOUNT,
                     FUND_START_DATE,
                     FUND_END_DATE,
                     CATEGORY,
-                    ORIGIN_THUMBNAIL,
-                    SHIP_START_DATE,
-                    TEMP_STORY_HTML,
-                    TEMP_STORY_JSON
+                    ORIGIN_THUMBNAIL AS thumbnailUrl,
+                    SHIP_START_DATE
                 FROM TEMPORARY
                 WHERE TEMP_NO = #{tempNo}
                     AND SELLER_NO = (
                     SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
-      )
-   </select>
+                    )
+            </select>
 
            <update id="updateDraft" parameterType="project">
                     UPDATE TEMPORARY
@@ -140,15 +115,22 @@
                             FUND_END_DATE = #{fundEndDate},
                             CATEGORY = #{category},
                             ORIGIN_THUMBNAIL = NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
-             SHIP_START_DATE = #{shipStartDate},
-             TEMP_STORY_HTML = #{content.html},
-             TEMP_STORY_JSON = #{content.json},
-             UPDATE_DATE = SYSDATE
+                            SHIP_START_DATE = #{shipStartDate},
+                            UPDATE_DATE = SYSDATE
                     WHERE TEMP_NO = #{tempNo}
                         AND SELLER_NO = (
                             SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
                         )
             </update>
 
-        
+            
+            <update id="deleteProject" parameterType="map">
+                UPDATE TEMPORARY
+                    SET TEMP_STATUS = 'N',
+                        UPDATE_DATE = SYSDATE
+                    WHERE TEMP_NO = #{tempNo}
+                    AND SELLER_NO = (
+                        SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
+                    )
+            </update>
 </mapper>

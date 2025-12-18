@@ -74,4 +74,10 @@ public class ProjectServiceImpl implements ProjectService {
     public Project selectProjectById(int userNo, long tempNo) {
         return projectDao.selectProjectById(sqlSession, userNo, tempNo);
     }
+
+    @Transactional
+    @Override
+    public int deleteProject(int userNo, long tempNo){
+        return projectDao.deleteProject(sqlSession, userNo, tempNo);
+    }
 }

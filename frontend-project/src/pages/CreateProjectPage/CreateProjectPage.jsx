@@ -36,7 +36,7 @@ const CustomImage = Image.extend({
   },
 });
 
-const emptyReward = { title: '', price: '', description: '', shipping: '' };
+const emptyReward = { title: '', price: '', description: '' };
 const MAX_REWARDS = 5;
 
 const STORY_GUIDE = `
@@ -117,6 +117,7 @@ export default function CreateProjectPage() {
     storyHtml: STORY_GUIDE,
     openStart: '',
     openEnd: '',
+    shippingDate: '',
     goal: '',
     rewards: [{ ...emptyReward }],
   });
@@ -220,6 +221,7 @@ export default function CreateProjectPage() {
       category: draftPrefill.category ?? prev.category,
       openStart: draftPrefill.fundStartDate ?? prev.openStart,
       openEnd: draftPrefill.fundEndDate ?? prev.openEnd,
+      shippingDate: draftPrefill.shipStartDate ?? prev.shippingDate,
       goal:
         draftPrefill.targetAmount !== undefined && draftPrefill.targetAmount !== null
           ? String(draftPrefill.targetAmount)
@@ -477,7 +479,7 @@ export default function CreateProjectPage() {
       targetAmount: Number(formData.goal) || 0,
       fundStartDate: formData.openStart || null,
       fundEndDate: formData.openEnd || null,
-      shipStartDate: formData.openEnd || formData.openStart || null,
+      shipStartDate: formData.shippingDate || formData.openEnd || formData.openStart || null,
       userNo: 1, // TODO: replace with logged-in user info
       tempNo: activeDraftId,
       thumbnailUrl: formData.thumbnailUrl,
@@ -520,7 +522,7 @@ export default function CreateProjectPage() {
       targetAmount: Number(formData.goal) || 0,
       fundStartDate: formData.openStart || null,
       fundEndDate: formData.openEnd || null,
-      shipStartDate: formData.openEnd || formData.openStart || null,
+      shipStartDate: formData.shippingDate || formData.openEnd || formData.openStart || null,
       userNo: 1, // TODO: replace with logged-in user info
       thumbnailUrl: formData.thumbnailUrl,
       content: {
@@ -797,6 +799,17 @@ export default function CreateProjectPage() {
                   required
                 />
               </div>
+              <div className="form-group">
+                <DatePickerField
+                  id="project-shipping-date"
+                  name="shippingDate"
+                  label="통합 배송 예정일"
+                  value={formData.shippingDate}
+                  onChange={updateField}
+                  min={formData.openEnd || formData.openStart || minStartDateValue}
+                  helperText="리워드 공통 배송 시작일을 선택하세요."
+                />
+              </div>
             </div>
             </section>
 
@@ -835,16 +848,6 @@ export default function CreateProjectPage() {
                       rows={2}
                       value={reward.description}
                       onChange={(event) => updateReward(index, 'description', event.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>배송 예정</label>
-                    <input
-                      type="text"
-                      value={reward.shipping}
-                      placeholder="예) 7월 1주차"
-                      onChange={(event) => updateReward(index, 'shipping', event.target.value)}
                       required
                     />
                   </div>

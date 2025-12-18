@@ -38,4 +38,12 @@ public class ProjectDao {
 
         return sqlSession.selectOne("projectMapper.selectProjectById", params);
     }
+
+    public int deleteProject(SqlSessionTemplate sqlSession, int userNo, long tempNo){
+        Map<String, Object> params = new HashMap<>();
+        params.put("userNo", userNo);
+        params.put("tempNo", tempNo);
+
+        return sqlSession.update("projectMapper.deleteProject", params);
+    }
 }
