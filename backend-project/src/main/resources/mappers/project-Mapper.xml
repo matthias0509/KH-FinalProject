@@ -2,25 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace = "projectMapper">
 
-    <resultMap id="draftResultMap" type="project">
-        <result property="tempNo" column="TEMP_NO" />
-        <result property="title" column="TEMP_TITLE" />
-        <result property="summary" column="TEMP_DESC" />
-        <result property="targetAmount" column="TARGET_AMOUNT" />
-        <result property="fundStartDate" column="FUND_START_DATE" />
-        <result property="fundEndDate" column="FUND_END_DATE" />
-        <result property="category" column="CATEGORY" />
-        <result property="thumbnailUrl" column="ORIGIN_THUMBNAIL" />
-        <result property="shipStartDate" column="SHIP_START_DATE" />
-        <association property="content" javaType="com.kh.foodding.createProject.model.vo.EditorContent">
-            <result property="html" column="TEMP_STORY_HTML" />
-            <result property="json" column="TEMP_STORY_JSON" />
-        </association>
-    </resultMap>
 
 
             <!-- 프로젝트 제출 (심의받기) -->
             <insert id="insertProject" parameterType="project">
+                <selectKey resultType="long" keyProperty="productNo" order="BEFORE">
+                    SELECT SEQ_PRODUCT_NO.NEXTVAL FROM DUAL
+                </selectKey>
                     INSERT INTO PRODUCT (
                         PRODUCT_NO,
                         PRODUCT_TITLE,
@@ -31,11 +19,12 @@
                         CURRENT_AMOUNT,
                         FUND_START_DATE,
                         FUND_END_DATE,
+                        SHIP_START_DATE,
                         CATEGORY,
                         ORIGIN_THUMBNAIL,
                         SELLER_NO
                     ) VALUES (
-                        SEQ_PRODUCT_NO.NEXTVAL,
+                        #{productNo},
                         #{title},
                         #{summary},
                         #{content.html},
@@ -44,6 +33,7 @@
                         NVL(#{currentAmount}, 0),
                         #{fundStartDate},
                         #{fundEndDate},
+                        #{shipStartDate},
                         #{category},
                         NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
                         (
@@ -54,9 +44,29 @@
                     )
             </insert>
 
+            <!-- 옵션 제출하기 -->
+            <insert id="insertProductOption" parameterType="map">
+                INSERT INTO TB_OPTION (
+                    OPTION_NO,
+                    PRODUCT_NO,
+                    OPTION_NAME,
+                    OPTION_CONTENT,
+                    OPTION_PRICE
+                ) VALUES (
+                    SEQ_OPTION_NO.NEXTVAL,
+                    #{productNo},
+                    #{title},
+                    #{description},
+                    #{price}
+                )
+            </insert>
+                    
 
             <!-- 임시저장 -->
-            <insert id = "imsiProject" parameterType="project">
+             <insert id="imsiProject" parameterType="project">
+                <selectKey resultType="long" keyProperty="tempNo" order="BEFORE">
+                    SELECT SEQ_TEMP_NO.NEXTVAL FROM DUAL
+                </selectKey>
                 INSERT INTO TEMPORARY (
                     TEMP_NO,
                     TEMP_TITLE,
@@ -64,63 +74,78 @@
                     TARGET_AMOUNT,
                     FUND_START_DATE,
                     FUND_END_DATE,
+                    SHIP_START_DATE,
                     CATEGORY,
                     ORIGIN_THUMBNAIL,
-                    SHIP_START_DATE,
                     TEMP_STORY_HTML,
                     TEMP_STORY_JSON,
                     SELLER_NO
-                )
-                VALUES (
-                    SEQ_TEMP_NO.NEXTVAL,
+                ) VALUES (
+                    #{tempNo},
                     #{title},
                     #{summary},
                     #{targetAmount},
                     #{fundStartDate},
                     #{fundEndDate},
+                    #{shipStartDate},
                     #{category},
                     NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
-                    #{shipStartDate},
                     #{content.html},
                     #{content.json},
-                    (
-                        SELECT SELLER_NO
-                        FROM SELLER_PROFILE
-                        WHERE USER_NO = #{userNo}
-                    )
+                    (SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo})
+                )
+            </insert>
+            <!-- 옵션 임시저장 -->
+            <insert id="insertTempOption" parameterType="map">
+                INSERT INTO TEMP_OPTION (
+                    OPTION_NO,
+                    TEMP_NO,
+                    OPTION_NAME,
+                    OPTION_CONTENT,
+                    OPTION_PRICE
+                ) VALUES (
+                    SEQ_TEMP_OPTION_NO.NEXTVAL,
+                    #{tempNo},
+                    #{title},
+                    #{description},
+                    #{price}
                 )
             </insert>
 
-           <select id="selectProject" parameterType="map" resultMap="draftResultMap">
+
+            <!-- 임시저장 프로젝트 목록조회 -->
+           <select id="selectProject" parameterType="map" resultType="project">
                     SELECT
-                        TEMP_NO,
-                        TEMP_TITLE,
-                        TEMP_DESC,
+                        TEMP_NO      AS tempNo,
+                        TEMP_TITLE   AS title,
+                        TEMP_DESC    AS summary,
                         TARGET_AMOUNT,
                         FUND_START_DATE,
                         FUND_END_DATE,
                         CATEGORY,
-                        ORIGIN_THUMBNAIL,
+                        ORIGIN_THUMBNAIL AS thumbnailUrl,
                         SHIP_START_DATE,
                         TEMP_STORY_HTML,
                         TEMP_STORY_JSON
                     FROM TEMPORARY
-                    WHERE SELLER_NO = (
+                    WHERE TEMP_STATUS = 'Y' 
+                        AND SELLER_NO = (
                         SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
                     )
                     ORDER BY TEMP_NO DESC
            </select>
 
-           <select id="selectProjectById" parameterType="map" resultMap="draftResultMap">
+            <!-- 임시저장 프로젝트 상세조회 -->
+           <select id="selectProjectById" parameterType="map" resultType="project">
                 SELECT
-                    TEMP_NO,
-                    TEMP_TITLE,
-                    TEMP_DESC,
+                    TEMP_NO      AS tempNo,
+                    TEMP_TITLE   AS title,
+                    TEMP_DESC    AS summary,
                     TARGET_AMOUNT,
                     FUND_START_DATE,
                     FUND_END_DATE,
                     CATEGORY,
-                    ORIGIN_THUMBNAIL,
+                    ORIGIN_THUMBNAIL AS thumbnailUrl,
                     SHIP_START_DATE,
                     TEMP_STORY_HTML,
                     TEMP_STORY_JSON
@@ -128,9 +153,21 @@
                 WHERE TEMP_NO = #{tempNo}
                     AND SELLER_NO = (
                     SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
-      )
-   </select>
+                    )
+            </select>
 
+            <!-- 임시 저장 옵션 불러오기 -->
+            <select id="selectTempOptions" parameterType="long" resultType="com.kh.foodding.createProject.model.vo.Project$Reward">
+                SELECT
+                    OPTION_NAME AS title,
+                    OPTION_PRICE AS price,
+                    OPTION_CONTENT AS description
+                FROM TEMP_OPTION
+                WHERE TEMP_NO = #{tempNo}
+                ORDER BY OPTION_NO
+            </select>
+
+            <!-- 임시저장된 프로젝트 이어쓰기 후 임시저장  -->
            <update id="updateDraft" parameterType="project">
                     UPDATE TEMPORARY
                         SET TEMP_TITLE = #{title},
@@ -140,15 +177,32 @@
                             FUND_END_DATE = #{fundEndDate},
                             CATEGORY = #{category},
                             ORIGIN_THUMBNAIL = NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
-             SHIP_START_DATE = #{shipStartDate},
-             TEMP_STORY_HTML = #{content.html},
-             TEMP_STORY_JSON = #{content.json},
-             UPDATE_DATE = SYSDATE
+                            SHIP_START_DATE = #{shipStartDate},
+                            TEMP_STORY_HTML = #{content.html},
+                            TEMP_STORY_JSON = #{content.json},
+                            UPDATE_DATE = SYSDATE
                     WHERE TEMP_NO = #{tempNo}
                         AND SELLER_NO = (
                             SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
                         )
             </update>
 
-        
+            <!-- 임시저장 목록 조회 프로젝트 삭제 -->
+            <update id="deleteProject" parameterType="map">
+                UPDATE TEMPORARY
+                    SET TEMP_STATUS = 'N',
+                        UPDATE_DATE = SYSDATE
+                    WHERE TEMP_NO = #{tempNo}
+                    AND SELLER_NO = (
+                        SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
+                    )
+            </update>
+
+            <delete id="deleteTempOptions" parameterType="long">
+                DELETE FROM TEMP_OPTION WHERE TEMP_NO = #{tempNo}
+            </delete>
+
+            <delete id="deleteProductOptions" parameterType="long">
+                DELETE FROM TB_OPTION WHERE PRODUCT_NO = #{productNo}
+            </delete>
 </mapper>

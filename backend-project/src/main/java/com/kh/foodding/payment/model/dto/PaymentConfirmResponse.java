@@ -1,12 +1,16 @@
-package com.kh.foodding.payment.model.dao;
+package com.kh.foodding.payment.model.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class PaymentConfirmResponse {
     private boolean success;
     private String message;

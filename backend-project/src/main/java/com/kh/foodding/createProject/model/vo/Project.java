@@ -28,7 +28,8 @@ import lombok.Builder.Default;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Project {
 
-    private String tempNo;
+    private Long tempNo;
+    private Long productNo;
     private Long userNo;             // 내부 사용자 번호
 
     private String title;               // 프로젝트 제목
@@ -41,11 +42,6 @@ public class Project {
     private LocalDate fundEndDate;          // 프로젝트 마감일
     private BigDecimal targetAmount;       // 프로젝트 목표 금액
 
-
-    // 옵션 테이블
-    private String rewardName;              // 옵션명
-    private BigDecimal price;               // 가격
-    private String explanation;             // 설명
     private LocalDate shipStartDate;        // 발송 예정일
 
 
@@ -53,7 +49,7 @@ public class Project {
     
     private String Status;                  // 프로젝트 상태 임시저장/제출/승인
 
-
+    
 
     @Singular("tag")
     private List<String> tags;
@@ -74,4 +70,18 @@ public class Project {
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     private EditorContent content;
+
+     private List<Reward> rewards;
+
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Reward {
+        private String title;
+        private BigDecimal price;
+        private String description;
+    }
+  
 }
+

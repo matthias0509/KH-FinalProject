@@ -97,3 +97,20 @@ export const fetchImsiAxios = async (userNo) => {
     }
   };
 
+
+export const deleteProjectAxios = async ({ userNo, tempNo }) => {
+  const url = `${commonUrl}drafts/${tempNo}`;
+
+  try {
+    const response = await axios({
+      url,
+      method: 'patch',
+      params: { userNo },
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('프로젝트 삭제 실패', error);
+    throw error;
+  }
+};

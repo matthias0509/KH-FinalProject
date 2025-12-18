@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace를 paymentMapper로 변경 -->
+<mapper namespace="paymentMapper">
+
+    <!-- id는 동일 -->
+    <insert id="insertOrder" parameterType="Orders">
+        INSERT INTO ORDERS (
+            ORDER_NO, ORDER_AMOUNT, ORDER_STATUS, 
+            DELIVERY_STATUS, POSTCODE, ADDRESS, USER_NO
+        ) VALUES (
+            #{orderNo}, #{orderAmount}, 'PAY',
+            'READY', #{postcode}, #{address}, #{userNo}
+        )
+    </insert>
+
+    <insert id="insertOrderDetail" parameterType="OrderDetail">
+        INSERT INTO ORDER_DETAIL (
+            QUANTITY, ORDER_NO, OPTION_NO
+        ) VALUES (
+            #{quantity}, #{orderNo}, #{optionNo}
+        )
+    </insert>
+
+</mapper>

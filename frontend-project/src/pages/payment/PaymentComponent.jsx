@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
-import { CreditCard, Lock } from 'lucide-react';
+import { CreditCard, Lock, MapPin } from 'lucide-react';
 import './PaymentComponent.css';
 import Header from '../../components/Header';
 
@@ -11,25 +11,26 @@ const PaymentComponent = () => {
     title: '얼리버드 특가 세트',
     amount: 35000,
     quantity: 1,
-    items: ['시그니처 소스 3종', '레시피 북', '감사 카드']
+    items: ['시그니처 소스 3종', '레시피 북', '감사 카드'],
+    optionNo: 1  // 실제 옵션 번호
   });
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    address: '',
+    postcode: '',      // 우편번호 추가
+    address: '',       // 기본 주소
+    detailAddress: '', // 상세 주소
     agreeTerms: false
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // 토스페이먼츠 클라이언트 키 (테스트용)
   const clientKey = 'test_ck_6BYq7GWPVvNRd1OJ7eqmVNE5vbo1';
-  const customerKey = `customer_${Date.now()}`; // 고유한 고객 키 생성
+  const customerKey = `customer_${Date.now()}`;
 
   useEffect(() => {
-    // 토스페이먼츠 SDK 로드
     loadTossPayments(clientKey).then(payments => {
       setTossPayments(payments);
     });
@@ -62,6 +63,38 @@ const PaymentComponent = () => {
     setFormData(prev => ({ ...prev, phone: formatted }));
   };
 
+  // 카카오 주소 검색
+  const handleAddressSearch = () => {
+    new window.daum.Postcode({
+      oncomplete: function(data) {
+        // 기본 주소
+        let fullAddress = data.address;
+        let extraAddress = '';
+
+        // 건물명이 있을 경우 추가
+        if (data.addressType === 'R') {
+          if (data.bname !== '') {
+            extraAddress += data.bname;
+          }
+          if (data.buildingName !== '') {
+            extraAddress += (extraAddress !== '' ? ', ' + data.buildingName : data.buildingName);
+          }
+          fullAddress += (extraAddress !== '' ? ' (' + extraAddress + ')' : '');
+        }
+
+        // 상태 업데이트
+        setFormData(prev => ({
+          ...prev,
+          postcode: data.zonecode,
+          address: fullAddress
+        }));
+
+        // 상세주소 입력란에 포커스
+        document.getElementById('detailAddress').focus();
+      }
+    }).open();
+  };
+
   const deliveryFee = 3000;
   const totalAmount = (selectedReward.amount * selectedReward.quantity) + deliveryFee;
 
@@ -72,7 +105,8 @@ const PaymentComponent = () => {
       return;
     }
 
-    if (!formData.name || !formData.email || !formData.phone || !formData.address) {
+    if (!formData.name || !formData.email || !formData.phone || 
+        !formData.postcode || !formData.address || !formData.detailAddress) {
       alert('모든 필수 정보를 입력해주세요.');
       return;
     }
@@ -85,10 +119,7 @@ const PaymentComponent = () => {
     setIsProcessing(true);
 
     try {
-      // 주문 ID 생성 (실제로는 서버에서 생성하는 것이 권장됩니다)
       const orderId = `order_${Date.now()}`;
-
-      // 전화번호에서 하이픈 제거 (숫자만 전송)
       const phoneNumberOnly = formData.phone.replace(/[^0-9]/g, '');
 
       // 결제 요청
@@ -98,8 +129,8 @@ const PaymentComponent = () => {
         orderName: selectedReward.title,
         customerName: formData.name,
         customerEmail: formData.email,
-        customerMobilePhone: phoneNumberOnly, // 하이픈 제거된 번호 전송
-        successUrl: `${window.location.origin}/payment/success`,
+        customerMobilePhone: phoneNumberOnly,
+        successUrl: `${window.location.origin}/payment/success?postcode=${formData.postcode}&address=${encodeURIComponent(formData.address + ' ' + formData.detailAddress)}&quantity=${selectedReward.quantity}&optionNo=${selectedReward.optionNo}`,
         failUrl: `${window.location.origin}/payment/fail`,
       });
     } catch (error) {
@@ -116,10 +147,8 @@ const PaymentComponent = () => {
   return (
     <div className="checkout-page">
       <Header />
-      {/* Main Content */}
       <div className="checkout-container">
         <div className="checkout-grid">
-          {/* Left Column - Form */}
           <div className="checkout-form">
             {/* Step 1: Reward Confirmation */}
             <div className="checkout-section">
@@ -222,14 +251,52 @@ const PaymentComponent = () => {
                   </div>
                 </div>
 
+                {/* 우편번호 검색 */}
                 <div className="form-field">
-                  <label className="form-field__label">배송 주소 *</label>
+                  <label className="form-field__label">우편번호 *</label>
+                  <div className="address-search">
+                    <input
+                      type="text"
+                      name="postcode"
+                      value={formData.postcode}
+                      placeholder="우편번호"
+                      className="form-field__input"
+                      readOnly
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddressSearch}
+                      className="address-search__button"
+                    >
+                      <MapPin size={18} />
+                      주소 검색
+                    </button>
+                  </div>
+                </div>
+
+                {/* 기본 주소 */}
+                <div className="form-field">
+                  <label className="form-field__label">기본 주소 *</label>
                   <input
                     type="text"
                     name="address"
                     value={formData.address}
+                    placeholder="주소 검색 버튼을 클릭하세요"
+                    className="form-field__input"
+                    readOnly
+                  />
+                </div>
+
+                {/* 상세 주소 */}
+                <div className="form-field">
+                  <label className="form-field__label">상세 주소 *</label>
+                  <input
+                    type="text"
+                    id="detailAddress"
+                    name="detailAddress"
+                    value={formData.detailAddress}
                     onChange={handleInputChange}
-                    placeholder="서울특별시 강남구 테헤란로 123"
+                    placeholder="상세 주소를 입력하세요"
                     className="form-field__input"
                   />
                 </div>
