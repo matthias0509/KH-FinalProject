@@ -20,6 +20,8 @@ export default function FindIdPage() {
     // 이름과 이메일 확인 요청
     const handleInitialSubmit = async (e) => {
         e.preventDefault();
+        toast.info("수정중~!");
+        /*
         try {
             // 백엔드에 회원 확인 요청
             const response = await axios.post("http://localhost:8001/foodding/member/emailCheck", { 
@@ -37,6 +39,7 @@ export default function FindIdPage() {
         } catch (error) {
             toast.error("서버 통신 중 오류가 발생했습니다.");
         }
+        */
     };
 
     // Step 1: 인증 성공 시 아이디 조회
@@ -86,6 +89,7 @@ export default function FindIdPage() {
                     {step === 2 && <FindIdResult />}
                 </AuthLayout>
             <AppFooter />
+            <ToastContainer />
         </div>
     );
 }
