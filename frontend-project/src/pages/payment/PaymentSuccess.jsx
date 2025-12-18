@@ -97,6 +97,7 @@ const PaymentSuccess = () => {
 
           {status === 'success' && (
             <div className="payment-result__content payment-result__content--success">
+              
               <div className="payment-result__icon">✅</div>
               <h1>결제가 완료되었습니다!</h1>
               
