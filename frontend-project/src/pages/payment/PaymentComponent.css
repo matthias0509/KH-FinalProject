@@ -563,7 +563,7 @@
   align-items: center;
   gap: 6px;
   padding: 12px 20px;
-  background: #3b82f6;
+  background: #f89b00;
   color: white;
   border: none;
   border-radius: 8px;
@@ -575,7 +575,7 @@
 }
 
 .address-search__button:hover {
-  background: #2563eb;
+  background: #ff7f00;
   transform: translateY(-1px);
 }
 
