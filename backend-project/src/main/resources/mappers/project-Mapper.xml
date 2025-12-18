@@ -2,6 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace = "projectMapper">
 
+    <resultMap id="projectResultMap" type="com.kh.foodding.createProject.model.vo.Project">
+        <id property="tempNo" column="tempNo" />
+        <result property="title" column="title" />
+        <result property="summary" column="summary" />
+        <result property="targetAmount" column="TARGET_AMOUNT" />
+        <result property="fundStartDate" column="FUND_START_DATE" />
+        <result property="fundEndDate" column="FUND_END_DATE" />
+        <result property="category" column="CATEGORY" />
+        <result property="thumbnailUrl" column="thumbnailUrl" />
+        <result property="shipStartDate" column="SHIP_START_DATE" />
+        <association property="content" javaType="com.kh.foodding.createProject.model.vo.EditorContent">
+            <result property="html" column="TEMP_STORY_HTML" />
+            <result property="json" column="TEMP_STORY_JSON" />
+        </association>
+    </resultMap>
+
 
 
             <!-- 프로젝트 제출 (심의받기) -->
@@ -114,7 +130,7 @@
 
 
             <!-- 임시저장 프로젝트 목록조회 -->
-           <select id="selectProject" parameterType="map" resultType="project">
+           <select id="selectProject" parameterType="map" resultMap="projectResultMap">
                     SELECT
                         TEMP_NO      AS tempNo,
                         TEMP_TITLE   AS title,
@@ -136,7 +152,7 @@
            </select>
 
             <!-- 임시저장 프로젝트 상세조회 -->
-           <select id="selectProjectById" parameterType="map" resultType="project">
+           <select id="selectProjectById" parameterType="map" resultMap="projectResultMap">
                 SELECT
                     TEMP_NO      AS tempNo,
                     TEMP_TITLE   AS title,
