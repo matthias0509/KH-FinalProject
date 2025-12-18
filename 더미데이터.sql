@@ -23,3 +23,5 @@ INSERT INTO SELLER_PROFILE (
     '테스트 셀러 프로필',
     1
 );
+
+COMMIT;
