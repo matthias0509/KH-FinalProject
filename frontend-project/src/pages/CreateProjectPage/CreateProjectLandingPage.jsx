@@ -4,7 +4,8 @@ import Header from '../../components/Header';
 import ProjectCard from '../../components/ProjectCard';
 import AppFooter from '../../components/AppFooter';
 import draftPlaceholder from '../../assets/기본이미지.jpg';
-import { fetchImsiAxios } from './ProjectApi';
+import { fetchImsiAxios, deleteProjectAxios } from './ProjectApi';
+import { toast } from 'react-toastify';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/foodding';
 
@@ -21,27 +22,37 @@ const resolveAssetUrl = (path) => {
   return `${API_BASE_URL}/${path}`;
 };
 
+
+
+
 export default function CreateProjectLandingPage() {
+
+  const USER_NO=1;
+
   const navigate = useNavigate();
+  // 임시저장 목록 관리
   const [drafts, setDrafts] = useState([]);
+  // 로딩중
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function loadDrafts() {
-      try {
-        const data = await fetchImsiAxios(1); // TODO: 실제 사용자 번호로 교체
-        setDrafts(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('임시저장 목록 불러오기 실패', error);
-        setDrafts([]);
-      } finally {
-        setLoading(false);
-      }
+  const loadDrafts = async () => {
+    try {
+      const data = await fetchImsiAxios(USER_NO); // TODO: 실제 사용자 번호로 교체
+      setDrafts(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('임시저장 목록 불러오기 실패', error);
+      setDrafts([]);
+    } finally {
+      setLoading(false);
     }
+  };
 
+  useEffect(() => {
     loadDrafts();
   }, []);
 
+
+  //
   const stats = useMemo(() => {
     const toNumber = (value) => {
       if (typeof value === 'number') return value;
@@ -59,6 +70,9 @@ export default function CreateProjectLandingPage() {
     };
   }, [drafts]);
 
+
+
+  // 
   const goToNewProject = () => navigate('/create/new');
   const goToMakerDashboard = () => navigate('/maker/project');
   const handleContinueDraft = (draft) => {
@@ -66,10 +80,31 @@ export default function CreateProjectLandingPage() {
     navigate(`/create/new?draft=${draft.tempNo}`);
   };
 
-  // const deleteProject = () => {
-    // 삭제 추가 예정
-  // }
 
+  // 삭제하기 버튼 클릭 시 실행할 함수
+  const handleDeleteDraft = (draft) => {
+    if (!draft?.tempNo) {
+      return;
+    }
+    if (!window.confirm('해당 임시저장을 삭제하시겠습니까?')) {
+      return;
+    }
+
+    const api = async () => {
+      try {
+        const msg = await deleteProjectAxios({ userNo: USER_NO, tempNo: draft.tempNo });
+        toast.info(msg);
+        setDrafts((prev) => prev.filter((item) => item.tempNo !== draft.tempNo));
+      } catch (error) {
+        toast.error('프로젝트 삭제 실패');
+        console.error(error);
+      }
+    };
+
+    api();
+  };
+
+  // UseEffect로 데이터 불러오기 전에 보여줄 화면
   if (loading) {
     return (
       <div className="app create-landing">
@@ -84,6 +119,7 @@ export default function CreateProjectLandingPage() {
 
   const hasDrafts = stats.count > 0;
 
+  // 로딩 완료 후 보여줄 화면
   return (
     <div className="app create-landing">
       <Header />
@@ -159,7 +195,11 @@ export default function CreateProjectLandingPage() {
                         >
                           이어서 작성
                         </button>
-                        <button type="button" className="btn btn--small btn--ghost" >
+                        <button
+                          type="button"
+                          className="btn btn--small btn--ghost"
+                          onClick={() => handleDeleteDraft(draft)}
+                        >
                           삭제
                         </button>
                       </div>
