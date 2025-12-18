@@ -5,15 +5,14 @@ import org.springframework.stereotype.Repository;
 
 import com.kh.foodding.member.model.vo.Member;
 
+import lombok.RequiredArgsConstructor;
+
 @Repository
+@RequiredArgsConstructor
 public class MemberDao {
 	
 	// Spring Boot 환경에서는 SqlSessionTemplate을 주입받아 사용합니다.
     private final SqlSession sqlSession;
-
-    public MemberDao(SqlSession sqlSession) {
-        this.sqlSession = sqlSession;
-    }
 
     /**
      * 새로운 회원을 TB_USER 테이블에 삽입합니다.
@@ -24,6 +23,18 @@ public class MemberDao {
         // 💡 member-mapper.xml 파일에서 "insertMember" id를 가진 쿼리를 실행합니다.
         // m 객체에는 userRole, modifyProfile 등이 모두 설정되어 있습니다.
         return sqlSession.insert("authMapper.insertMember", m);
+    }
+    
+    public int idCheck(String userId) {
+    	return sqlSession.selectOne("authMapper.idCheck", userId);
+    }
+    
+    public int nicknameCheck(String nickname) {
+    	return sqlSession.selectOne("authMapper.nicknameCheck", nickname);
+    }
+    
+    public int emailCheck(Member m) {
+    	return sqlSession.selectOne("authMapper.emailCheck", m);
     }
 
 }

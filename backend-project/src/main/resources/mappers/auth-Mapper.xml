@@ -67,6 +67,26 @@
         )
     </insert>
     
+    <select id="idCheck" parameterType="string" resultType="_int">
+    	SELECT COUNT(*)
+    	  FROM TB_USER
+    	 WHERE USER_ID = #{userId}
+    </select>
+    
+    <select id="nicknameCheck" parameterType="string" resultType="_int">
+    	SELECT COUNT(*)
+    	  FROM TB_USER
+    	 WHERE NICKNAME = #{nickname}
+    </select>
+    
+    <select id="emailCheck" parameterType="member" resultType="_int">
+    	SELECT COUNT(*)
+    	  FROM TB_USER
+    	 WHERE USER_NAME = #{userName}
+    	   AND EMAIL = #{email}
+    	   AND USER_YN = 'N'
+    </select>
+    
 	<insert id="insertAuthCode" parameterType="map">
         MERGE INTO AUTH
         USING DUAL

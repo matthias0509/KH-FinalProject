@@ -57,5 +57,17 @@ public class MemberService {
         // 4. DB에 회원 정보 삽입 (MyBatis/DAO 호출)
         return memberDao.insertMember(m); 
     }
+    
+    public int idCheck(String userId) {
+    	return memberDao.idCheck(userId);
+    }
+    
+    public int nicknameCheck(String nickname) {
+    	return memberDao.nicknameCheck(nickname);
+    }
+    
+    public int emailCheck(Member m) {
+    	return memberDao.emailCheck(m);
+    }
 
 }

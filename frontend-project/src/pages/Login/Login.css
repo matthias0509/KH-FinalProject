@@ -136,8 +136,7 @@
 
 .address-search-button {
     /* 💡 버튼의 높이를 입력 필드와 맞추기 위해 패딩 조정 */
-    padding: 12px 15px; 
-    
+    padding: 12px 15px;
     /* 💡 주황색 스타일 재활용 또는 적용 */
     background-image: linear-gradient(to right, var(--accent, #f97316), var(--accent-strong, #ef4444));
     color: white;
@@ -145,10 +144,8 @@
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    
     /* 💡 텍스트가 두 줄로 나오는 것을 방지 */
-    white-space: nowrap; 
-
+    white-space: nowrap;
     /* 높이를 강제 지정하거나, 패딩으로 조절 */
     /* height: 48px;  // 높이 강제 지정 시 */
 }

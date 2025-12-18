@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import InputField from "./InputField";
+import { toast } from "react-toastify";
 
 /**
  * @param {string} email - 부모(CreateMember)로부터 전달받은 이메일 값
@@ -28,7 +29,7 @@ function EmailVerificationForm({ email, onChange ,onVerified }) {
     // 1. 인증번호 발송 (Spring Boot 컨트롤러로 요청)
     const handleSendCode = async () => {
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            alert("유효한 이메일 주소를 입력해주세요.");
+            toast.warning("유효한 이메일 주소를 입력해주세요.");
             return;
         }
 
@@ -38,17 +39,17 @@ function EmailVerificationForm({ email, onChange ,onVerified }) {
             setIsSent(true);
             setTimer(180); // 발송 시마다 3분 초기화
             setIsVerified(false);
-            alert("인증번호가 발송되었습니다. 3분 이내에 입력해주세요.");
+            toast.success("인증번호가 발송되었습니다. 3분 이내에 입력해주세요.");
         } catch (error) {
             console.error("발송 실패:", error);
-            alert("인증번호 발송에 실패했습니다. 이메일 주소를 다시 확인해주세요.");
+            toast.error("인증번호 발송에 실패했습니다. 이메일 주소를 다시 확인해주세요.");
         }
     };
 
     // 2. 인증번호 확인 (Spring Boot 컨트롤러로 검증 요청)
     const handleVerifyCode = async () => {
         if (authCode.length < 6) {
-            alert("인증번호 6자리를 입력해주세요.");
+            toast.warning("인증번호 6자리를 입력해주세요.");
             return;
         }
 
@@ -62,12 +63,12 @@ function EmailVerificationForm({ email, onChange ,onVerified }) {
             if (response.data === true || response.data === "success") {
                 setIsVerified(true);
                 onVerified(true); // 💡 부모(CreateMember)의 상태를 true로 변경
-                alert("이메일 인증에 성공했습니다.");
+                toast.success("이메일 인증에 성공했습니다.");
             } else {
-                alert("인증번호가 일치하지 않거나 만료되었습니다.");
+                toast.error("인증번호가 일치하지 않거나 만료되었습니다.");
             }
         } catch (error) {
-            alert("인증 확인 중 오류가 발생했습니다.");
+            toast.error("인증 확인 중 오류가 발생했습니다.");
         }
     };
 
@@ -90,26 +91,29 @@ function EmailVerificationForm({ email, onChange ,onVerified }) {
                         value={email}
                         onChange={onChange}
                         readOnly={isVerified} // 인증 완료 시 수정 불가
-                        placeholder="이메일을 입력하세요"
+                        placeholder="example@email.com"
                     />
                 </div>
-                <button
-                    type="button"
-                    onClick={handleSendCode}
-                    disabled={isVerified}
-                    style={{
-                        padding: '12px 16px',
-                        height: '48px',
-                        backgroundImage: 'linear-gradient(to right, var(--accent, #f97316), var(--accent-strong, #ef4444))',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: isVerified ? 'default' : 'pointer',
-                        fontWeight: '600'
-                    }}
-                >
-                    {isSent ? "재발송" : "인증번호 받기"}
-                </button>
+                {!isVerified && (
+                    <button
+                        type="button"
+                        onClick={handleSendCode}
+                        disabled={isVerified}
+                        style={{
+                            padding: '12px 16px',
+                            height: '48px',
+                            backgroundImage: 'linear-gradient(to right, var(--accent, #f97316), var(--accent-strong, #ef4444))',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: isVerified ? 'default' : 'pointer',
+                            fontWeight: '600',
+                            fontSize: '16px'
+                        }}
+                    >
+                        {isSent ? "재발송" : "인증번호 받기"}
+                    </button>
+                )}
             </div>
 
             {/* 인증번호 입력 필드 (발송된 후에만 등장) */}
@@ -147,11 +151,13 @@ function EmailVerificationForm({ email, onChange ,onVerified }) {
                         onClick={handleVerifyCode}
                         style={{
                             padding: '0 20px',
-                            backgroundColor: '#333',
+                            background: 'linear-gradient(to right, var(--accent, #f97316), var(--accent-strong, #ef4444))',
                             color: 'white',
                             border: 'none',
                             borderRadius: '8px',
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            fontSize: '16px'
                         }}
                     >
                         인증확인

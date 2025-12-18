@@ -8,6 +8,8 @@ import AuthLayout from '../../components/Login/AuthLayout';
 import SubmitButton from '../../components/Login/SubmitButton';
 import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
 
 export default function FindIdPage() {
     const [step, setStep] = useState(0); 
@@ -18,23 +20,39 @@ export default function FindIdPage() {
     // 이름과 이메일 확인 요청
     const handleInitialSubmit = async (e) => {
         e.preventDefault();
-        console.log('이름/이메일 확인 요청:', { name, email });
-        // TODO: 서버에서 이름/이메일 일치 확인 및 인증 코드 발송 요청
-        
-        // 성공 가정:
-        setStep(1); 
+        try {
+            // 백엔드에 회원 확인 요청
+            const response = await axios.post("http://localhost:8001/foodding/member/emailCheck", { 
+                userName: name, 
+                email: email 
+            });
+
+            if (response.data === "MATCH") {
+                // 회원이 존재하면 Step 1(인증번호 입력)로 이동
+                setStep(1);
+                toast.success("인증번호가 발송되었습니다.");
+            } else {
+                toast.error("일치하는 회원 정보가 없습니다.");
+            }
+        } catch (error) {
+            toast.error("서버 통신 중 오류가 발생했습니다.");
+        }
     };
 
-    // Step 1: 인증 코드 확인 성공
-    const handleVerificationSuccess = (verifiedEmail) => {
-        console.log('인증 성공:', verifiedEmail);
+    // Step 1: 인증 성공 시 아이디 조회
+    const handleVerificationSuccess = async () => {
+    try {
+        // 인증 성공 후 서버에 아이디 조회를 최종 요청
+        const response = await axios.get("http://localhost:8001/foodding/member/findId", {
+            params: { email: email }
+        });
         
-        // TODO: 서버에서 이메일을 통해 아이디 조회 요청
-        
-        // 아이디 조회 성공 가정:
-        setFoundId('user***id'); // 실제 조회된 아이디
+        setFoundId(response.data); // 서버에서 받아온 실제 아이디
         setStep(2);
-    };
+    } catch (error) {
+        toast.error("아이디를 불러오는 데 실패했습니다.");
+    }
+};
 
     // Step 2: 결과 표시
     const FindIdResult = () => (
