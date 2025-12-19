@@ -23,51 +23,50 @@ export default function FindIdPage() {
 
     // 💡 정보 확인 + 메일 발송 통합 핸들러
     const handleFindIdProcess = async (e) => {
-    e.preventDefault();
-    setErrorMsg('');
-    
-    if (!name || !email) {
-        setErrorMsg("이름과 이메일을 입력해주세요.");
-        return;
-    }
+        e.preventDefault();
+        setErrorMsg('');
+        
+        if (!name || !email) {
+            setErrorMsg("이름과 이메일을 입력해주세요.");
+            return;
+        }
 
-    setIsLoading(true); // "처리 중" 시작
+        setIsLoading(true); // "처리 중" 시작
 
-    try {
-        // 1. 이름/이메일 일치 확인
-        const response = await axios.post("http://localhost:8001/foodding/member/emailCheck", { 
-            userName: name, 
-            email: email 
-        });
-
-        if (response.data === "MATCH") {
-            // 💡 핵심: Step을 먼저 바꿉니다. (화면에는 아직 로딩창이 떠 있음)
-            setStep(1);
-
-            // 💡 리액트가 렌더링을 완료할 때까지 기다린 후 발송 시작
-            // 발송이 끝날 때까지(await) 로딩창을 끄지 않습니다.
-            await new Promise((resolve) => {
-                const checkRef = setInterval(async () => {
-                    if (verifyRef.current) {
-                        clearInterval(checkRef);
-                        const result = await verifyRef.current.sendCode();
-                        resolve(result);
-                    }
-                }, 50); // ref가 잡힐 때까지 0.05초마다 체크
+        try {
+            // 1. 이름/이메일 일치 확인
+            const response = await axios.post("http://localhost:8001/foodding/member/emailCheck", { 
+                userName: name, 
+                email: email 
             });
 
-        } else {
-            setErrorMsg("입력하신 정보와 일치하는 회원이 없습니다.");
-            setIsLoading(false); // 틀렸을 때만 로딩 즉시 해제
+            if (response.data === "MATCH") {
+                // 💡 핵심: Step을 먼저 바꿉니다. (화면에는 아직 로딩창이 떠 있음)
+                setStep(1);
+
+                // 💡 리액트가 렌더링을 완료할 때까지 기다린 후 발송 시작
+                // 발송이 끝날 때까지(await) 로딩창을 끄지 않습니다.
+                await new Promise((resolve) => {
+                    const checkRef = setInterval(async () => {
+                        if (verifyRef.current) {
+                            clearInterval(checkRef);
+                            const result = await verifyRef.current.sendCode();
+                            resolve(result);
+                        }
+                    }, 50); // ref가 잡힐 때까지 0.05초마다 체크
+                });
+                toast.info("인증번호가 이메일로 발송되었습니다.");
+
+            } else {
+                setErrorMsg("입력하신 정보와 일치하는 회원이 없습니다.");
+            }
+        } catch (error) {
+            toast.error("통신 오류가 발생했습니다.");
+        } finally {
+            // 💡 모든 발송 과정이 끝난 후 (sendCode의 await가 풀린 후) 로딩 해제
+            setIsLoading(false); 
         }
-    } catch (error) {
-        toast.error("통신 오류가 발생했습니다.");
-        setIsLoading(false);
-    } finally {
-        // 💡 모든 발송 과정이 끝난 후 (sendCode의 await가 풀린 후) 로딩 해제
-        setIsLoading(false); 
-    }
-};
+    };
 
     const handleVerificationSuccess = async () => {
         try {

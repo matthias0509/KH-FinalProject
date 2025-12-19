@@ -93,6 +93,21 @@
     	 WHERE EMAIL = #{email}
     </select>
     
+    <select id="idEmailCheck" parameterType="member" resultType="_int">
+    	SELECT COUNT(*)
+    	  FROM TB_USER
+    	 WHERE USER_ID = #{userId}
+    	   AND EMAIL = #{email}
+    	   AND USER_YN = 'N'
+    </select>
+    
+    <update id="updatePassword" parameterType="member">
+    	UPDATE TB_USER
+    	   SET USER_PWD = #{userPwd}
+    	 WHERE USER_ID = #{userId}
+    	   AND USER_YN = 'N'
+    </update>
+    
 	<insert id="insertAuthCode" parameterType="map">
         MERGE INTO AUTH
         USING DUAL

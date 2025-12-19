@@ -7,9 +7,9 @@ import AuthLayout from '../../components/Login/AuthLayout';
 import InputField from '../../components/Login/InputField';
 import AuthLinkGroup from '../../components/Login/AuthLinkGroup';
 import SubmitButton from '../../components/Login/SubmitButton';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import * as AuthService from './LoginService';
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 export default function LoginPage() {
     
@@ -21,6 +21,16 @@ export default function LoginPage() {
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
 
+    const location = useLocation();
+
+    useEffect(() => {
+        // 전달받은 state에 메시지가 있다면 토스트를 띄웁니다.
+        if (location.state?.message) {
+            toast.success(location.state.message);
+            // 💡 중요: 페이지 새로고침 시 토스트가 또 뜨지 않게 state를 비워주는 것이 좋습니다.
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
     // 💡 1. 컴포넌트가 마운트되거나 상태가 변경될 때 로그인 상태 확인
     useEffect(() => {
         if (currentUser) {
@@ -110,6 +120,7 @@ export default function LoginPage() {
                 <AuthLinkGroup /> 
             </AuthLayout>
             <AppFooter />
+            <ToastContainer />
         </div>
     );
 }

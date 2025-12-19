@@ -40,5 +40,13 @@ public class MemberDao {
     public String findId(String email) {
     	return sqlSession.selectOne("authMapper.findId", email);
     }
+    
+    public int idEmailCheck(Member m) {
+    	return sqlSession.selectOne("authMapper.idEmailCheck", m);
+    }
+    
+    public int updatePassword(Member m) {
+    	return sqlSession.update("authMapper.updatePassword", m);
+    }
 
 }

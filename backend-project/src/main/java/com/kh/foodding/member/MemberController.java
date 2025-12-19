@@ -12,11 +12,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kh.foodding.member.model.service.EmailService;
 import com.kh.foodding.member.model.service.MemberService;
 import com.kh.foodding.member.model.vo.Member;
 
-import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 
 
@@ -27,7 +25,6 @@ public class MemberController {
 	
 	private final MemberService memberService;
 	private final BCryptPasswordEncoder bCryptPasswordEncoder;
-	private final EmailService emailService;
 	
     @PostMapping("/insert")
     // 💡 반환 타입을 ResponseEntity<String>으로 변경
@@ -69,13 +66,6 @@ public class MemberController {
     	int count = memberService.emailCheck(m);
     	
     	if(count>0) {
-    		String code = emailService.createCode();
-    		try {
-				emailService.sendEmail(m.getEmail(), code);
-			} catch (MessagingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
     		return "MATCH";
     	}else {
     		return "FAIL";
@@ -86,5 +76,28 @@ public class MemberController {
     public String findId(String email) {
     	String userId = memberService.findId(email);
     	return userId;
+    }
+    
+    @PostMapping("/idEmailCheck")
+    public String idEmailCheck(@RequestBody Member m) {
+    	//System.out.println(m);
+    	int count = memberService.idEmailCheck(m);
+    	//System.out.println("count : " + count);
+    	if (count > 0) {    		
+    		return "MATCH";
+    	}else {
+    		return "FAIL";
+    	}
+    }
+    
+    @PostMapping("/updatePassword")
+    public String updatePassword(@RequestBody Member m) {
+    	// System.out.println(m);
+    	int result = memberService.updatePassword(m);
+    	if (result>0) {
+    		return "success";
+    	} else {
+    		return "fail";
+    	}
     }
 }

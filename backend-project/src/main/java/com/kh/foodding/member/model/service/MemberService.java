@@ -22,7 +22,7 @@ public class MemberService {
     	// 💡 저장 경로 폴더가 없으면 생성하는 코드 추가
         File folder = new File(savePath);
         if (!folder.exists()) {
-            folder.mkdirs(); // d:/fooding/profile_images/ 폴더를 생성함
+            folder.mkdirs(); // d:/foodding/profile_images/ 폴더를 생성함
         }
         
         if (upfile != null && !upfile.isEmpty()) {
@@ -72,6 +72,14 @@ public class MemberService {
     
     public String findId(String email) {
     	return memberDao.findId(email);
+    }
+    
+    public int idEmailCheck(Member m) {
+    	return memberDao.idEmailCheck(m);
+    }
+    
+    public int updatePassword(Member m) {
+    	return memberDao.updatePassword(m);
     }
 
 }
