@@ -6,6 +6,7 @@ import ProjectsSection from '../components/ProjectsSection';
 import RankSection from '../components/RankSection';
 import AppFooter from '../components/AppFooter';
 import { categories, projects, slides } from '../data/content';
+import MyPage from './MyPage';
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('전체');
