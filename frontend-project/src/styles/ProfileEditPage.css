@@ -1,22 +1,13 @@
-<<<<<<< Updated upstream
 /* =======================================================
    ProfileEditPage.css (필수 추가 및 수정 스타일)
    ======================================================= */
 
 /* --- 메인 레이아웃 (MyPageLayout.css에 없다고 가정하고 추가) --- */
-=======
-/* 공통 레이아웃 (MakerPage와 동일) */
-.page-wrapper {
-    background-color: #f9fafb; /* 배경색 회색 유지 */
-}
-
->>>>>>> Stashed changes
 .mypage-container {
     display: flex;
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px 20px;
-<<<<<<< Updated upstream
 }
 .sidebar {
     width: 250px;
@@ -98,90 +89,10 @@
 .tab-item.active {
     color: #333;
     border-bottom: 2px solid #ff7878;
-=======
-    gap: 40px;
-    font-family: 'Pretendard', sans-serif;
-    color: #333;
-}
-
-/* 사이드바 스타일 (기존 유지) */
-.sidebar { width: 250px; flex-shrink: 0; }
-
-.mode-switch {
-    display: flex; background-color: #e9ecef; border-radius: 20px; padding: 4px; margin-bottom: 30px;
-}
-.mode-btn {
-    flex: 1; border: none; background: transparent; padding: 8px 0; border-radius: 16px;
-    font-weight: bold; color: #868e96; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; font-size: 14px;
-}
-.mode-btn.active { background-color: #fff; color: #00c4c4; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.link-btn:hover { color: #333; }
-
-.profile-section { text-align: center; margin-bottom: 30px; }
-.profile-img {
-    width: 80px; height: 80px; background-color: #eee; border-radius: 50%;
-    margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 30px;
-}
-.username { font-size: 16px; margin-bottom: 10px; }
-
-/* 설정 버튼 활성화 스타일 */
-.profile-setting-btn {
-    width: 100%; padding: 10px; border: 1px solid #ddd; background: #fff;
-    border-radius: 20px; cursor: pointer; font-size: 13px;
-}
-.profile-setting-btn.active {
-    border-color: #00c4c4; color: #00c4c4; font-weight: bold;
-}
-
-.menu-list ul { list-style: none; padding: 0; }
-.menu-category { font-size: 12px; color: #adb5bd; margin-bottom: 10px; }
-.menu-list li { padding: 8px 0; font-size: 14px; color: #495057; }
-
-
-/* ================== 메인 콘텐츠 (폼 스타일) ================== */
-.main-content { flex: 1; }
-
-.page-title {
-    font-size: 26px; margin-bottom: 20px; font-weight: bold;
-}
-
-.edit-card {
-    background: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 12px;
-    padding: 0; /* 헤더 탭 때문에 패딩 제거 */
-    overflow: hidden;
-}
-
-/* 카드 헤더 탭 */
-.card-header-tab {
-    display: flex;
-    border-bottom: 1px solid #eee;
-    padding: 0 24px;
-}
-
-.tab-item {
-    padding: 20px 0;
-    margin-right: 20px;
-    font-size: 15px;
-    cursor: pointer;
-    color: #868e96;
-    font-weight: bold;
-    position: relative;
-}
-
-.tab-item.active {
-    color: #333;
-}
-
-.tab-item.active::after {
-    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #333;
->>>>>>> Stashed changes
 }
 
 /* 폼 컨테이너 */
 .form-container {
-<<<<<<< Updated upstream
     padding: 30px;
 }
 .form-group {
@@ -328,61 +239,4 @@
 }
 .withdrawal-group .input-label {
     color: #dc3545;
-=======
-    padding: 30px 24px;
-    max-width: 600px; /* 폼이 너무 넓어지지 않게 제한 */
-}
-
-.form-group { margin-bottom: 30px; }
-
-.input-label {
-    display: block; font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #333;
-}
-
-/* 프로필 사진 영역 */
-.photo-wrapper {
-    display: flex; align-items: center; gap: 20px;
-}
-.current-photo {
-    width: 64px; height: 64px; background-color: #f2f4f6; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; font-size: 24px;
-}
-.photo-buttons button {
-    margin-right: 8px; padding: 6px 12px; border-radius: 4px; font-size: 13px; cursor: pointer;
-}
-.btn-upload { background: #fff; border: 1px solid #ddd; color: #333; }
-.btn-delete { background: #fff; border: 1px solid #ddd; color: #ff5d5d; }
-
-/* 입력 필드 */
-.input-field {
-    width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 15px;
-}
-.input-field:focus { outline: none; border-color: #00c4c4; }
-.input-field.read-only { background-color: #f8f9fa; color: #868e96; cursor: default; }
-.textarea-field { resize: none; height: 100px; }
-
-.input-guide { font-size: 12px; color: #868e96; margin-top: 6px; }
-
-.input-row { display: flex; gap: 10px; }
-.btn-outline {
-    white-space: nowrap; padding: 0 16px; border: 1px solid #ddd; background: #fff;
-    border-radius: 6px; font-size: 13px; cursor: pointer;
-}
-
-.divider { height: 1px; background-color: #eee; margin: 40px 0; }
-
-/* 버튼 그룹 */
-.btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
-.btn-save {
-    flex: 1; padding: 14px; background-color: #00c4c4; color: #fff; border: none;
-    border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer;
-}
-.btn-cancel {
-    flex: 1; padding: 14px; background-color: #fff; color: #333; border: 1px solid #ddd;
-    border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer;
-}
-
-.withdrawal-link {
-    text-align: right; font-size: 13px; color: #868e96; text-decoration: underline; cursor: pointer;
->>>>>>> Stashed changes
 }
