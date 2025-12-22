@@ -20,4 +20,5 @@ public class ProjectListServiceImpl implements ProjectListService {
     public ProjectList selectDetail(long productNo) {
         return projectListDao.selectDetail(sqlSession, productNo);
     }
+
 }

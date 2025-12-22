@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kh.foodding.project.model.service.ProjectListService;
 import com.kh.foodding.project.model.vo.ProjectList;
 
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("project")
@@ -27,4 +28,6 @@ public class ProjectListController {
         }
         return ResponseEntity.ok(detail);
     }
+
+    
 }

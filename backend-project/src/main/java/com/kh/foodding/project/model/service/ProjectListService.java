@@ -6,4 +6,5 @@ public interface ProjectListService{
 
     // 상세조회용
     ProjectList selectDetail(long productNo);
+
 }

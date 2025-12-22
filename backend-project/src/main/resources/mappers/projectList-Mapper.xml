@@ -20,6 +20,10 @@
         <result property="createDate" column="CREATE_DATE" />
         <result property="productYn" column="PRODUCT_YN" />
         <result property="sellerNo" column="SELLER_NO" />
+
+        <result property="optionName" column="OPTION_NAME"/>
+        <result property="optionContent" column="OPTION_CONTENT"/>
+        <result property="optionPrice" column="OPTION_PRICE"/>
     </resultMap>
 
     <select id="selectProject" parameterType="map" resultMap="projectResultSet">
@@ -44,5 +48,6 @@
         FROM PRODUCT
         WHERE PRODUCT_NO = #{productNo}
     </select>
+
 
 </mapper>
