@@ -184,7 +184,7 @@
 }
 
 .category-bar {
-  background-color: var(--surface);
+  background-color: transparent;
 }
 
 .category-bar__inner {
@@ -270,7 +270,7 @@
 }
 
 .hero {
-  background-color: var(--surface);
+  background-color: transparent;
   margin-bottom: 32px;
 }
 

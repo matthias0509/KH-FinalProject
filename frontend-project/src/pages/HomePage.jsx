@@ -6,7 +6,7 @@ import ProjectsSection from '../components/ProjectsSection';
 import RankSection from '../components/RankSection';
 import AppFooter from '../components/AppFooter';
 import { categories, projects, slides } from '../data/content';
-import MyPage from './MyPage';
+import Snowfall from 'react-snowfall'; // ❄️ 눈 효과 (주석 처리)
 
 export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState('전체');
@@ -23,39 +23,56 @@ export default function HomePage() {
   const isAllCategory = selectedCategory === '전체';
 
   return (
-    <div className="app">
-      <Header />
-      <CategoryBar
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelect={setSelectedCategory}
+    <div className="app" style={{ position: 'relative' }}>
+    
+      <Snowfall
+       color="#2883faff"
+        style={{
+          
+          position: 'fixed',
+          width: '100vw',
+          height: '100vh',
+          zIndex: 0,
+        }}
       />
-      
-      {isAllCategory && <HeroSlider slides={slides} />}
+     
 
-      <main className="main-content">
-        {isAllCategory ? (
-          <div className="home-grid">
+      {/* 실제 페이지 콘텐츠 */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        <Header />
+
+        <CategoryBar
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelect={setSelectedCategory}
+        />
+
+        {isAllCategory && <HeroSlider slides={slides} />}
+
+        <main className="main-content">
+          {isAllCategory ? (
+            <div className="home-grid">
+              <ProjectsSection
+                title="주목할 만한 프로젝트"
+                projects={filteredProjects}
+                variant="featured"
+                limit={6}
+                className="project-section"
+              />
+              <RankSection projects={rankedProjects} />
+            </div>
+          ) : (
             <ProjectsSection
-              title="주목할 만한 프로젝트"
+              title={`${selectedCategory} 프로젝트`}
+              count={filteredProjects.length}
               projects={filteredProjects}
-              variant="featured"
-              limit={6}
-              className="project-section"
+              variant="compact"
             />
-            <RankSection projects={rankedProjects} />
-          </div>
-        ) : (
-          <ProjectsSection
-            title={`${selectedCategory} 프로젝트`}
-            count={filteredProjects.length}
-            projects={filteredProjects}
-            variant="compact"
-          />
-        )}
-      </main>
+          )}
+        </main>
 
-      <AppFooter />
+        <AppFooter />
+      </div>
     </div>
   );
 }
