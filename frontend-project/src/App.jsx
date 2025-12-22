@@ -92,11 +92,11 @@ export default function App() {
       <Route path="/findid" element={<FindIdPage />} />
       <Route path="/resetpassword" element={<ResetPasswordPage />} />
       <Route path="/faq" element={<FAQPage />} />
-      <Route path="/notice/:id" element={<NoticeDetailPage />} />
       <Route path="/inquiry" element={<InquiryPage />} />
       <Route path="/inquiries" element={<InquiryHistoryPage />} />
-      <Route path="/noticewrite" element={<NoticeWritePage />} />
+      <Route path="/notice/write" element={<NoticeWritePage />} />
       <Route path="/logout" element={<LogoutPage />} />
+      <Route path="/notice/:noticeNo" element={<NoticeDetailPage />} />
 
       
       {/* 박주현 */}

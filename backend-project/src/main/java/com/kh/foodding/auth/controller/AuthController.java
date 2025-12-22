@@ -71,6 +71,10 @@ public class AuthController {
 			.claim("name", loginUser.getUserName()) // 회원의 이름
 		
 			.claim("role", loginUser.getUserRole()) // 회원의 권한
+			
+			.claim("userNo", loginUser.getUserNo())
+			
+			.claim("userRole", loginUser.getUserRole())
 		
 			.setIssuedAt(new Date()) // JWT 발급시간
 		

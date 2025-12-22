@@ -149,3 +149,62 @@
     /* 높이를 강제 지정하거나, 패딩으로 조절 */
     /* height: 48px;  // 높이 강제 지정 시 */
 }
+
+
+/* 페이징 컨테이너 */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    gap: 8px;
+    padding-bottom: 40px;
+}
+
+/* 네비게이션 버튼 (<<, <, >, >>) */
+.nav-btn {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    color: #555;
+    transition: all 0.2s ease;
+}
+
+.nav-btn:hover:not(:disabled) {
+    background-color: #f8f9fa;
+    border-color: #bbb;
+}
+
+.nav-btn:disabled {
+    cursor: default;
+    opacity: 0.4;
+    background-color: #f4f4f4;
+}
+
+/* 숫자 페이지 버튼 */
+.page-btn {
+    padding: 6px 14px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    min-width: 40px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.page-btn:hover {
+    background-color: #f1f1f1;
+}
+
+/* 활성화된(현재) 페이지 버튼 */
+.page-btn.active {
+    background-color: var(--accent); /* 기존에 설정한 강조 색상 변수 */
+    color: white;
+    border-color: var(--accent);
+    font-weight: 700;
+}
+
