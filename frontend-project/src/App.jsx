@@ -9,7 +9,7 @@ import CreateProjectPage from './pages/CreateProjectPage/CreateProjectPage';
 import CreateProjectSuccessPage from './pages/CreateProjectPage/CreateProjectSuccessPage';
 import ImbakPage from './pages/ImbakPage';
 import SearchPage from './pages/SearchPage';
-import ProductDetailPage from './pages/ProductDetailPage';
+import ProductDetailPage from './pages/DetailPage/ProductDetailPage';
 import ChangePage from './pages/ChangePage';
 
 // 박성진
@@ -75,7 +75,7 @@ export default function App() {
       <Route path="/create/success" element={<CreateProjectSuccessPage />} />
       <Route path='/imbak' element={<ImbakPage/> }/>
       <Route path="/search" element={<SearchPage />} />
-      <Route path="/projects/:projectNo" element={<ProductDetailPage />} />
+      <Route path="/projects/:ProjectNo" element={<ProductDetailPage />} />
       {/* path="/projects/:slug 예정 각 상품별 상세페이지 */}
       <Route path='/change' element={<ChangePage/>}/>
       <Route path="/payment" element={<PaymentComponent />}/>

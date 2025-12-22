@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="projectListMapper">
+
+    <resultMap id="projectResultSet" type="com.kh.foodding.project.model.vo.ProjectList">
+        <id property="productNo" column="PRODUCT_NO" />
+        <result property="productTitle" column="PRODUCT_TITLE" />
+        <result property="productDesc" column="PRODUCT_DESC" />
+        <result property="storyHtml" column="STORY_HTML" />
+        <result property="storyJson" column="STORY_JSON" />
+        <result property="targetAmount" column="TARGET_AMOUNT" />
+        <result property="currentAmount" column="CURRENT_AMOUNT" />
+        <result property="fundStartDate" column="FUND_START_DATE" />
+        <result property="fundEndDate" column="FUND_END_DATE" />
+        <result property="shipStartDate" column="SHIP_START_DATE" />
+        <result property="productStatus" column="PRODUCT_STATUS" />
+        <result property="category" column="CATEGORY" />
+        <result property="originThumbnail" column="ORIGIN_THUMBNAIL" />
+        <result property="modifyThumbnail" column="MODIFY_THUMBNAIL" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="productYn" column="PRODUCT_YN" />
+        <result property="sellerNo" column="SELLER_NO" />
+    </resultMap>
+
+    <select id="selectProject" parameterType="map" resultMap="projectResultSet">
+        SELECT
+            PRODUCT_NO,
+            PRODUCT_TITLE,
+            PRODUCT_DESC,
+            STORY_HTML,
+            STORY_JSON,
+            TARGET_AMOUNT,
+            CURRENT_AMOUNT,
+            FUND_START_DATE,
+            FUND_END_DATE,
+            SHIP_START_DATE,
+            PRODUCT_STATUS,
+            CATEGORY,
+            ORIGIN_THUMBNAIL,
+            MODIFY_THUMBNAIL,
+            CREATE_DATE,
+            PRODUCT_YN,
+            SELLER_NO
+        FROM PRODUCT
+        WHERE PRODUCT_NO = #{productNo}
+    </select>
+
+</mapper>

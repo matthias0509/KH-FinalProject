@@ -1,13 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Heart } from 'lucide-react';
-import Header from '../components/Header';
-import AppFooter from '../components/AppFooter';
+import Header from '../../components/Header';
+import AppFooter from '../../components/AppFooter';
 
 import { useNavigate, useParams } from 'react-router-dom';
+import { fetchProjectAxios } from './DetailApi';
+import { useEffect } from 'react';
+import { toast } from 'react-toastify';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 
-const projectInit = {
+
+
+  let projectInit = {
   projectNo: '',
   productTitle: '',
   productDesc: '',
@@ -43,6 +48,73 @@ const projectInit = {
   rewards: [],
 };
 
+const API_BASE_URL = 'http://localhost:8001/foodding';
+
+const stripHtml = (value = '') => value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+const resolveThumbnailUrl = (path = '') => {
+  if (!path) return projectInit.heroImage;
+  if (path.startsWith('http')) {
+    return path;
+  }
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE_URL}${normalized}`;
+};
+
+const normalizeProjectDetail = (data = {}) => {
+  const targetAmount = Number(data.targetAmount) || 0;
+  const currentAmount = Number(data.currentAmount) || 0;
+  const percent = targetAmount ? Math.round((currentAmount / targetAmount) * 100) : 0;
+  const today = new Date();
+  const endDate = data.fundEndDate ? new Date(data.fundEndDate) : null;
+  const daysLeft = endDate ? Math.max(0, Math.ceil((endDate - today) / (1000 * 60 * 60 * 24))) : 0;
+
+  const timeline = [
+    data.fundStartDate && {
+      title: '펀딩 시작',
+      date: data.fundStartDate,
+      description: '프로젝트 펀딩이 시작되었습니다.',
+    },
+    data.fundEndDate && {
+      title: '펀딩 종료',
+      date: data.fundEndDate,
+      description: '펀딩이 종료되는 날짜입니다.',
+    },
+    data.shipStartDate && {
+      title: '배송 시작',
+      date: data.shipStartDate,
+      description: '리워드 배송이 시작되는 예정일입니다.',
+    },
+  ].filter(Boolean);
+
+  const storyBlocks = data.storyHtml
+    ? [
+        {
+          heading: data.productTitle ?? '프로젝트 스토리',
+          body: [stripHtml(data.storyHtml) || '프로젝트 소개 내용이 등록되었습니다.'],
+        },
+      ]
+    : projectInit.story;
+
+  return {
+    ...projectInit,
+    ...data,
+    title: data.productTitle ?? projectInit.title,
+    subtitle: data.productDesc ?? projectInit.subtitle,
+    heroImage: resolveThumbnailUrl(data.modifyThumbnail || data.originThumbnail),
+    funding: {
+      ...projectInit.funding,
+      goal: targetAmount,
+      raised: currentAmount,
+      percent,
+      daysLeft,
+    },
+    story: storyBlocks,
+    timeline: timeline.length ? timeline : projectInit.timeline,
+  };
+};
+
+
 export default function ProductDetailPage() {
 
 
@@ -70,6 +142,7 @@ export default function ProductDetailPage() {
     (currentReviewPage - 1) * REVIEWS_PER_PAGE,
     currentReviewPage * REVIEWS_PER_PAGE,
   );
+
 
 
   const { ProjectNo } = useParams();
@@ -114,91 +187,51 @@ export default function ProductDetailPage() {
 
   // 클릭 시 채팅 나옴
   const handleOpenChat = () => {
-  const width = 400;
-  const height = 650;
-  const left = window.screen.width - width - 100;
-  const top = (window.screen.height - height) / 2;
-  
-  // 강호형
-  const chatWindow = window.open(
-    `/chat`,
-    'ChatWindow',
-    `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no`
-  );
-  
-  // 창이 로드되면 데이터 전달
-  chatWindow.onload = () => {
-    chatWindow.postMessage({
-      type: 'CREATOR_DATA',
-      creator: project.creator
-    }, window.location.origin);
+    const width = 400;
+    const height = 650;
+    const left = window.screen.width - width - 100;
+    const top = (window.screen.height - height) / 2;
+
+    // 강호형
+    const chatWindow = window.open(
+      `/chat`,
+      'ChatWindow',
+      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no`
+    );
+
+    // 창이 로드되면 데이터 전달
+    chatWindow.onload = () => {
+      chatWindow.postMessage(
+        {
+          type: 'CREATOR_DATA',
+          creator: project.creator,
+        },
+        window.location.origin,
+      );
+    };
   };
-};
 
+  // 처음에 출력 될 정보 useEffect사용
   useEffect(() => {
-    if (!ProjectNo) return;
+    if (!ProjectNo) {
+      return;
+    }
 
-    const fetchProject = async () => {
+    const api = async () => {
       try {
-        const res = await fetch(`/api/projects/${ProjectNo}`);
-        if (!res.ok) throw new Error('Failed to load project');
-        const data = await res.json();
-
-        const targetAmount = Number(data.TARGET_AMOUNT ?? 0);
-        const currentAmount = Number(data.CURRENT_AMOUNT ?? 0);
-        const fundEndDate = data.FUND_END_DATE ? new Date(data.FUND_END_DATE) : null;
-        const today = new Date();
-        const daysLeft = fundEndDate
-          ? Math.max(0, Math.ceil((fundEndDate - today) / (1000 * 60 * 60 * 24)))
-          : 0;
-
-        const normalized = {
-          projectNo: data.PRODUCT_NO ?? '',
-          productTitle: data.PRODUCT_TITLE ?? '',
-          productDesc: data.PRODUCT_DESC ?? '',
-          storyHtml: data.STORY_HTML ?? '',
-          storyJson: data.STORY_JSON ?? '',
-          targetAmount,
-          currentAmount,
-          fundStartDate: data.FUND_START_DATE ?? '',
-          fundEndDate: data.FUND_END_DATE ?? '',
-          shipStartDate: data.SHIP_START_DATE ?? '',
-          productStatus: data.PRODUCT_STATUS ?? '',
-          category: data.CATEGORY ?? '',
-          originThumbnail: data.ORIGIN_THUMBNAIL ?? '',
-          modifyThumbnail: data.MODIFY_THUMBNAIL ?? '',
-          createDate: data.CREATE_DATE ?? '',
-          productYn: data.PRODUCT_YN ?? '',
-          sellerNo: data.SELLER_NO ?? '',
-          heroImage: data.MODIFY_THUMBNAIL ?? data.ORIGIN_THUMBNAIL ?? '',
-          title: data.PRODUCT_TITLE ?? '',
-          subtitle: data.PRODUCT_DESC ?? '',
-          funding: {
-            goal: targetAmount,
-            raised: currentAmount,
-            percent: targetAmount ? Math.round((currentAmount / targetAmount) * 100) : 0,
-            backers: Number(data.BACKER_COUNT ?? 0),
-            daysLeft,
-          },
-        };
-
-        setProject((prev) => ({
-          ...prev,
-          ...normalized,
-          creator: {
-            ...prev.creator,
-            name: data.SELLER_NAME ?? prev.creator.name,
-            avatar: data.MODIFY_THUMBNAIL ?? data.ORIGIN_THUMBNAIL ?? prev.creator.avatar,
-            profileImage: data.MODIFY_THUMBNAIL ?? prev.creator.profileImage,
-          },
-        }));
-      } catch (err) {
-        console.error(err);
+        const item = await fetchProjectAxios(ProjectNo);
+        if (!item || !item.productNo) {
+          toast.info('이미 삭제되거나 없는 프로젝트입니다.');
+          navigate('/');
+          return;
+        }
+        setProject(normalizeProjectDetail(item));
+      } catch (error) {
+        toast.error('프로젝트 정보를 불러오지 못했습니다.');
       }
     };
-
-    fetchProject();
-  }, [ProjectNo]);
+    api();
+  }, [ProjectNo, navigate]);
 
   return (
     <div className="app">

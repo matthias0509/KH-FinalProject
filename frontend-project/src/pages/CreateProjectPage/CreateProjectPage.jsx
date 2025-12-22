@@ -680,6 +680,7 @@ export default function CreateProjectPage() {
                 onChange={handleImageChange}
                 required={!formData.heroImage}
               />
+              <p>620*420 사이즈 권장</p>
               {formData.heroImage ? (
                 <div className="image-preview">
                   <img src={formData.heroImage} alt="대표 이미지 미리보기" />
