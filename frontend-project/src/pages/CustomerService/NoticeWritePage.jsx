@@ -73,7 +73,7 @@ export default function NoticeWritePage() {
                     </div>
                     <div style={{ marginTop: '30px', display: 'flex', gap: '10px' }}>
                         <SubmitButton isLoading={isLoading} style={{ flex: 1 }}>등록하기</SubmitButton>
-                        <button type="button" onClick={() => navigate('/cs/notice')} style={{ flex: 1, backgroundColor: '#ccc', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 'bold' }}>취소</button>
+                        <button type="button" onClick={() => navigate('/notice')} style={{ minWidth: '100px', backgroundColor: '#ccc', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>취소</button>
                     </div>
                 </form>
             </CSLayout>
