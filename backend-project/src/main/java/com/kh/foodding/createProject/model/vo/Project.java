@@ -47,7 +47,7 @@ public class Project {
 
     private BigDecimal currentAmount;      // 현재까지 모금된 금액 0원
     
-    private String Status;                  // 프로젝트 상태 임시저장/제출/승인
+    private String status;                  // 프로젝트 상태 임시저장/제출/승인
 
     
 

@@ -19,6 +19,8 @@
         <typeAlias type="com.kh.foodding.payment.model.vo.Orders" alias="Orders"/>
         <typeAlias type="com.kh.foodding.payment.model.vo.OrderDetail" alias="OrderDetail"/>
         
+        <typeAlias type="com.kh.foodding.notice.model.vo.Notice" alias="notice" />
+        
         <package name="com.kh.foodding" />
         
     </typeAliases>

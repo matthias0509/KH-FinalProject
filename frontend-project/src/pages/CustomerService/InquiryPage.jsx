@@ -7,101 +7,91 @@ import { useNavigate } from "react-router-dom";
 import InquiryTypeSelect from "../../components/CustomerService/InquiryTypeSelect";
 import InputField from "../../components/Login/InputField";
 import SubmitButton from "../../components/Login/SubmitButton";
+import axios from "axios";
 
 export default function InquiryPage() {
     const [form, setForm] = useState({
-        inquiryType: '',
-        title: '',
-        content: '',
-        contactEmail: '', // 답변 받을 이메일
+        qnaTitle: '',    // 💡 VO 필드명과 일치시킴
+        qnaContent: '',  // 💡 VO 필드명과 일치시킴
     });
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
+        // id를 qnaTitle, qnaContent로 설정해야 함
         setForm({ ...form, [e.target.id]: e.target.value });
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!form.inquiryType) {
-            alert("문의 유형을 선택해 주세요.");
+        
+        const token = sessionStorage.getItem("loginUser");
+        if (!token) {
+            alert("로그인 정보가 없습니다. 다시 로그인 해주세요.");
+            navigate('/login');
             return;
         }
 
         setIsLoading(true);
-        console.log('1:1 문의 제출 데이터:', form);
 
-        // TODO: 여기에 Spring Boot 백엔드 API 호출 로직 구현
-        // fetch('/api/inquiry', { method: 'POST', body: JSON.stringify(form) });
+        try {
+            const response = await axios({
+                url: 'http://localhost:8001/foodding/inquiry/insert',
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}` // 💡 전달받은 인증 방식 적용
+                },
+                data: form
+            });
 
-        // API 통신 시뮬레이션
-        await new Promise(resolve => setTimeout(resolve, 1500)); 
-        
-        setIsLoading(false);
-        
-        // 성공 후 처리
-        alert('문의가 성공적으로 접수되었습니다. 빠른 시일 내에 답변드리겠습니다.');
-        navigate('/cs/faq'); // FAQ 페이지로 이동하거나, 문의 확인 페이지로 이동
+            if (response.data === "success") {
+                alert('문의가 성공적으로 접수되었습니다.');
+                navigate('/inquiries');
+            } else {
+                alert('접수 중 오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('문의 접수 에러:', error);
+            alert('인증이 만료되었거나 서버 통신 오류가 발생했습니다.');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
         <div className="app">
             <Header />
-                <CSLayout title="1:1 문의하기">
-                    <p style={{ marginBottom: '25px', color: '#666', textAlign: 'center' }}>
-                        궁금한 점을 자세히 남겨주시면, 담당자가 확인 후 답변드리겠습니다.
-                    </p>
-
-                    <form onSubmit={handleSubmit} className="inquiry-form">
-                        
-                        {/* 1. 문의 유형 선택 (새 컴포넌트) */}
-                        <InquiryTypeSelect 
-                            value={form.inquiryType} 
-                            onChange={handleChange} 
-                        />
-
-                        {/* 2. 제목 입력 */}
-                        <InputField
-                            label="제목"
-                            id="title"
-                            value={form.title}
+            <CSLayout title="1:1 문의하기">
+                <form onSubmit={handleSubmit} className="inquiry-form">
+                    {/* InquiryTypeSelect는 기존대로 사용 */}
+                    
+                    <InputField
+                        label="제목"
+                        id="qnaTitle" // 💡 VO 필드명과 일치
+                        value={form.qnaTitle}
+                        onChange={handleChange}
+                        placeholder="문의 제목을 입력하세요"
+                        required
+                    />
+                    
+                    <div className="input-field-group">
+                        <label htmlFor="qnaContent" className="textarea-label">내용</label>
+                        <textarea
+                            id="qnaContent" // 💡 VO 필드명과 일치
+                            className="textarea-input"
+                            value={form.qnaContent}
                             onChange={handleChange}
-                            placeholder="문의 제목을 입력하세요"
+                            rows="10"
+                            placeholder="문의 내용을 자세히 작성해 주세요."
                             required
                         />
-                        
-                        {/* 3. 내용 입력 (Textarea 스타일 적용) */}
-                        <div className="input-field-group">
-                            <label htmlFor="content" className="textarea-label">내용</label>
-                            <textarea
-                                id="content"
-                                className="textarea-input"
-                                value={form.content}
-                                onChange={handleChange}
-                                rows="10"
-                                placeholder="문의 내용을 자세히 작성해 주세요."
-                                required
-                            />
-                        </div>
+                    </div>
 
-                        {/* 4. 회신 이메일 (선택 사항) */}
-                        <InputField
-                            label="회신 이메일 주소 (선택)"
-                            type="email"
-                            id="contactEmail"
-                            value={form.contactEmail}
-                            onChange={handleChange}
-                            placeholder="답변 받을 이메일 주소"
-                        />
-
-                        {/* 5. 제출 버튼 (주황색 스타일 활용) */}
-                        <div style={{ marginTop: '30px' }}>
-                            <SubmitButton isLoading={isLoading}>문의 접수하기</SubmitButton>
-                        </div>
-                    </form>
-                </CSLayout>
+                    <div style={{ marginTop: '30px' }}>
+                        <SubmitButton isLoading={isLoading}>문의 접수하기</SubmitButton>
+                    </div>
+                </form>
+            </CSLayout>
             <AppFooter />
         </div>
     );
