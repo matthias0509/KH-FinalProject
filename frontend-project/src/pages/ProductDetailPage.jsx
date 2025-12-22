@@ -1,17 +1,58 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Heart } from 'lucide-react';
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
-import { premiumMacaronDetail } from '../data/content';
 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 
+const projectInit = {
+  projectNo: '',
+  productTitle: '',
+  productDesc: '',
+  storyHtml: '',
+  storyJson: '',
+  targetAmount: 0,
+  currentAmount: 0,
+  fundStartDate: '',
+  fundEndDate: '',
+  shipStartDate: '',
+  productStatus: '',
+  category: '',
+  originThumbnail: '',
+  modifyThumbnail: '',
+  createDate: '',
+  productYn: '',
+  sellerNo: '',
+  heroImage: '',
+  title: '',
+  subtitle: '',
+  funding: {
+    goal: 0,
+    raised: 0,
+    percent: 0,
+    backers: 0,
+    daysLeft: 0,
+  },
+  creator: { name: '', profileImage: '', avatar: '', followers: 0 },
+  reviews: [],
+  story: [],
+  timeline: [],
+  faqs: [],
+  rewards: [],
+};
+
 export default function ProductDetailPage() {
-  const project = premiumMacaronDetail;
+
+
+  // 프로젝트에 들어갈 정보들
+  const [project, setProject] = useState(projectInit);
+  //
   const REVIEWS_PER_PAGE = 5;
-  const progressRate = Math.round((project.funding.raised / project.funding.goal) * 100);
+  const fundingGoal = project.funding.goal || 0;
+  const fundingRaised = project.funding.raised || 0;
+  const progressRate = fundingGoal ? Math.round((fundingRaised / fundingGoal) * 100) : 0;
   const progressWidth = Math.min(progressRate, 100);
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -30,16 +71,25 @@ export default function ProductDetailPage() {
     currentReviewPage * REVIEWS_PER_PAGE,
   );
 
+
+  const { ProjectNo } = useParams();
+  // console.log(ProjectNo);
+
   const navigate = useNavigate();
 
+  // 좋아요 기능 추가 예정
   const toggleLike = () => {
     setIsLiked((prev) => !prev);
   };
 
+
+  // 팔로우 기능 추가 예정
   const toggleFollow = () => {
     setIsFollowing((prev) => !prev);
   };
 
+
+  // 후기 이동
   const handleTabSelect = (tabId) => {
     setActiveDetailTab(tabId);
     if (tabId === 'reviews') {
@@ -47,25 +97,29 @@ export default function ProductDetailPage() {
     }
   };
 
-
+  // 판매자 프로필로 이동기능 넣을 예정
   const handleCreatorProfileClick = () => {
     console.log('Creator profile clicked');
   };
 
+  // 후원하기 버튼 클릭 시 아래 후원 옵션 선택창으로 이동
   const handleDonateClick = () => {
     rewardSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // 강호형
   const handlePayment= () => {
     navigate('/payment')
   }
 
+  // 클릭 시 채팅 나옴
   const handleOpenChat = () => {
   const width = 400;
   const height = 650;
   const left = window.screen.width - width - 100;
   const top = (window.screen.height - height) / 2;
   
+  // 강호형
   const chatWindow = window.open(
     `/chat`,
     'ChatWindow',
@@ -80,6 +134,71 @@ export default function ProductDetailPage() {
     }, window.location.origin);
   };
 };
+
+  useEffect(() => {
+    if (!ProjectNo) return;
+
+    const fetchProject = async () => {
+      try {
+        const res = await fetch(`/api/projects/${ProjectNo}`);
+        if (!res.ok) throw new Error('Failed to load project');
+        const data = await res.json();
+
+        const targetAmount = Number(data.TARGET_AMOUNT ?? 0);
+        const currentAmount = Number(data.CURRENT_AMOUNT ?? 0);
+        const fundEndDate = data.FUND_END_DATE ? new Date(data.FUND_END_DATE) : null;
+        const today = new Date();
+        const daysLeft = fundEndDate
+          ? Math.max(0, Math.ceil((fundEndDate - today) / (1000 * 60 * 60 * 24)))
+          : 0;
+
+        const normalized = {
+          projectNo: data.PRODUCT_NO ?? '',
+          productTitle: data.PRODUCT_TITLE ?? '',
+          productDesc: data.PRODUCT_DESC ?? '',
+          storyHtml: data.STORY_HTML ?? '',
+          storyJson: data.STORY_JSON ?? '',
+          targetAmount,
+          currentAmount,
+          fundStartDate: data.FUND_START_DATE ?? '',
+          fundEndDate: data.FUND_END_DATE ?? '',
+          shipStartDate: data.SHIP_START_DATE ?? '',
+          productStatus: data.PRODUCT_STATUS ?? '',
+          category: data.CATEGORY ?? '',
+          originThumbnail: data.ORIGIN_THUMBNAIL ?? '',
+          modifyThumbnail: data.MODIFY_THUMBNAIL ?? '',
+          createDate: data.CREATE_DATE ?? '',
+          productYn: data.PRODUCT_YN ?? '',
+          sellerNo: data.SELLER_NO ?? '',
+          heroImage: data.MODIFY_THUMBNAIL ?? data.ORIGIN_THUMBNAIL ?? '',
+          title: data.PRODUCT_TITLE ?? '',
+          subtitle: data.PRODUCT_DESC ?? '',
+          funding: {
+            goal: targetAmount,
+            raised: currentAmount,
+            percent: targetAmount ? Math.round((currentAmount / targetAmount) * 100) : 0,
+            backers: Number(data.BACKER_COUNT ?? 0),
+            daysLeft,
+          },
+        };
+
+        setProject((prev) => ({
+          ...prev,
+          ...normalized,
+          creator: {
+            ...prev.creator,
+            name: data.SELLER_NAME ?? prev.creator.name,
+            avatar: data.MODIFY_THUMBNAIL ?? data.ORIGIN_THUMBNAIL ?? prev.creator.avatar,
+            profileImage: data.MODIFY_THUMBNAIL ?? prev.creator.profileImage,
+          },
+        }));
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchProject();
+  }, [ProjectNo]);
 
   return (
     <div className="app">

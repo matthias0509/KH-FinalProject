@@ -75,7 +75,7 @@ export default function App() {
       <Route path="/create/success" element={<CreateProjectSuccessPage />} />
       <Route path='/imbak' element={<ImbakPage/> }/>
       <Route path="/search" element={<SearchPage />} />
-      <Route path="/projects/premium-macarons" element={<ProductDetailPage />} />
+      <Route path="/projects/:projectNo" element={<ProductDetailPage />} />
       {/* path="/projects/:slug 예정 각 상품별 상세페이지 */}
       <Route path='/change' element={<ChangePage/>}/>
       <Route path="/payment" element={<PaymentComponent />}/>
