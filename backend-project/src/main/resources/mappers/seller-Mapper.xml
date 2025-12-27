@@ -23,4 +23,19 @@
         )
     </insert>
 
+    <select id="selectSellerProfile" parameterType="long" resultType="com.kh.foodding.project.model.vo.SellerProfile">
+        SELECT
+            sp.SELLER_NO,
+            sp.USER_NO,
+            sp.INTRODUCTION,
+            u.USER_NAME AS sellerName,
+            u.NICKNAME,
+            u.EMAIL,
+            u.PHONE,
+            u.MODIFY_PROFILE AS profileImage
+        FROM SELLER_PROFILE sp
+        JOIN TB_USER u ON sp.USER_NO = u.USER_NO
+        WHERE sp.SELLER_NO = #{sellerNo}
+    </select>
+
 </mapper>

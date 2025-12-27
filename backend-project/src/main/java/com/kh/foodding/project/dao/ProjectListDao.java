@@ -37,4 +37,5 @@ public class ProjectListDao {
         params.put("productYn", productYn);
         return sqlSession.update("projectListMapper.updateProductVisibility", params);
     }
+
 }

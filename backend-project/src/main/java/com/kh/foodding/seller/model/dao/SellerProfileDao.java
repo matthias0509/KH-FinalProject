@@ -6,6 +6,8 @@ import java.util.Map;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
+import com.kh.foodding.project.model.vo.SellerProfile;
+
 @Repository
 public class SellerProfileDao {
 
@@ -26,5 +28,12 @@ public class SellerProfileDao {
         sqlSession.insert("sellerMapper.insertSellerProfile", params);
         Object sellerNo = params.get("sellerNo");
         return sellerNo instanceof Number ? ((Number) sellerNo).longValue() : null;
+    }
+
+    public SellerProfile selectSellerProfile(SqlSessionTemplate sqlSession, Long sellerNo) {
+        if (sellerNo == null) {
+            return null;
+        }
+        return sqlSession.selectOne("sellerMapper.selectSellerProfile", sellerNo);
     }
 }

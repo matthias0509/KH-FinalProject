@@ -1386,6 +1386,19 @@
   margin-top: 4px;
 }
 
+.detail-creator__intro {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.detail-creator__contact {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: #2563eb;
+}
+
 .detail-creator__actions {
   display: flex;
   gap: 8px;

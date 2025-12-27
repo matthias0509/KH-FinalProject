@@ -19,34 +19,51 @@
         <result property="modifyThumbnail" column="MODIFY_THUMBNAIL" />
         <result property="createDate" column="CREATE_DATE" />
         <result property="productYn" column="PRODUCT_YN" />
-        <result property="sellerNo" column="SELLER_NO" />
+        <result property="sellerNo" column="PRODUCT_SELLER_NO" />
 
-        <result property="optionName" column="OPTION_NAME"/>
-        <result property="optionContent" column="OPTION_CONTENT"/>
-        <result property="optionPrice" column="OPTION_PRICE"/>
+        <association property="sellerProfile" javaType="com.kh.foodding.project.model.vo.SellerProfile">
+            <id property="sellerNo" column="SP_SELLER_NO" />
+            <result property="userNo" column="SP_USER_NO" />
+            <result property="introduction" column="SELLER_INTRODUCTION" />
+            <result property="sellerName" column="SELLER_NAME" />
+            <result property="nickname" column="SELLER_NICKNAME" />
+            <result property="email" column="SELLER_EMAIL" />
+            <result property="phone" column="SELLER_PHONE" />
+            <result property="profileImage" column="SELLER_PROFILE_IMAGE" />
+        </association>
     </resultMap>
 
     <select id="selectProject" parameterType="map" resultMap="projectResultSet">
         SELECT
-            PRODUCT_NO,
-            PRODUCT_TITLE,
-            PRODUCT_DESC,
-            STORY_HTML,
-            STORY_JSON,
-            TARGET_AMOUNT,
-            CURRENT_AMOUNT,
-            FUND_START_DATE,
-            FUND_END_DATE,
-            SHIP_START_DATE,
-            PRODUCT_STATUS,
-            CATEGORY,
-            ORIGIN_THUMBNAIL,
-            MODIFY_THUMBNAIL,
-            CREATE_DATE,
-            PRODUCT_YN,
-            SELLER_NO
-        FROM PRODUCT
-        WHERE PRODUCT_NO = #{productNo}
+            p.PRODUCT_NO,
+            p.PRODUCT_TITLE,
+            p.PRODUCT_DESC,
+            p.STORY_HTML,
+            p.STORY_JSON,
+            p.TARGET_AMOUNT,
+            p.CURRENT_AMOUNT,
+            p.FUND_START_DATE,
+            p.FUND_END_DATE,
+            p.SHIP_START_DATE,
+            p.PRODUCT_STATUS,
+            p.CATEGORY,
+            p.ORIGIN_THUMBNAIL,
+            p.MODIFY_THUMBNAIL,
+            p.CREATE_DATE,
+            p.PRODUCT_YN,
+            p.SELLER_NO AS PRODUCT_SELLER_NO,
+            sp.SELLER_NO AS SP_SELLER_NO,
+            sp.USER_NO AS SP_USER_NO,
+            sp.INTRODUCTION AS SELLER_INTRODUCTION,
+            u.USER_NAME AS SELLER_NAME,
+            u.NICKNAME AS SELLER_NICKNAME,
+            u.EMAIL AS SELLER_EMAIL,
+            u.PHONE AS SELLER_PHONE,
+            u.MODIFY_PROFILE AS SELLER_PROFILE_IMAGE
+        FROM PRODUCT p
+        LEFT JOIN SELLER_PROFILE sp ON p.SELLER_NO = sp.SELLER_NO
+        LEFT JOIN TB_USER u ON sp.USER_NO = u.USER_NO
+        WHERE p.PRODUCT_NO = #{productNo}
     </select>
 
     <select id="selectRecentProjects" parameterType="map" resultMap="projectResultSet">
@@ -69,7 +86,7 @@
                 MODIFY_THUMBNAIL,
                 CREATE_DATE,
                 PRODUCT_YN,
-                SELLER_NO
+                SELLER_NO AS PRODUCT_SELLER_NO
             FROM PRODUCT
             WHERE PRODUCT_YN = 'Y' OR PRODUCT_YN IS NULL
             ORDER BY CREATE_DATE DESC
@@ -95,7 +112,7 @@
             MODIFY_THUMBNAIL,
             CREATE_DATE,
             PRODUCT_YN,
-            SELLER_NO
+            SELLER_NO AS PRODUCT_SELLER_NO
         FROM PRODUCT
         <where>
             <if test="status != null and status != '' and status != 'ALL'">

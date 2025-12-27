@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.kh.foodding.project.dao.ProjectListDao;
 import com.kh.foodding.project.model.vo.ProjectList;
+import com.kh.foodding.seller.model.dao.SellerProfileDao;
 
 @Service
 public class ProjectListServiceImpl implements ProjectListService {
@@ -18,9 +19,19 @@ public class ProjectListServiceImpl implements ProjectListService {
     @Autowired
     private SqlSessionTemplate sqlSession;
 
+    @Autowired
+    private SellerProfileDao sellerProfileDao;
+
     @Override
     public ProjectList selectDetail(long productNo) {
-        return projectListDao.selectDetail(sqlSession, productNo);
+        ProjectList detail = projectListDao.selectDetail(sqlSession, productNo);
+        if (detail == null) {
+            return null;
+        }
+        if (detail.getSellerNo() != null) {
+            detail.setSellerProfile(sellerProfileDao.selectSellerProfile(sqlSession, detail.getSellerNo()));
+        }
+        return detail;
     }
 
     @Override

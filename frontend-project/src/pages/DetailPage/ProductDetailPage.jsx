@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
+const DEFAULT_AVATAR = 'https://placehold.co/80x80?text=Maker';
 
 
 
@@ -41,7 +42,7 @@ const currencyFormatter = new Intl.NumberFormat('ko-KR');
     backers: 0,
     daysLeft: 0,
   },
-  creator: { name: '', profileImage: '', avatar: '', followers: 0 },
+  creator: { name: '메이커', profileImage: DEFAULT_AVATAR, avatar: DEFAULT_AVATAR, followers: 0 },
   reviews: [],
   story: [],
   timeline: [],
@@ -51,6 +52,30 @@ const currencyFormatter = new Intl.NumberFormat('ko-KR');
 
 const stripHtml = (value = '') => value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
+const mapCreatorFromSeller = (seller) => {
+  if (!seller) {
+    return {
+      name: '메이커',
+      profileImage: DEFAULT_AVATAR,
+      avatar: DEFAULT_AVATAR,
+      followers: 0,
+      introduction: '',
+      email: '',
+      phone: '',
+    };
+  }
+  const avatar = resolveProjectImageUrl(seller.profileImage) || DEFAULT_AVATAR;
+  return {
+    name: seller.nickname || seller.sellerName || '메이커',
+    profileImage: avatar,
+    avatar,
+    followers: seller.followers ?? 0,
+    introduction: seller.introduction ?? '',
+    email: seller.email ?? '',
+    phone: seller.phone ?? '',
+  };
+};
+
 const normalizeProjectDetail = (data = {}) => {
   const targetAmount = Number(data.targetAmount) || 0;
   const currentAmount = Number(data.currentAmount) || 0;
@@ -58,6 +83,7 @@ const normalizeProjectDetail = (data = {}) => {
   const today = new Date();
   const endDate = data.fundEndDate ? new Date(data.fundEndDate) : null;
   const daysLeft = endDate ? Math.max(0, Math.ceil((endDate - today) / (1000 * 60 * 60 * 24))) : 0;
+  const creator = mapCreatorFromSeller(data.sellerProfile);
 
   const timeline = [
     data.fundStartDate && {
@@ -104,6 +130,7 @@ const normalizeProjectDetail = (data = {}) => {
     },
     story: storyBlocks,
     timeline: timeline.length ? timeline : projectInit.timeline,
+    creator: creator ?? projectInit.creator,
   };
 };
 
@@ -438,6 +465,12 @@ export default function ProductDetailPage() {
                   <span className="detail-creator__followers">
                     팔로워 {project.creator.followers.toLocaleString()}명
                   </span>
+                  {project.creator.introduction && (
+                    <p className="detail-creator__intro">{project.creator.introduction}</p>
+                  )}
+                  {project.creator.email && (
+                    <span className="detail-creator__contact">{project.creator.email}</span>
+                  )}
                 </div>
               </button>
               <div className="detail-creator__actions">
