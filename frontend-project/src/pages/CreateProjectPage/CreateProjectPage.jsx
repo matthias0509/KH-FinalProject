@@ -9,6 +9,7 @@ import { categories } from '../../data/content';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { getLoginUserNo } from '../../utils/auth';
+import { fetchSellerProfileStatus } from '../../api/sellerApplicationApi';
 
 import { imsiProjectAxios, insertProjectAxios, fetchDraftDetailAxios, uploadThumbnailAxios } from './ProjectApi';
 import DatePickerField from '../../components/DatePickerField';
@@ -101,6 +102,8 @@ export default function CreateProjectPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [userNo] = useState(() => getLoginUserNo());
+  const [hasSellerProfile, setHasSellerProfile] = useState(false);
+  const [checkingSeller, setCheckingSeller] = useState(true);
   const draftId = searchParams.get('draft');
   const storyImageInputRef = useRef(null);
   const basicsRef = useRef(null);
@@ -176,6 +179,45 @@ export default function CreateProjectPage() {
     const { name, value } = event.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+    if (!userNo) {
+      toast.error('로그인 후 이용해 주세요.');
+      navigate('/login');
+      return;
+    }
+
+    let cancelled = false;
+    const checkSeller = async () => {
+      try {
+        setCheckingSeller(true);
+        const status = await fetchSellerProfileStatus(userNo);
+        if (!cancelled) {
+          setHasSellerProfile(status);
+          if (!status) {
+            toast.error('판매자 전환 승인 후 이용해 주세요.');
+            navigate('/change');
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setHasSellerProfile(false);
+          toast.error('판매자 정보를 확인할 수 없습니다.');
+          navigate('/change');
+        }
+      } finally {
+        if (!cancelled) {
+          setCheckingSeller(false);
+        }
+      }
+    };
+
+    checkSeller();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userNo, navigate]);
 
   useEffect(() => {
     if (!draftId) {
@@ -636,6 +678,14 @@ export default function CreateProjectPage() {
         </aside>
 
         <div className="create-project">
+          {checkingSeller && (
+            <div className="create-project__draft-alert">판매자 정보를 확인하는 중입니다...</div>
+          )}
+          {!checkingSeller && !hasSellerProfile && (
+            <div className="create-project__draft-alert create-project__draft-alert--error">
+              판매자 전환 승인 후 이용할 수 있습니다.
+            </div>
+          )}
           {draftId && (
             <div
               className={`create-project__draft-alert${
