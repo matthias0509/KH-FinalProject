@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sellerMapper">
+
+    <select id="selectSellerNoByUser" parameterType="long" resultType="long">
+        SELECT SELLER_NO
+        FROM SELLER_PROFILE
+        WHERE USER_NO = #{userNo}
+    </select>
+
+    <insert id="insertSellerProfile" parameterType="map">
+        <selectKey resultType="long" keyProperty="sellerNo" order="BEFORE">
+            SELECT SEQ_SELLER_PROFILE_NO.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO SELLER_PROFILE (
+            SELLER_NO,
+            INTRODUCTION,
+            USER_NO
+        ) VALUES (
+            #{sellerNo},
+            NVL(#{introduction}, '신규 메이커입니다.'),
+            #{userNo}
+        )
+    </insert>
+
+</mapper>

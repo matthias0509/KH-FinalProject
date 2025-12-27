@@ -1,6 +1,9 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
+import { getLoginUserInfo } from '../utils/auth';
+import { submitSellerApplication, fetchMySellerApplication } from '../api/sellerApplicationApi';
+import { toast } from 'react-toastify';
 
 const steps = [
   {
@@ -39,6 +42,39 @@ export default function ChangePage() {
   const [formData, setFormData] = useState(initialForm);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState('');
+  const [application, setApplication] = useState(null);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const loginInfo = getLoginUserInfo();
+  const userNo = loginInfo?.userNo;
+
+  useEffect(() => {
+    if (!userNo) {
+      return;
+    }
+    let cancelled = false;
+    const load = async () => {
+      setStatusLoading(true);
+      try {
+        const data = await fetchMySellerApplication(userNo);
+        if (!cancelled) {
+          const normalized = data && typeof data === 'object' ? data : null;
+          setApplication(normalized);
+        }
+      } catch (error) {
+        if (!cancelled) {
+      setApplication(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setStatusLoading(false);
+        }
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [userNo]);
 
   const handleScrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -59,16 +95,53 @@ export default function ChangePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
+    if (!userNo) {
+      toast.error('로그인 후 이용해 주세요.');
+      return;
+    }
+    if (application && application.status === 'PENDING') {
+      toast.info('이미 접수된 신청이 있습니다. 결과를 기다려 주세요.');
+      return;
+    }
     setIsSubmitting(true);
 
-    window.setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const payload = {
+        userNo,
+        applicantName: formData.name,
+        applicantEmail: formData.email,
+        applicantPhone: formData.phone,
+        businessName: formData.businessName,
+        businessNumber: formData.businessNumber,
+        website: formData.website,
+        brandDescription: formData.description,
+        documentPath: formData.document?.name ?? null,
+      };
+      const response = await submitSellerApplication(payload);
+      setApplication(response);
       setSubmitMessage('전환 신청이 접수되었습니다. 영업일 기준 3일 내 연락드릴게요!');
       setFormData(initialForm);
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 800);
+    } catch (error) {
+      const message = error.response?.data || '신청 접수에 실패했습니다.';
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const currentStatus = application?.status ?? (statusLoading ? 'LOADING' : null);
+  const statusLabelMap = {
+    PENDING: '심사 중',
+    APPROVED: '승인 완료',
+    REJECTED: '반려됨',
+  };
+  const statusClassMap = {
+    PENDING: 'change-page__status change-page__status--pending',
+    APPROVED: 'change-page__status change-page__status--approved',
+    REJECTED: 'change-page__status change-page__status--rejected',
   };
 
   return (
@@ -91,6 +164,11 @@ export default function ChangePage() {
                 가이드 다운로드
               </button>
             </div>
+            {currentStatus && currentStatus !== 'LOADING' && (
+              <div className={statusClassMap[application?.status] ?? 'change-page__status'}>
+                현재 상태: {statusLabelMap[application?.status] ?? '정보 없음'}
+              </div>
+            )}
           </div>
           <div className="change-page__hero-card">
             <h3>판매자 전환 상태</h3>
@@ -179,10 +257,22 @@ export default function ChangePage() {
               <input type="file" name="document" accept="application/pdf,image/*" onChange={handleChange} required />
               {formData.document && <span>{formData.document.name}</span>}
             </label>
-            <button type="submit" className="change-page__submit" disabled={isSubmitting}>
+            <button
+              type="submit"
+              className="change-page__submit"
+              disabled={
+                isSubmitting ||
+                !userNo ||
+                (application && application.status === 'PENDING')
+              }
+            >
               {isSubmitting ? '접수 중...' : '신청 접수하기'}
             </button>
             {submitMessage && <p className="change-page__success">{submitMessage}</p>}
+            {!userNo && <p className="change-page__error">로그인 후 신청이 가능합니다.</p>}
+            {application?.status === 'APPROVED' && (
+              <p className="change-page__success">이미 판매자 전환이 완료된 계정입니다.</p>
+            )}
           </form>
         </section>
       </main>

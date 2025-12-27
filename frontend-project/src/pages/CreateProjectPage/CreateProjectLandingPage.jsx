@@ -6,6 +6,8 @@ import AppFooter from '../../components/AppFooter';
 import draftPlaceholder from '../../assets/기본이미지.jpg';
 import { fetchImsiAxios, deleteProjectAxios } from './ProjectApi';
 import { toast } from 'react-toastify';
+import { getLoginUserNo } from '../../utils/auth';
+import { fetchSellerProfileStatus } from '../../api/sellerApplicationApi';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/foodding';
 
@@ -27,17 +29,24 @@ const resolveAssetUrl = (path) => {
 
 export default function CreateProjectLandingPage() {
 
-  const USER_NO=1;
-
   const navigate = useNavigate();
+  const [userNo] = useState(() => getLoginUserNo());
   // 임시저장 목록 관리
   const [drafts, setDrafts] = useState([]);
   // 로딩중
   const [loading, setLoading] = useState(true);
+  const [hasSellerProfile, setHasSellerProfile] = useState(false);
+  const [checkingSeller, setCheckingSeller] = useState(true);
 
-  const loadDrafts = async () => {
+  const loadDrafts = async (currentUserNo) => {
+    if (!currentUserNo) {
+      setDrafts([]);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
     try {
-      const data = await fetchImsiAxios(USER_NO); // TODO: 실제 사용자 번호로 교체
+      const data = await fetchImsiAxios(currentUserNo);
       setDrafts(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('임시저장 목록 불러오기 실패', error);
@@ -48,8 +57,26 @@ export default function CreateProjectLandingPage() {
   };
 
   useEffect(() => {
-    loadDrafts();
-  }, []);
+    if (!userNo) {
+      setLoading(false);
+      toast.error('로그인 후 이용해 주세요.');
+      navigate('/login');
+      return;
+    }
+    const init = async () => {
+      try {
+        setCheckingSeller(true);
+        const status = await fetchSellerProfileStatus(userNo);
+        setHasSellerProfile(status);
+      } catch (error) {
+        setHasSellerProfile(false);
+      } finally {
+        setCheckingSeller(false);
+      }
+      loadDrafts(userNo);
+    };
+    init();
+  }, [userNo, navigate]);
 
 
   //
@@ -72,9 +99,28 @@ export default function CreateProjectLandingPage() {
 
 
 
+  const ensureSeller = () => {
+    if (checkingSeller) {
+      toast.info('판매자 정보를 확인 중입니다. 잠시만 기다려 주세요.');
+      return false;
+    }
+    if (!hasSellerProfile) {
+      toast.error('판매자 전환 승인 후 이용해 주세요.');
+      navigate('/change');
+      return false;
+    }
+    return true;
+  };
+
   // 
-  const goToNewProject = () => navigate('/create/new');
-  const goToMakerDashboard = () => navigate('/maker/project');
+  const goToNewProject = () => {
+    if (!ensureSeller()) return;
+    navigate('/create/new');
+  };
+  const goToMakerDashboard = () => {
+    if (!ensureSeller()) return;
+    navigate('/maker/project');
+  };
   const handleContinueDraft = (draft) => {
     if (!draft?.tempNo) return;
     navigate(`/create/new?draft=${draft.tempNo}`);
@@ -86,13 +132,18 @@ export default function CreateProjectLandingPage() {
     if (!draft?.tempNo) {
       return;
     }
+    if (!userNo) {
+      toast.error('로그인 후 이용해 주세요.');
+      navigate('/login');
+      return;
+    }
     if (!window.confirm('해당 임시저장을 삭제하시겠습니까?')) {
       return;
     }
 
     const api = async () => {
       try {
-        const msg = await deleteProjectAxios({ userNo: USER_NO, tempNo: draft.tempNo });
+        const msg = await deleteProjectAxios({ userNo, tempNo: draft.tempNo });
         toast.info(msg);
         setDrafts((prev) => prev.filter((item) => item.tempNo !== draft.tempNo));
       } catch (error) {

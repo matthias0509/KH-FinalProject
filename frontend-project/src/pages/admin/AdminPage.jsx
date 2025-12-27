@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import UserManagementPage from './UserManagementPage';
 import DashBoardPage from './DashBoardPage'; // DashboardTab 대신 DashBoardPage 사용
 import ProductVisibilityManager from './ProductVisibilityManager';
+import SellerApplicationAdmin from './SellerApplicationAdmin';
 
 import '../../styles/AdminPage.css'; // 관리자 전용 CSS
 import '../../styles/MyPageLayout.css'; // 공통 레이아웃 (재활용)
@@ -20,6 +21,7 @@ const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
     const adminMenus = [
         { id: 'dashboard', name: '📊 대시보드 (통계)', category: '주요 기능' },
         { id: 'proj_manage', name: '📝 프로젝트 승인/반려', category: '운영 관리' },
+        { id: 'seller_apply', name: '🧾 판매자 전환 관리', category: '' },
         { id: 'refund_manage', name: '💰 후원/환불 관리', category: '' },
         { id: 'user_manage', name: '👤 회원 정보 조회/관리', category: '회원 관리' },
         { id: 'pudding_manage', name: '🍮 푸슐랭 관리', category: '' },
@@ -103,6 +105,11 @@ const AdminContent = ({ activeMenu }) => {
         case 'proj_manage':
             content = (
                 <ProductVisibilityManager />
+            );
+            break;
+        case 'seller_apply':
+            content = (
+                <SellerApplicationAdmin />
             );
             break;
         case 'refund_manage':

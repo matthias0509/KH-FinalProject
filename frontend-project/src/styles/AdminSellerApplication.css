@@ -1,0 +1,105 @@
+.admin-seller {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.admin-seller__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-seller__header h2 {
+  margin: 0;
+}
+
+.admin-seller__header select {
+  padding: 0.45rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+}
+
+.admin-seller__error {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.admin-seller__status {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #f3f4f6;
+}
+
+.admin-seller__table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
+}
+
+.admin-seller__table th,
+.admin-seller__table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid #edf2f7;
+  text-align: left;
+}
+
+.admin-seller__table th {
+  background: #f8fafc;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.admin-seller__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.admin-seller__actions button {
+  padding: 0.35rem 0.85rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #0ea5e9;
+  color: #fff;
+}
+
+.admin-seller__actions button:last-child {
+  background: #f97316;
+}
+
+.admin-seller__actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-seller__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.admin-seller__badge--pending {
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.admin-seller__badge--approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.admin-seller__badge--rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}

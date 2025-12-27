@@ -763,6 +763,34 @@
   font-weight: 600;
 }
 
+.change-page__error {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.change-page__status {
+  margin-top: 16px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  display: inline-flex;
+  font-weight: 600;
+}
+
+.change-page__status--pending {
+  background: #fef9c3;
+  color: #92400e;
+}
+
+.change-page__status--approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.change-page__status--rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 @media (max-width: 960px) {
   .change-page__hero {
     grid-template-columns: 1fr;

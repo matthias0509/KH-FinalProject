@@ -72,11 +72,7 @@
                         #{shipStartDate},
                         #{category},
                         NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
-                        (
-                            SELECT SELLER_NO
-                            FROM SELLER_PROFILE
-                            WHERE USER_NO = #{userNo}
-                        )
+                        #{sellerNo}
                     )
             </insert>
 
@@ -128,7 +124,7 @@
                     NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
                     #{content.html},
                     #{content.json},
-                    (SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo})
+                    #{sellerNo}
                 )
             </insert>
             <!-- 옵션 임시저장 -->

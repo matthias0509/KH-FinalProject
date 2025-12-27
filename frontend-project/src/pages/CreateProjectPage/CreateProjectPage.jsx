@@ -8,6 +8,7 @@ import TextAlignExtension from '../../utils/textAlignExtension';
 import { categories } from '../../data/content';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getLoginUserNo } from '../../utils/auth';
 
 import { imsiProjectAxios, insertProjectAxios, fetchDraftDetailAxios, uploadThumbnailAxios } from './ProjectApi';
 import DatePickerField from '../../components/DatePickerField';
@@ -99,6 +100,7 @@ export default function CreateProjectPage() {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [userNo] = useState(() => getLoginUserNo());
   const draftId = searchParams.get('draft');
   const storyImageInputRef = useRef(null);
   const basicsRef = useRef(null);
@@ -183,11 +185,16 @@ export default function CreateProjectPage() {
       return;
     }
 
+    if (!userNo) {
+      setDraftStatus({ loading: false, error: null, applied: false });
+      return;
+    }
+
     let cancelled = false;
     const loadDraft = async () => {
       setDraftStatus({ loading: true, error: null, applied: false });
       try {
-        const draft = await fetchDraftDetailAxios({ userNo: 1, tempNo: draftId });
+        const draft = await fetchDraftDetailAxios({ userNo, tempNo: draftId });
         if (cancelled) return;
         setDraftPrefill(draft || null);
         setActiveDraftId(draft?.tempNo ? String(draft.tempNo) : draftId);
@@ -206,7 +213,7 @@ export default function CreateProjectPage() {
     return () => {
       cancelled = true;
     };
-  }, [draftId]);
+  }, [draftId, userNo]);
 
   useEffect(() => {
     if (!draftPrefill) {
@@ -254,6 +261,14 @@ export default function CreateProjectPage() {
 
     editor.commands.setContent(draftPrefill.content.html);
   }, [draftPrefill, editor]);
+
+  useEffect(() => {
+    if (userNo) {
+      return;
+    }
+    toast.error('로그인 후 이용해 주세요.');
+    navigate('/login');
+  }, [userNo, navigate]);
 
   const getCurrentImageCount = () => {
     let count = 0;
@@ -482,6 +497,12 @@ export default function CreateProjectPage() {
   const handleSaveDraft = (e) => {
     e.preventDefault(); // 기본 이벤트 제거
 
+    if (!userNo) {
+      toast.error('로그인 후 이용해 주세요.');
+      navigate('/login');
+      return;
+    }
+
     const editorHtml = editor?.getHTML() ?? '';
     const editorJson = editor ? JSON.stringify(editor.getJSON()) : '{}';
 
@@ -493,7 +514,7 @@ export default function CreateProjectPage() {
       fundStartDate: formData.openStart || null,
       fundEndDate: formData.openEnd || null,
       shipStartDate: formData.shippingDate || formData.openEnd || formData.openStart || null,
-      userNo: 1, // 유저 넘버로 변경해야함
+      userNo,
       tempNo: activeDraftId,
       thumbnailUrl: formData.thumbnailUrl,
       content: {
@@ -512,6 +533,10 @@ export default function CreateProjectPage() {
     const api = async () => {
       try {
         const msg = await imsiProjectAxios(requestPayload);
+        if (typeof msg === 'string' && msg.includes('이용해 주세요')) {
+          toast.error(msg);
+          return;
+        }
         toast.info(msg);
         navigate("/create");
       } catch (error) {
@@ -535,6 +560,12 @@ export default function CreateProjectPage() {
       return;
     }
 
+    if (!userNo) {
+      toast.error('로그인 후 이용해 주세요.');
+      navigate('/login');
+      return;
+    }
+
     const requestPayload = {
       title: formData.title.trim(),
       summary: formData.subtitle.trim(),
@@ -543,7 +574,7 @@ export default function CreateProjectPage() {
       fundStartDate: formData.openStart || null,
       fundEndDate: formData.openEnd || null,
       shipStartDate: formData.shippingDate || formData.openEnd || formData.openStart || null,
-      userNo: 1, // TODO: replace with logged-in user info
+      userNo,
       tempNo: activeDraftId,
       thumbnailUrl: formData.thumbnailUrl,
       content: {
@@ -562,6 +593,10 @@ export default function CreateProjectPage() {
     const api = async () => {
       try {
         const msg = await insertProjectAxios(requestPayload);
+        if (typeof msg === 'string' && msg.includes('이용해 주세요')) {
+          toast.error(msg);
+          return;
+        }
         toast.info(msg);
         navigate('/create/success');
       } catch (error) {
