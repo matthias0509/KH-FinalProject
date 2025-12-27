@@ -9,6 +9,8 @@
   --accent-strong: #ef4444;
 }
 
+
+
 .app {
   min-height: 100vh;
   background-color: var(--app-bg);
@@ -807,6 +809,33 @@
 .project-card--compact .project-card__body {
   padding: 16px;
   gap: 8px;
+}
+
+.product-detail--empty {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 80px 24px;
+}
+
+.product-detail__error {
+  padding: 48px;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #ffffff;
+  text-align: center;
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+}
+
+.product-detail__error h1 {
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: #0f172a;
+}
+
+.product-detail__error p {
+  margin-bottom: 24px;
+  color: #475569;
+  line-height: 1.6;
 }
 
 .tag {

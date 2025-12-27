@@ -113,6 +113,7 @@ export default function ProductDetailPage() {
 
   // 프로젝트에 들어갈 정보들
   const [project, setProject] = useState(projectInit);
+  const [loadError, setLoadError] = useState('');
   //
   const REVIEWS_PER_PAGE = 5;
   const fundingGoal = project.funding.goal || 0;
@@ -210,21 +211,41 @@ export default function ProductDetailPage() {
       return;
     }
 
+    setLoadError('');
     const api = async () => {
       try {
         const item = await fetchProjectAxios(ProjectNo);
         if (!item || !item.productNo) {
-          toast.info('이미 삭제되거나 없는 프로젝트입니다.');
-          navigate('/');
+          setProject(projectInit);
+          setLoadError('존재하지 않거나 삭제된 프로젝트입니다.');
           return;
         }
         setProject(normalizeProjectDetail(item));
       } catch (error) {
-        toast.error('프로젝트 정보를 불러오지 못했습니다.');
+        setProject(projectInit);
+        setLoadError('프로젝트 정보를 불러오지 못했습니다.');
       }
     };
     api();
   }, [ProjectNo, navigate]);
+
+  if (loadError) {
+    return (
+      <div className="app">
+        <Header />
+        <main className="product-detail product-detail--empty">
+          <div className="product-detail__error">
+            <h1>알림</h1>
+            <p>{loadError}</p>
+            <button type="button" onClick={() => navigate('/')} className="detail-cta detail-cta--primary">
+              홈으로 이동
+            </button>
+          </div>
+        </main>
+        <AppFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="app">

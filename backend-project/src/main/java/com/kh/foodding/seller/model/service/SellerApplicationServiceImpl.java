@@ -40,7 +40,7 @@ public class SellerApplicationServiceImpl implements SellerApplicationService {
         }
 
         sellerApplicationDao.insertApplication(sqlSession, application);
-        return application;
+        return sellerApplicationDao.selectById(sqlSession, application.getApplicationNo());
     }
 
     @Override
