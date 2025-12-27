@@ -49,5 +49,66 @@
         WHERE PRODUCT_NO = #{productNo}
     </select>
 
+    <select id="selectRecentProjects" parameterType="map" resultMap="projectResultSet">
+        SELECT *
+        FROM (
+            SELECT
+                PRODUCT_NO,
+                PRODUCT_TITLE,
+                PRODUCT_DESC,
+                STORY_HTML,
+                STORY_JSON,
+                TARGET_AMOUNT,
+                CURRENT_AMOUNT,
+                FUND_START_DATE,
+                FUND_END_DATE,
+                SHIP_START_DATE,
+                PRODUCT_STATUS,
+                CATEGORY,
+                ORIGIN_THUMBNAIL,
+                MODIFY_THUMBNAIL,
+                CREATE_DATE,
+                PRODUCT_YN,
+                SELLER_NO
+            FROM PRODUCT
+            WHERE PRODUCT_YN = 'Y' OR PRODUCT_YN IS NULL
+            ORDER BY CREATE_DATE DESC
+        ) project_list
+        WHERE ROWNUM &lt;= #{limit}
+    </select>
+
+    <select id="selectAllProjects" parameterType="map" resultMap="projectResultSet">
+        SELECT
+            PRODUCT_NO,
+            PRODUCT_TITLE,
+            PRODUCT_DESC,
+            STORY_HTML,
+            STORY_JSON,
+            TARGET_AMOUNT,
+            CURRENT_AMOUNT,
+            FUND_START_DATE,
+            FUND_END_DATE,
+            SHIP_START_DATE,
+            PRODUCT_STATUS,
+            CATEGORY,
+            ORIGIN_THUMBNAIL,
+            MODIFY_THUMBNAIL,
+            CREATE_DATE,
+            PRODUCT_YN,
+            SELLER_NO
+        FROM PRODUCT
+        <where>
+            <if test="status != null and status != '' and status != 'ALL'">
+                PRODUCT_YN = #{status}
+            </if>
+        </where>
+        ORDER BY CREATE_DATE DESC
+    </select>
+
+    <update id="updateProductVisibility" parameterType="map">
+        UPDATE PRODUCT
+        SET PRODUCT_YN = #{productYn}
+        WHERE PRODUCT_NO = #{productNo}
+    </update>
 
 </mapper>

@@ -7,6 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { fetchProjectAxios } from './DetailApi';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 
@@ -48,18 +49,7 @@ const currencyFormatter = new Intl.NumberFormat('ko-KR');
   rewards: [],
 };
 
-const API_BASE_URL = 'http://localhost:8001/foodding';
-
 const stripHtml = (value = '') => value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-
-const resolveThumbnailUrl = (path = '') => {
-  if (!path) return projectInit.heroImage;
-  if (path.startsWith('http')) {
-    return path;
-  }
-  const normalized = path.startsWith('/') ? path : `/${path}`;
-  return `${API_BASE_URL}${normalized}`;
-};
 
 const normalizeProjectDetail = (data = {}) => {
   const targetAmount = Number(data.targetAmount) || 0;
@@ -101,7 +91,10 @@ const normalizeProjectDetail = (data = {}) => {
     ...data,
     title: data.productTitle ?? projectInit.title,
     subtitle: data.productDesc ?? projectInit.subtitle,
-    heroImage: resolveThumbnailUrl(data.modifyThumbnail || data.originThumbnail),
+    heroImage: resolveProjectImageUrl(
+      data.modifyThumbnail || data.originThumbnail,
+      projectInit.heroImage,
+    ),
     funding: {
       ...projectInit.funding,
       goal: targetAmount,
