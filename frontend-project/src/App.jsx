@@ -24,6 +24,7 @@ import InquiryPage from './pages/CustomerService/InquiryPage';
 import InquiryHistoryPage from './pages/CustomerService/InquiryHistoryPage';
 import NoticeWritePage from './pages/CustomerService/NoticeWritePage';
 import LogoutPage from './pages/Login/logoutPage';
+import NoticeEditPage from './pages/CustomerService/NoticeEditPage';
 
 // 박주현
 import MakerPage from './pages/MakerPage'
@@ -97,6 +98,7 @@ export default function App() {
       <Route path="/notice/write" element={<NoticeWritePage />} />
       <Route path="/logout" element={<LogoutPage />} />
       <Route path="/notice/:noticeNo" element={<NoticeDetailPage />} />
+      <Route path="/notice/edit/:noticeNo" element={<NoticeEditPage />} />
 
       
       {/* 박주현 */}

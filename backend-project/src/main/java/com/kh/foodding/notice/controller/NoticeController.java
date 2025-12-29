@@ -51,11 +51,11 @@ public class NoticeController {
 	
 	@GetMapping("/detail/{noticeNo}")
 	public Notice selectNoticeDetail(@PathVariable int noticeNo) {
-	    System.out.println("컨트롤러 요청 번호: " + noticeNo); // 1. 번호가 잘 오는지 확인
+	    //System.out.println("컨트롤러 요청 번호: " + noticeNo); // 1. 번호가 잘 오는지 확인
 	    
 	    Notice notice = noticeService.selectNoticeDetail(noticeNo);
 	    
-	    System.out.println("조회된 결과: " + notice); // 2. 결과가 null인지 데이터가 있는지 확인
+	    //System.out.println("조회된 결과: " + notice);
 	    return notice;
 	}
 	
@@ -72,5 +72,20 @@ public class NoticeController {
 	    int result = noticeService.deleteNotice(notice.getNoticeNo());
 	    return result > 0 ? "success" : "fail";
 	}
+	
+	@PostMapping("/update")
+	public String updateNotice(@RequestHeader("Authorization") String token, @RequestBody Notice notice) {
+		String jwtToken = token.substring(7);
+		String role = jwtUtil.extractUserRole(jwtToken);
+		
+		if(!"ADMIN".equals(role)) {
+			return "no_auth";
+		}
+		
+		int result = noticeService.updateNotice(notice);
+		
+		return result > 0 ? "success" : "fail";
+	}
+	
 
 }

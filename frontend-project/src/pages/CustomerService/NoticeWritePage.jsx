@@ -32,12 +32,12 @@ export default function NoticeWritePage() {
             });
         
         if (response.data === "success") {
-            alert('공지사항이 등록되었습니다.');
+            toast.success('공지사항이 성공적으로 등록되었습니다!');
             navigate('/notice');
         } else if (response.data === "no_auth") {
-            alert('권한이 없습니다. 관리자만 등록 가능합니다.');
+            toast.error('권한이 없습니다. 관리자 계정으로 로그인 해주세요.');
         } else {
-            alert('등록에 실패했습니다.');
+            toast.error('공지사항 등록에 실패했습니다. 다시 시도해주세요.');
         }
     } catch (error) {
         console.error('에러 발생:', error);
