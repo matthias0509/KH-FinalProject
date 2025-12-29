@@ -219,9 +219,23 @@ export default function ProductDetailPage() {
   };
 
   // 강호형
-  const handlePayment= () => {
-    navigate('/payment')
-  }
+  // handlePayment 함수를 다음과 같이 수정:
+  const handlePayment = (reward) => {
+    navigate('/payment', { 
+      state: { 
+        reward: {
+          id: reward.id,
+          title: reward.title,
+          amount: reward.price,
+          items: reward.includes || [],
+          optionNo: reward.id,
+          description: reward.description,
+          shipping: reward.shipping
+        }
+      }
+    });
+  };
+
 
   const handleOpenChat = () => {
     // JWT 토큰에서 사용자 정보 가져오기
@@ -574,7 +588,7 @@ export default function ProductDetailPage() {
                       </ul>
                     )}
                     <div className="detail-reward__shipping">배송 예정: {reward.shipping}</div>
-                    <button type="button" className="detail-cta detail-cta--outline" onClick={handlePayment}>
+                    <button type="button" className="detail-cta detail-cta--outline" onClick={() => handlePayment(reward)}>
                       리워드 선택
                     </button>
                   </div>
