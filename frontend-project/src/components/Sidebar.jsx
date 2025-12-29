@@ -1,15 +1,24 @@
-import React, { useMemo } from 'react'; // useMemo 추가
+import React, { useMemo } from 'react'; 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../styles/MyPageLayout.css'; 
 
-// 서버 주소
+// 1. 서버 주소 상수
 const SERVER_URL = "http://localhost:8001/foodding";
 
-// 이미지 전체 경로 변환 함수
-const getFullImageUrl = (url) => {
-    if (!url) return null;
-    if (url.startsWith("http")) return url;
-    return `${SERVER_URL}${url}`;
+// 2. 업로드 경로 상수 (백엔드 WebMvcConfig와 일치해야 함)
+// 주의: 끝에 슬래시(/)가 꼭 있어야 경로가 자연스럽게 이어집니다.
+const UPLOAD_PATH = "/uploads/"; 
+
+// 3. 이미지 전체 경로 변환 함수 (핵심 로직)
+const getFullImageUrl = (filename) => {
+    // 파일명이 없거나 'null' 문자열이면 null 반환
+    if (!filename || filename === "null") return null;
+
+    // (1) 소셜 로그인 등으로 이미 http로 시작하는 완벽한 주소인 경우 -> 그대로 사용
+    if (filename.startsWith("http")) return filename;
+    
+    // (2) 우리가 업로드한 파일인 경우 -> "http://.../uploads/파일명.png" 형태로 조립
+    return `${SERVER_URL}${UPLOAD_PATH}${filename}`;
 };
 
 const Sidebar = ({ userInfo = {} }) => { 
@@ -22,9 +31,8 @@ const Sidebar = ({ userInfo = {} }) => {
     const isMakerMode = location.pathname.startsWith('/maker');
 
     // ✅ 수정 포인트: 이미지 캐시 버스터 최적화 (useMemo)
-    // 컴포넌트가 처음 마운트되거나, profileImageUrl 자체가 바뀔 때만 시간을 갱신합니다.
-    // 단순히 메뉴를 클릭하거나 다른 상태가 변할 때는 이미지를 다시 불러오지 않아 깜빡임을 방지합니다.
-    const imageTimestamp = useMemo(() => Date.now(), [userInfo.profileImageUrl]);
+    // 변수명을 DB 컬럼 매핑값인 modifyProfile로 통일했습니다.
+    const imageTimestamp = useMemo(() => Date.now(), [userInfo.modifyProfile]);
 
     // 메뉴 활성화 로직
     const isActive = (path) => {
@@ -71,30 +79,36 @@ const Sidebar = ({ userInfo = {} }) => {
                 )}
             </div>
 
-            {/* 프로필 영역 */}
+            {/* ✅ 프로필 영역 (디자인 수정됨) */}
             <div className="profile-section">
+                
+                {/* 1. 둥근 프로필 이미지 틀 */}
                 <div className="profile-img-wrapper">
                    <img
                     src={
-                        userInfo.profileImageUrl
-                            // ✅ 여기서 useMemo로 만든 고정된 타임스탬프를 사용
-                            ? `${getFullImageUrl(userInfo.profileImageUrl)}?t=${imageTimestamp}`
+                        // 1. modifyProfile 값이 존재하는지 확인
+                        userInfo.modifyProfile
+                            // 2. 존재하면 전체 주소 생성 + 캐시 갱신용 파라미터 추가
+                            ? `${getFullImageUrl(userInfo.modifyProfile)}?t=${imageTimestamp}`
+                            // 3. 없으면 기본 이미지
                             : "/placeholder.png"
                     }
                     alt="프로필"
                     className="sidebar-profile-img"
+                    // 4. 엑박(404)이 뜨면 기본 이미지로 대체하는 안전장치
                     onError={(e) => {
-                        e.target.onerror = null;
+                        e.target.onerror = null; 
                         e.target.src = "/placeholder.png";
                     }}
                     />
                 </div>
                 
+                {/* 2. 닉네임 (화살표 링크 제거됨) */}
                 <h3 className="username">
-                    {displayName} {isMakerMode ? '메이커' : ''}님 
-                    <Link to="/mypage/profile" className="arrow-link"> &gt;</Link>
+                    {displayName} {isMakerMode ? '메이커' : ''}님
                 </h3>
                 
+                {/* 3. 하단 버튼 (설정 바로가기) */}
                 {isMakerMode ? (
                     <p className="follow-count">팔로워 0</p>
                 ) : (
@@ -102,7 +116,7 @@ const Sidebar = ({ userInfo = {} }) => {
                 )}
             </div>
 
-            {/* 메뉴 리스트 */}
+            {/* 메뉴 리스트 (기존 유지) */}
             <nav className={`menu-list ${isMakerMode ? 'maker-menu' : ''}`}>
                 {isMakerMode ? (
                     /* --- 메이커 모드 메뉴 --- */

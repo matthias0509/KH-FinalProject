@@ -18,63 +18,223 @@
     color: #333;
 }
 
-/* --- 사이드바 --- */
-.sidebar { width: 250px; flex-shrink: 0; }
+/* --- 사이드바 레이아웃 --- */
+.sidebar { 
+    width: 250px; 
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* 요소 간 간격 */
+}
 
+/* --- 모드 스위치 (서포터/메이커) --- */
 .mode-switch {
-    display: flex; background-color: #fff; border-radius: 20px;
-    padding: 4px; margin-bottom: 30px;
+    display: flex; 
+    background-color: #fff; 
+    border-radius: 20px;
+    padding: 4px; 
+    /* margin-bottom: 30px; -> sidebar gap으로 대체 */
+    border: 1px solid #e9ecef; /* 테두리 추가로 선명하게 */
 }
 
 .mode-btn {
-    flex: 1; border: none; background: transparent; padding: 8px 0;
-    border-radius: 16px; font-weight: bold; color: #868e96; cursor: pointer;
-    text-align: center; font-size: 14px; display: flex; align-items: center;
-    justify-content: center; text-decoration: none;
+    flex: 1; 
+    border: none; 
+    background: transparent; 
+    padding: 8px 0;
+    border-radius: 16px; 
+    font-weight: bold; 
+    color: #868e96; 
+    cursor: pointer;
+    text-align: center; 
+    font-size: 14px; 
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    text-decoration: none;
+    transition: all 0.2s;
 }
 
 .mode-btn.active {
-    background-color: #fff; color: #b91c1c; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    background-color: #fff; 
+    color: #b91c1c; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #eee; /* 활성 버튼 테두리 */
 }
 
-.mode-btn.link-btn:hover { color: #b91c1c; }
+.mode-btn.link-btn:hover { 
+    color: #b91c1c; 
+    background-color: #fff5f5;
+}
 
 .mode-btn.locked {
-    cursor: pointer; color: #adb5bd; background-color: #f9fafb;
-    position: relative; transition: background-color 0.2s;
+    cursor: not-allowed; 
+    color: #adb5bd; 
+    background-color: transparent;
 }
-.mode-btn.locked:hover { background-color: #f1f3f5; color: #868e96; }
-
-.lock-icon { font-size: 12px; margin-left: 6px; margin-bottom: 2px; }
-
-/* 프로필 영역 */
-.profile-section { text-align: center; margin-bottom: 30px; }
-.profile-img {
-    width: 80px; height: 80px; background-color: #eee; border-radius: 50%;
-    margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 30px;
+.mode-btn.locked:hover { 
+    background-color: #f1f3f5; 
+    color: #868e96; 
 }
-.username { font-size: 16px; margin-bottom: 10px; }
+
+.lock-icon { 
+    font-size: 12px; 
+    margin-left: 6px; 
+    margin-bottom: 2px; 
+}
+
+
+/* --- [수정됨] 프로필 영역 디자인 --- */
+.profile-section { 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    background-color: #fff;
+    border-radius: 12px; /* 카드 형태 */
+    border: 1px solid #e9ecef;
+}
+
+/* 1. 프로필 이미지 래퍼 (둥근 틀) */
+.profile-img-wrapper {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f0f0f0;
+    border: 2px solid #eaeaea;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 2. 실제 이미지 */
+.sidebar-profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.profile-img-wrapper:hover .sidebar-profile-img {
+    transform: scale(1.05); /* 마우스 올리면 살짝 확대 */
+}
+
+/* 3. 닉네임 텍스트 */
+.username { 
+    font-size: 18px; 
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 10px 0;
+    letter-spacing: -0.5px;
+    text-align: center;
+    cursor: default; /* 클릭 안 됨 표시 */
+}
+
+/* 4. 내 정보 설정 버튼 */
 .profile-setting-btn {
-    display: inline-block; width: 100%; padding: 10px; border: 1px solid #ddd;
-    background: #fff; border-radius: 20px; cursor: pointer; font-size: 13px;
-    text-decoration: none; color: #333; text-align: center; box-sizing: border-box;
+    display: inline-block; 
+    padding: 6px 16px; 
+    border: 1px solid #e9ecef;
+    background: #fff; 
+    border-radius: 20px; 
+    cursor: pointer; 
+    font-size: 13px;
+    text-decoration: none; 
+    color: #868e96; 
+    transition: all 0.2s;
 }
-.profile-setting-btn:hover { border-color: #f97316; color: #b91c1c; }
 
-/* 메뉴 리스트 */
-.menu-list ul { list-style: none; padding: 0; margin-bottom: 25px; }
-.menu-category { font-size: 12px; color: #adb5bd; margin-bottom: 10px; }
-.menu-list li { padding: 0; font-size: 14px; color: #495057; margin-bottom: 5px; }
+.profile-setting-btn:hover { 
+    border-color: #ced4da; 
+    color: #495057; 
+    background-color: #f8f9fa;
+}
+
+/* 5. 메이커 뱃지 */
+.maker-badge {
+    display: inline-block;
+    font-size: 11px;
+    background-color: #ff4757;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+    font-weight: 500;
+    transform: translateY(-1px);
+}
+
+/* 6. 팔로워 카운트 */
+.follow-count {
+    font-size: 13px;
+    color: #868e96;
+    margin: 0;
+}
+
+
+/* --- 메뉴 리스트 --- */
+.menu-list ul { 
+    list-style: none; 
+    padding: 0; 
+    margin-bottom: 25px; 
+}
+
+.menu-category { 
+    font-size: 12px; 
+    color: #adb5bd; 
+    margin-bottom: 10px; 
+    font-weight: 600;
+}
+
+.menu-list li { 
+    padding: 0; 
+    font-size: 15px; 
+    color: #495057; 
+    margin-bottom: 2px; 
+}
 
 .menu-list ul li a {
-    text-decoration: none; color: inherit; display: flex; align-items: center;
-    justify-content: space-between; width: 100%; padding: 8px 0; transition: color 0.2s;
+    text-decoration: none; 
+    color: inherit; 
+    display: flex; 
+    align-items: center;
+    justify-content: space-between; 
+    width: 100%; 
+    padding: 10px 12px; /* 클릭 영역 확보 */
+    border-radius: 8px; /* 메뉴 배경 둥글게 */
+    transition: all 0.2s;
 }
-.menu-list ul li a:hover { color: #b91c1c; font-weight: bold; }
-.active-menu a { color: #b91c1c !important; font-weight: bold; }
-.badge-dot { color: #f97316; font-size: 8px; margin-left: 5px; }
 
-/* 메인 콘텐츠 영역 공통 */
-.main-content { flex: 1; }
-.greeting { font-size: 26px; margin-bottom: 20px; }
-.page-title { font-size: 26px; margin-bottom: 20px; font-weight: bold; } /* 추가됨 */
+.menu-list ul li a:hover { 
+    color: #333; 
+    background-color: #f1f3f5; /* 호버 시 연한 회색 배경 */
+}
+
+.active-menu a { 
+    color: #b91c1c !important; 
+    font-weight: bold; 
+    background-color: #fff5f5; /* 활성 메뉴 배경색 */
+}
+
+/* --- 메인 콘텐츠 영역 공통 --- */
+.main-content { 
+    flex: 1; 
+    min-width: 0; /* flexbox 오버플로우 방지 */
+}
+
+.greeting { 
+    font-size: 26px; 
+    margin-bottom: 20px; 
+}
+
+.page-title { 
+    font-size: 24px; 
+    margin-bottom: 24px; 
+    font-weight: bold; 
+    color: #333;
+    border-bottom: 2px solid #333;
+    padding-bottom: 15px;
+}

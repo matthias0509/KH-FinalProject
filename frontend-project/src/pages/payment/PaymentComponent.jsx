@@ -1,27 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { loadTossPayments } from '@tosspayments/payment-sdk';
 import { CreditCard, Lock, MapPin } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './PaymentComponent.css';
 import Header from '../../components/Header';
 
 const PaymentComponent = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [tossPayments, setTossPayments] = useState(null);
-  const [selectedReward, setSelectedReward] = useState({
-    id: 1,
-    title: '얼리버드 특가 세트',
-    amount: 35000,
-    quantity: 1,
-    items: ['시그니처 소스 3종', '레시피 북', '감사 카드'],
-    optionNo: 1  // 실제 옵션 번호
+
+  // location.state에서 리워드 정보 가져오기, 없으면 기본값 사용
+  const [selectedReward, setSelectedReward] = useState(() => {
+    if (location.state?.reward) {
+      return {
+        ...location.state.reward,
+        quantity: 1
+      };
+    }
   });
 
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    postcode: '',      // 우편번호 추가
-    address: '',       // 기본 주소
-    detailAddress: '', // 상세 주소
+    postcode: '',
+    address: '',
+    detailAddress: '',
     agreeTerms: false
   });
 
@@ -29,6 +34,40 @@ const PaymentComponent = () => {
 
   const clientKey = 'test_ck_6BYq7GWPVvNRd1OJ7eqmVNE5vbo1';
   const customerKey = `customer_${Date.now()}`;
+
+  // 로그인 정보 확인 useEffect 추가
+  useEffect(() => {
+    console.log('=== PaymentComponent 로그인 정보 확인 ===');
+    
+    // sessionStorage 확인
+    const loginUser = sessionStorage.getItem('loginUser');
+    console.log('1. sessionStorage.loginUser (raw):', loginUser);
+    
+    // localStorage 확인
+    const loginUserLocal = localStorage.getItem('loginUser');
+    console.log('2. localStorage.loginUser (raw):', loginUserLocal);
+    
+    // JWT 토큰 디코딩
+    if (loginUser) {
+      try {
+        const payload = JSON.parse(window.atob(loginUser.split('.')[1]));
+        console.log('3. JWT 디코딩 결과:', payload);
+        console.log('4. userNo:', payload.userNo || payload.sub || payload.id);
+        console.log('5. 전체 payload keys:', Object.keys(payload));
+      } catch (e) {
+        console.error('JWT 디코딩 실패:', e);
+        console.log('토큰 형식이 JWT가 아닐 수 있습니다. 원본 값:', loginUser);
+      }
+    } else {
+      console.log('⚠️ sessionStorage에 loginUser가 없습니다');
+    }
+    
+    // 모든 sessionStorage 키 확인
+    console.log('6. 전체 sessionStorage keys:', Object.keys(sessionStorage));
+    console.log('7. 전체 localStorage keys:', Object.keys(localStorage));
+    
+    console.log('=== 로그인 정보 확인 끝 ===');
+  }, []);
 
   useEffect(() => {
     loadTossPayments(clientKey).then(payments => {
@@ -63,15 +102,12 @@ const PaymentComponent = () => {
     setFormData(prev => ({ ...prev, phone: formatted }));
   };
 
-  // 카카오 주소 검색
   const handleAddressSearch = () => {
     new window.daum.Postcode({
       oncomplete: function(data) {
-        // 기본 주소
         let fullAddress = data.address;
         let extraAddress = '';
 
-        // 건물명이 있을 경우 추가
         if (data.addressType === 'R') {
           if (data.bname !== '') {
             extraAddress += data.bname;
@@ -82,14 +118,12 @@ const PaymentComponent = () => {
           fullAddress += (extraAddress !== '' ? ' (' + extraAddress + ')' : '');
         }
 
-        // 상태 업데이트
         setFormData(prev => ({
           ...prev,
           postcode: data.zonecode,
           address: fullAddress
         }));
 
-        // 상세주소 입력란에 포커스
         document.getElementById('detailAddress').focus();
       }
     }).open();
@@ -98,8 +132,9 @@ const PaymentComponent = () => {
   const deliveryFee = 3000;
   const totalAmount = (selectedReward.amount * selectedReward.quantity) + deliveryFee;
 
-  // 결제 처리 함수
   const handlePayment = async () => {
+    console.log('=== 결제 시작 ===');
+    
     if (!formData.agreeTerms) {
       alert('약관에 동의해주세요.');
       return;
@@ -116,13 +151,40 @@ const PaymentComponent = () => {
       return;
     }
 
+    // 로그인 정보 확인
+    const loginUser = sessionStorage.getItem('loginUser');
+    console.log('결제 시 loginUser:', loginUser);
+    
+    let userNo = 1; // 기본값
+    if (loginUser) {
+      try {
+        const payload = JSON.parse(window.atob(loginUser.split('.')[1]));
+        console.log('결제 시 JWT payload:', payload);
+        userNo = payload.userNo || payload.sub || payload.id || 1;
+        console.log('추출된 userNo:', userNo);
+      } catch (e) {
+        console.error('JWT 파싱 실패:', e);
+      }
+    } else {
+      console.warn('⚠️ 로그인 정보 없음 - userNo를 1로 설정');
+    }
+
     setIsProcessing(true);
 
     try {
       const orderId = `order_${Date.now()}`;
       const phoneNumberOnly = formData.phone.replace(/[^0-9]/g, '');
 
-      // 결제 요청
+      console.log('결제 요청 데이터:', {
+        amount: totalAmount,
+        orderId: orderId,
+        orderName: selectedReward.title,
+        customerName: formData.name,
+        quantity: selectedReward.quantity,
+        optionNo: selectedReward.optionNo,
+        userNo: userNo
+      });
+
       await tossPayments.requestPayment('카드', {
         amount: totalAmount,
         orderId: orderId,
@@ -130,7 +192,7 @@ const PaymentComponent = () => {
         customerName: formData.name,
         customerEmail: formData.email,
         customerMobilePhone: phoneNumberOnly,
-        successUrl: `${window.location.origin}/payment/success?postcode=${formData.postcode}&address=${encodeURIComponent(formData.address + ' ' + formData.detailAddress)}&quantity=${selectedReward.quantity}&optionNo=${selectedReward.optionNo}`,
+        successUrl: `${window.location.origin}/payment/success?postcode=${formData.postcode}&address=${encodeURIComponent(formData.address + ' ' + formData.detailAddress)}&quantity=${selectedReward.quantity}&optionNo=${selectedReward.optionNo}&userNo=${userNo}`,
         failUrl: `${window.location.origin}/payment/fail`,
       });
     } catch (error) {
@@ -167,11 +229,17 @@ const PaymentComponent = () => {
                   </span>
                 </div>
                 
-                <ul className="reward-card__items">
-                  {selectedReward.items.map((item, idx) => (
-                    <li key={idx}>{item}</li>
-                  ))}
-                </ul>
+                {selectedReward.description && (
+                  <p className="reward-card__description">{selectedReward.description}</p>
+                )}
+
+                {selectedReward.items && selectedReward.items.length > 0 && (
+                  <ul className="reward-card__items">
+                    {selectedReward.items.map((item, idx) => (
+                      <li key={idx}>{item}</li>
+                    ))}
+                  </ul>
+                )}
 
                 <div className="reward-card__quantity">
                   <label>수량:</label>
@@ -201,6 +269,12 @@ const PaymentComponent = () => {
                     </button>
                   </div>
                 </div>
+
+                {selectedReward.shipping && (
+                  <div className="reward-card__shipping">
+                    배송 예정: {selectedReward.shipping}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -251,7 +325,6 @@ const PaymentComponent = () => {
                   </div>
                 </div>
 
-                {/* 우편번호 검색 */}
                 <div className="form-field">
                   <label className="form-field__label">우편번호 *</label>
                   <div className="address-search">
@@ -274,7 +347,6 @@ const PaymentComponent = () => {
                   </div>
                 </div>
 
-                {/* 기본 주소 */}
                 <div className="form-field">
                   <label className="form-field__label">기본 주소 *</label>
                   <input
@@ -287,7 +359,6 @@ const PaymentComponent = () => {
                   />
                 </div>
 
-                {/* 상세 주소 */}
                 <div className="form-field">
                   <label className="form-field__label">상세 주소 *</label>
                   <input
@@ -347,7 +418,7 @@ const PaymentComponent = () => {
 
               <div className="order-summary__notice">
                 <strong>📦 배송 안내</strong>
-                프로젝트 성공 시 2025년 3월부터 순차 배송됩니다.
+                {selectedReward.shipping || '프로젝트 성공 시 2025년 3월부터 순차 배송됩니다.'}
               </div>
 
               <button

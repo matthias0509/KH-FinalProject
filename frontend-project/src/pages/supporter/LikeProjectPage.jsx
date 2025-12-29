@@ -1,21 +1,15 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Header from '../../components/Header';
-import AppFooter from '../../components/AppFooter';
-import Sidebar from '../../components/Sidebar';
+import { useNavigate } from 'react-router-dom';
+import MyPageLayout from '../../components/MyPageLayout'; // 🚨 Header, Sidebar 대신 이거 하나만 import!
+
 // 스타일
 import '../../styles/MyPageLayout.css';
-import '../../styles/LikeFollow.css'; // 새로 만든 CSS
+import '../../styles/LikeFollow.css';
 
 const LikeProjectsPage = () => {
-    const navigate = useNavigate();
+    // const navigate = useNavigate(); // (현재 페이지 로직에서 안 쓰이면 제거해도 됨)
 
-    // 유저 정보
-    const userInfo = {
-        name: '푸딩러버',
-        profileImg: '🍮',
-        role: 'supporter'
-    };
+    // ❌ 기존 가짜 userInfo 삭제 (Layout이 처리함)
 
     // 가상 데이터: 좋아요한 프로젝트
     const likedProjects = [
@@ -49,53 +43,35 @@ const LikeProjectsPage = () => {
         }
     ];
 
-    // 메이커 버튼 핸들러 (공통)
-    const handleMakerClick = () => {
-        if (userInfo.role !== 'maker') {
-            if (window.confirm("메이커 권한이 없습니다.\n신청하시겠습니까?")) {
-                alert("요청되었습니다!");
-            }
-        } else {
-            navigate('/maker');
-        }
-    };
+    // ❌ handleMakerClick 삭제 (Sidebar에서 처리)
 
     return (
-        <div className="page-wrapper">
-            <Header />
-            <div className="mypage-container">
-                {/* --- 사이드바 --- */}
-               <Sidebar userInfo={userInfo} />
+        // ✅ Layout으로 감싸기
+        <MyPageLayout>
+            <h2 className="page-title">좋아요한 프로젝트 ❤️</h2>
 
-                {/* --- 메인 콘텐츠 --- */}
-                <main className="main-content">
-                    <h2 className="page-title">좋아요한 프로젝트 ❤️</h2>
-
-                    {likedProjects.length > 0 ? (
-                        <div className="grid-container">
-                            {likedProjects.map((item) => (
-                                <div key={item.id} className="like-card">
-                                    <div className="like-img-wrapper">
-                                        <img src={item.img} alt={item.title} />
-                                        <button className="card-heart-btn">♥</button>
-                                    </div>
-                                    <div className="like-card-info">
-                                        <p className="like-percent">{item.percent}% 달성</p>
-                                        <h3 className="like-title">{item.title}</h3>
-                                        <p className="like-maker">{item.maker}</p>
-                                    </div>
-                                </div>
-                            ))}
+            {likedProjects.length > 0 ? (
+                <div className="grid-container">
+                    {likedProjects.map((item) => (
+                        <div key={item.id} className="like-card">
+                            <div className="like-img-wrapper">
+                                <img src={item.img} alt={item.title} />
+                                <button className="card-heart-btn">♥</button>
+                            </div>
+                            <div className="like-card-info">
+                                <p className="like-percent">{item.percent}% 달성</p>
+                                <h3 className="like-title">{item.title}</h3>
+                                <p className="like-maker">{item.maker}</p>
+                            </div>
                         </div>
-                    ) : (
-                        <div className="empty-state">
-                            <p>좋아요한 프로젝트가 없습니다.</p>
-                        </div>
-                    )}
-                </main>
-            </div>
-            <AppFooter />
-        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="empty-state">
+                    <p>좋아요한 프로젝트가 없습니다.</p>
+                </div>
+            )}
+        </MyPageLayout>
     );
 };
 
