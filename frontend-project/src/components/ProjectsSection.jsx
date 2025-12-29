@@ -37,7 +37,10 @@ export default function ProjectsSection({
     <section className={className.trim()}>
       <div className="section-header">
         <h2 className="section-title">
-          {title} <span className="text-accent">{count}</span>
+          {title}
+          {typeof count === 'number' && (
+            <span className="text-accent">{count}</span>
+          )}
         </h2>
         {showSort && (
           <select className="select-control">

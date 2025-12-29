@@ -7,8 +7,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { fetchProjectAxios } from './DetailApi';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
+import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
+const DEFAULT_AVATAR = 'https://placehold.co/80x80?text=Maker';
 
 
 
@@ -40,7 +42,7 @@ const currencyFormatter = new Intl.NumberFormat('ko-KR');
     backers: 0,
     daysLeft: 0,
   },
-  creator: { name: '', profileImage: '', avatar: '', followers: 0 },
+  creator: { name: '메이커', profileImage: DEFAULT_AVATAR, avatar: DEFAULT_AVATAR, followers: 0 },
   reviews: [],
   story: [],
   timeline: [],
@@ -48,17 +50,30 @@ const currencyFormatter = new Intl.NumberFormat('ko-KR');
   rewards: [],
 };
 
-const API_BASE_URL = 'http://localhost:8001/foodding';
-
 const stripHtml = (value = '') => value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
-const resolveThumbnailUrl = (path = '') => {
-  if (!path) return projectInit.heroImage;
-  if (path.startsWith('http')) {
-    return path;
+const mapCreatorFromSeller = (seller) => {
+  if (!seller) {
+    return {
+      name: '메이커',
+      profileImage: DEFAULT_AVATAR,
+      avatar: DEFAULT_AVATAR,
+      followers: 0,
+      introduction: '',
+      email: '',
+      phone: '',
+    };
   }
-  const normalized = path.startsWith('/') ? path : `/${path}`;
-  return `${API_BASE_URL}${normalized}`;
+  const avatar = resolveProjectImageUrl(seller.profileImage) || DEFAULT_AVATAR;
+  return {
+    name: seller.nickname || seller.sellerName || '메이커',
+    profileImage: avatar,
+    avatar,
+    followers: seller.followers ?? 0,
+    introduction: seller.introduction ?? '',
+    email: seller.email ?? '',
+    phone: seller.phone ?? '',
+  };
 };
 
 const normalizeProjectDetail = (data = {}) => {
@@ -68,6 +83,7 @@ const normalizeProjectDetail = (data = {}) => {
   const today = new Date();
   const endDate = data.fundEndDate ? new Date(data.fundEndDate) : null;
   const daysLeft = endDate ? Math.max(0, Math.ceil((endDate - today) / (1000 * 60 * 60 * 24))) : 0;
+  const creator = mapCreatorFromSeller(data.sellerProfile);
 
   const timeline = [
     data.fundStartDate && {
@@ -101,7 +117,10 @@ const normalizeProjectDetail = (data = {}) => {
     ...data,
     title: data.productTitle ?? projectInit.title,
     subtitle: data.productDesc ?? projectInit.subtitle,
-    heroImage: resolveThumbnailUrl(data.modifyThumbnail || data.originThumbnail),
+    heroImage: resolveProjectImageUrl(
+      data.modifyThumbnail || data.originThumbnail,
+      projectInit.heroImage,
+    ),
     funding: {
       ...projectInit.funding,
       goal: targetAmount,
@@ -111,6 +130,7 @@ const normalizeProjectDetail = (data = {}) => {
     },
     story: storyBlocks,
     timeline: timeline.length ? timeline : projectInit.timeline,
+    creator: creator ?? projectInit.creator,
   };
 };
 
@@ -120,6 +140,7 @@ export default function ProductDetailPage() {
 
   // 프로젝트에 들어갈 정보들
   const [project, setProject] = useState(projectInit);
+  const [loadError, setLoadError] = useState('');
   //
   const REVIEWS_PER_PAGE = 5;
   const fundingGoal = project.funding.goal || 0;
@@ -238,21 +259,41 @@ export default function ProductDetailPage() {
       return;
     }
 
+    setLoadError('');
     const api = async () => {
       try {
         const item = await fetchProjectAxios(ProjectNo);
         if (!item || !item.productNo) {
-          toast.info('이미 삭제되거나 없는 프로젝트입니다.');
-          navigate('/');
+          setProject(projectInit);
+          setLoadError('존재하지 않거나 삭제된 프로젝트입니다.');
           return;
         }
         setProject(normalizeProjectDetail(item));
       } catch (error) {
-        toast.error('프로젝트 정보를 불러오지 못했습니다.');
+        setProject(projectInit);
+        setLoadError('프로젝트 정보를 불러오지 못했습니다.');
       }
     };
     api();
   }, [ProjectNo, navigate]);
+
+  if (loadError) {
+    return (
+      <div className="app">
+        <Header />
+        <main className="product-detail product-detail--empty">
+          <div className="product-detail__error">
+            <h1>알림</h1>
+            <p>{loadError}</p>
+            <button type="button" onClick={() => navigate('/')} className="detail-cta detail-cta--primary">
+              홈으로 이동
+            </button>
+          </div>
+        </main>
+        <AppFooter />
+      </div>
+    );
+  }
 
   return (
     <div className="app">
@@ -445,6 +486,12 @@ export default function ProductDetailPage() {
                   <span className="detail-creator__followers">
                     팔로워 {project.creator.followers.toLocaleString()}명
                   </span>
+                  {project.creator.introduction && (
+                    <p className="detail-creator__intro">{project.creator.introduction}</p>
+                  )}
+                  {project.creator.email && (
+                    <span className="detail-creator__contact">{project.creator.email}</span>
+                  )}
                 </div>
               </button>
               <div className="detail-creator__actions">

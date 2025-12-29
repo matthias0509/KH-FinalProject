@@ -8,6 +8,8 @@ import TextAlignExtension from '../../utils/textAlignExtension';
 import { categories } from '../../data/content';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getLoginUserNo } from '../../utils/auth';
+import { fetchSellerProfileStatus } from '../../api/sellerApplicationApi';
 
 import { imsiProjectAxios, insertProjectAxios, fetchDraftDetailAxios, uploadThumbnailAxios } from './ProjectApi';
 import DatePickerField from '../../components/DatePickerField';
@@ -99,6 +101,9 @@ export default function CreateProjectPage() {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [userNo] = useState(() => getLoginUserNo());
+  const [hasSellerProfile, setHasSellerProfile] = useState(false);
+  const [checkingSeller, setCheckingSeller] = useState(true);
   const draftId = searchParams.get('draft');
   const storyImageInputRef = useRef(null);
   const basicsRef = useRef(null);
@@ -176,9 +181,53 @@ export default function CreateProjectPage() {
   };
 
   useEffect(() => {
+    if (!userNo) {
+      toast.error('로그인 후 이용해 주세요.');
+      navigate('/login');
+      return;
+    }
+
+    let cancelled = false;
+    const checkSeller = async () => {
+      try {
+        setCheckingSeller(true);
+        const status = await fetchSellerProfileStatus(userNo);
+        if (!cancelled) {
+          setHasSellerProfile(status);
+          if (!status) {
+            toast.error('판매자 전환 승인 후 이용해 주세요.');
+            navigate('/change');
+          }
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setHasSellerProfile(false);
+          toast.error('판매자 정보를 확인할 수 없습니다.');
+          navigate('/change');
+        }
+      } finally {
+        if (!cancelled) {
+          setCheckingSeller(false);
+        }
+      }
+    };
+
+    checkSeller();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userNo, navigate]);
+
+  useEffect(() => {
     if (!draftId) {
       setActiveDraftId(null);
       setDraftPrefill(null);
+      setDraftStatus({ loading: false, error: null, applied: false });
+      return;
+    }
+
+    if (!userNo) {
       setDraftStatus({ loading: false, error: null, applied: false });
       return;
     }
@@ -187,7 +236,7 @@ export default function CreateProjectPage() {
     const loadDraft = async () => {
       setDraftStatus({ loading: true, error: null, applied: false });
       try {
-        const draft = await fetchDraftDetailAxios({ userNo: 1, tempNo: draftId });
+        const draft = await fetchDraftDetailAxios({ userNo, tempNo: draftId });
         if (cancelled) return;
         setDraftPrefill(draft || null);
         setActiveDraftId(draft?.tempNo ? String(draft.tempNo) : draftId);
@@ -206,7 +255,7 @@ export default function CreateProjectPage() {
     return () => {
       cancelled = true;
     };
-  }, [draftId]);
+  }, [draftId, userNo]);
 
   useEffect(() => {
     if (!draftPrefill) {
@@ -254,6 +303,14 @@ export default function CreateProjectPage() {
 
     editor.commands.setContent(draftPrefill.content.html);
   }, [draftPrefill, editor]);
+
+  useEffect(() => {
+    if (userNo) {
+      return;
+    }
+    toast.error('로그인 후 이용해 주세요.');
+    navigate('/login');
+  }, [userNo, navigate]);
 
   const getCurrentImageCount = () => {
     let count = 0;
@@ -482,6 +539,12 @@ export default function CreateProjectPage() {
   const handleSaveDraft = (e) => {
     e.preventDefault(); // 기본 이벤트 제거
 
+    if (!userNo) {
+      toast.error('로그인 후 이용해 주세요.');
+      navigate('/login');
+      return;
+    }
+
     const editorHtml = editor?.getHTML() ?? '';
     const editorJson = editor ? JSON.stringify(editor.getJSON()) : '{}';
 
@@ -493,7 +556,7 @@ export default function CreateProjectPage() {
       fundStartDate: formData.openStart || null,
       fundEndDate: formData.openEnd || null,
       shipStartDate: formData.shippingDate || formData.openEnd || formData.openStart || null,
-      userNo: 1, // 유저 넘버로 변경해야함
+      userNo,
       tempNo: activeDraftId,
       thumbnailUrl: formData.thumbnailUrl,
       content: {
@@ -512,6 +575,10 @@ export default function CreateProjectPage() {
     const api = async () => {
       try {
         const msg = await imsiProjectAxios(requestPayload);
+        if (typeof msg === 'string' && msg.includes('이용해 주세요')) {
+          toast.error(msg);
+          return;
+        }
         toast.info(msg);
         navigate("/create");
       } catch (error) {
@@ -535,6 +602,12 @@ export default function CreateProjectPage() {
       return;
     }
 
+    if (!userNo) {
+      toast.error('로그인 후 이용해 주세요.');
+      navigate('/login');
+      return;
+    }
+
     const requestPayload = {
       title: formData.title.trim(),
       summary: formData.subtitle.trim(),
@@ -543,7 +616,7 @@ export default function CreateProjectPage() {
       fundStartDate: formData.openStart || null,
       fundEndDate: formData.openEnd || null,
       shipStartDate: formData.shippingDate || formData.openEnd || formData.openStart || null,
-      userNo: 1, // TODO: replace with logged-in user info
+      userNo,
       tempNo: activeDraftId,
       thumbnailUrl: formData.thumbnailUrl,
       content: {
@@ -562,6 +635,10 @@ export default function CreateProjectPage() {
     const api = async () => {
       try {
         const msg = await insertProjectAxios(requestPayload);
+        if (typeof msg === 'string' && msg.includes('이용해 주세요')) {
+          toast.error(msg);
+          return;
+        }
         toast.info(msg);
         navigate('/create/success');
       } catch (error) {
@@ -601,6 +678,14 @@ export default function CreateProjectPage() {
         </aside>
 
         <div className="create-project">
+          {checkingSeller && (
+            <div className="create-project__draft-alert">판매자 정보를 확인하는 중입니다...</div>
+          )}
+          {!checkingSeller && !hasSellerProfile && (
+            <div className="create-project__draft-alert create-project__draft-alert--error">
+              판매자 전환 승인 후 이용할 수 있습니다.
+            </div>
+          )}
           {draftId && (
             <div
               className={`create-project__draft-alert${

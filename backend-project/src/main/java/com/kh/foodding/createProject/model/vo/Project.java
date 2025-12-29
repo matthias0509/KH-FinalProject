@@ -31,6 +31,7 @@ public class Project {
     private Long tempNo;
     private Long productNo;
     private Long userNo;             // 내부 사용자 번호
+    private Long sellerNo;           // 판매자 번호
 
     private String title;               // 프로젝트 제목
     private String summary;             // 프로젝트 한 줄 요약
@@ -84,4 +85,3 @@ public class Project {
     }
   
 }
-
