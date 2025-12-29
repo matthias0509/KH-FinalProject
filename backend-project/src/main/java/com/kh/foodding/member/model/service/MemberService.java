@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 	
 	private final MemberDao memberDao;
-    private final String savePath = "D:/foodding/profile_images/"; // 파일 저장 경로를 상수로 관리
+    private final String savePath = "c:/foodding/profile_images/"; // 파일 저장 경로를 상수로 관리
 
     public int insertMember(Member m, MultipartFile upfile) {
     	System.out.println("전달된 upfile: " + (upfile != null ? upfile.getOriginalFilename() : "NULL"));

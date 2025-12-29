@@ -42,6 +42,15 @@ public class MyPageController {
         
         String userId = (principal != null) ? principal.getName() : "testUser";
         MyPage info = mypageService.selectMemberInfo(userId);
+        
+     // 🔍 [진단 로그] 제발 찍혀라
+        System.out.println("============================================");
+        if (info != null) {
+            System.out.println(">>> DB에서 가져온 프로필 값: " + info.getModifyProfile());
+        } else {
+            System.out.println(">>> info 객체가 NULL 입니다.");
+        }
+        System.out.println("============================================");
 
         return (info != null)
             ? ResponseEntity.ok(info)

@@ -15,10 +15,15 @@ import EmailVerificationForm from "../../components/Login/EmailVerificationForm"
 const API_BASE_URL = "http://localhost:8001/foodding/api/mypage";
 const SERVER_URL = "http://localhost:8001/foodding";
 
-const getFullImageUrl = (url) => {
-  if (!url || url === "null") return null;
-  if (url.startsWith("http")) return url;
-  return `${SERVER_URL}${url}`;
+// ✅ 1. 업로드 경로 상수 추가 (Sidebar와 동일하게!)
+const UPLOAD_PATH = "/uploads/";
+
+// ✅ 2. 이미지 주소 변환 함수 수정 (Sidebar와 로직 통일)
+const getFullImageUrl = (filename) => {
+  if (!filename || filename === "null") return null;
+  if (filename.startsWith("http")) return filename;
+  // 서버주소 + /uploads/ + 파일명
+  return `${SERVER_URL}${UPLOAD_PATH}${filename}`;
 };
 
 const ProfileEditPage = () => {
@@ -36,20 +41,19 @@ const ProfileEditPage = () => {
 
   const [profile, setProfile] = useState({
     userId: "", name: "", userName: "", nickname: "", email: "", phone: "",
-    postcode: "", mainAddress: "", detailAddress: "", profileImageUrl: "",
+    postcode: "", mainAddress: "", detailAddress: "", 
+    modifyProfile: "", // ✅ 변수명 변경 (profileImageUrl -> modifyProfile)
   });
 
   const [accountForm, setAccountForm] = useState({
     newPassword: "", newPasswordConfirm: "", email: "", postcode: "", mainAddress: "", detailAddress: "",
   });
 
-  // ✅ 1. 토큰 가져오기 헬퍼 함수 (반복 줄이기용)
   const getAuthHeader = () => {
-    const token = localStorage.getItem('token'); // 저장된 토큰 키 확인 ('token' or 'accessToken')
+    const token = localStorage.getItem('token'); 
     return { Authorization: `Bearer ${token}` };
   };
 
-  // ✅ 2. 초기 데이터 로드 (토큰 추가)
   useEffect(() => {
     (async () => {
       try {
@@ -61,10 +65,12 @@ const ProfileEditPage = () => {
         }
 
         const res = await axios.get(`${API_BASE_URL}/info`, {
-            headers: getAuthHeader() // 헤더 추가
+            headers: getAuthHeader()
         });
 
-        setProfile(res.data);
+        // DB에서 가져온 modifyProfile 값을 state에 저장
+        setProfile(res.data); 
+        
         setAccountForm({
           newPassword: "", newPasswordConfirm: "",
           email: res.data.email || "",
@@ -86,7 +92,6 @@ const ProfileEditPage = () => {
 
   const handleTabChange = (tab) => setActiveTab(tab);
 
-  // ✅ 3. 기본 정보 수정 (토큰 추가)
   const handleUpdateBaseInfo = async () => {
     try {
       await axios.post(`${API_BASE_URL}/base/updateInfo`, {
@@ -94,7 +99,7 @@ const ProfileEditPage = () => {
         userName: profile.userName || profile.name,
         nickname: profile.nickname,
       }, {
-        headers: getAuthHeader() // 헤더 추가
+        headers: getAuthHeader()
       });
       toast.success("닉네임이 저장되었습니다.");
     } catch (e) {
@@ -102,7 +107,6 @@ const ProfileEditPage = () => {
     }
   };
 
-  // ✅ 4. 프로필 이미지 변경 (토큰 + 멀티파트 헤더)
   const handleProfileImageChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -112,19 +116,21 @@ const ProfileEditPage = () => {
 
     try {
       const res = await axios.post(
-        `${API_BASE_URL}/base/updateProfileImage`, // URL 상수로 변경함
+        `${API_BASE_URL}/base/updateProfileImage`,
         formData,
         {
           headers: { 
             "Content-Type": "multipart/form-data",
-            ...getAuthHeader() // ✅ 토큰 병합
+            ...getAuthHeader()
           },
         }
       );
 
+      // ✅ 수정 포인트: 컨트롤러가 반환한 값을 modifyProfile에 저장
+      // (컨트롤러가 Map으로 "profileImageUrl" 키로 줬다면 res.data.profileImageUrl 사용)
       setProfile(prev => ({
         ...prev,
-        profileImageUrl: res.data.profileImageUrl,
+        modifyProfile: res.data.profileImageUrl, 
       }));
 
       toast.success("사진이 변경되었습니다.");
@@ -136,23 +142,21 @@ const ProfileEditPage = () => {
     }
   };
 
-  // ✅ 5. 프로필 이미지 삭제 (토큰 추가)
   const handleDeleteProfileImage = async () => {
     if (!window.confirm("프로필 사진을 삭제하시겠습니까?")) return;
     try {
-      await axios.post(`${API_BASE_URL}/base/deleteProfileImage`, {}, { // post body가 비었으므로 빈 객체 {}
+      await axios.post(`${API_BASE_URL}/base/deleteProfileImage`, {}, { 
         headers: getAuthHeader()
       });
-      setProfile((prev) => ({ ...prev, profileImageUrl: null }));
+      // ✅ 수정 포인트: modifyProfile을 null로 변경
+      setProfile((prev) => ({ ...prev, modifyProfile: null }));
       toast.success("기본 이미지로 변경되었습니다.");
     } catch (e) { toast.error("사진 삭제 실패"); }
   };
 
-  // ✅ 6. 계정 정보 저장 (토큰 추가)
   const handleSaveAccount = async () => {
     if (accountForm.newPassword && !isPwdValid) return toast.error("비밀번호 형식을 확인해주세요.");
     if (accountForm.newPassword !== accountForm.newPasswordConfirm) return toast.error("새 비밀번호가 일치하지 않습니다.");
-    // 이메일 변경 로직은 상황에 따라 다를 수 있으나 일단 유지
     if (accountForm.email !== profile.email && !emailVerified) return toast.warning("이메일 변경 시 인증이 필요합니다.");
 
     try {
@@ -160,21 +164,19 @@ const ProfileEditPage = () => {
         userId: profile.userId,
         userName: profile.userName || profile.name,
         nickname: profile.nickname,
-        userPwd: accountForm.newPassword, // 비밀번호가 비어있으면 백엔드에서 변경 안하도록 처리 필요
+        userPwd: accountForm.newPassword,
         email: accountForm.email,
         postcode: accountForm.postcode,
         mainAddress: accountForm.mainAddress,
         detailAddress: accountForm.detailAddress,
       }, {
-        headers: getAuthHeader() // 헤더 추가
+        headers: getAuthHeader()
       });
 
       toast.success("계정 정보가 수정되었습니다.");
       
-      // 저장 후 최신 정보 다시 불러오기
       const res = await axios.get(`${API_BASE_URL}/info`, { headers: getAuthHeader() });
       setProfile(res.data);
-      // 입력창 초기화 (비밀번호 등)
       setAccountForm(prev => ({ ...prev, newPassword: "", newPasswordConfirm: "" }));
 
     } catch (e) { toast.error("저장 중 오류 발생"); }
@@ -211,15 +213,19 @@ const ProfileEditPage = () => {
                 <div className="form-container base-info-form">
                   <div className="photo-section">
                     <div className="photo-wrapper">
+                      {/* ✅ 3. 이미지 태그 수정 (Sidebar와 동일하게!) */}
                       <img
                         src={
-                          profile.profileImageUrl
-                            ? `${getFullImageUrl(profile.profileImageUrl)}?t=${Date.now()}`
+                          profile.modifyProfile
+                            ? `${getFullImageUrl(profile.modifyProfile)}?t=${Date.now()}`
                             : "/placeholder.png"
                         }
                         alt="프로필"
                         className="current-photo"
-                        onError={(e) => (e.currentTarget.src = "/placeholder.png")}
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "/placeholder.png";
+                        }}
                       />
 
                     </div>

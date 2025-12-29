@@ -3,17 +3,17 @@
 
 <mapper namespace="com.kh.foodding.mypage.model.dao.MyPageDao">
 
-    <select id="selectMemberById" resultType="com.kh.foodding.mypage.model.vo.MyPage">
+   <select id="selectMemberById" resultType="com.kh.foodding.mypage.model.vo.MyPage">
         SELECT 
             USER_ID as userId,
             USER_NAME as userName,      
             NICKNAME as nickname,
             EMAIL as email,
             PHONE as phone,
-            MODIFY_PROFILE as profileImageUrl,
-            POSTCODE as postcode,
+            MODIFY_PROFILE as modifyProfile, POSTCODE as postcode,
             MAIN_ADDRESS as mainAddress,
-            DETAIL_ADDRESS as detailAddress
+            DETAIL_ADDRESS as detailAddress,
+            USER_ROLE as userRole
         FROM TB_USER
         WHERE USER_ID = #{userId}
     </select>
@@ -24,27 +24,21 @@
         WHERE USER_ID = #{userId}
     </select>
 		
-		<update id="updateMemberInfo" parameterType="com.kh.foodding.mypage.model.vo.MyPage">
-		    UPDATE TB_USER
-		    <set>
-		        <if test="userName != null">USER_NAME = #{userName},</if>
-		        <if test="nickname != null">NICKNAME = #{nickname},</if>
-		        <if test="postcode != null">POSTCODE = #{postcode},</if>
-		        <if test="mainAddress != null">MAIN_ADDRESS = #{mainAddress},</if>
-		        <if test="detailAddress != null">DETAIL_ADDRESS = #{detailAddress},</if>
-		    </set>
-		    WHERE USER_ID = #{userId}
-		</update>
-
-    <update id="updatePassword">
+    <update id="updateMemberInfo" parameterType="com.kh.foodding.mypage.model.vo.MyPage">
         UPDATE TB_USER
-        SET USER_PWD = #{newPassword}
+        <set>
+            <if test="userName != null">USER_NAME = #{userName},</if>
+            <if test="nickname != null">NICKNAME = #{nickname},</if>
+            <if test="postcode != null">POSTCODE = #{postcode},</if>
+            <if test="mainAddress != null">MAIN_ADDRESS = #{mainAddress},</if>
+            <if test="detailAddress != null">DETAIL_ADDRESS = #{detailAddress},</if>
+        </set>
         WHERE USER_ID = #{userId}
     </update>
 
     <update id="updateProfileImage">
         UPDATE TB_USER
-        SET MODIFY_PROFILE = #{profileImageUrl}
+        SET MODIFY_PROFILE = #{modifyProfile} 
         WHERE USER_ID = #{userId}
     </update>
     
@@ -64,7 +58,5 @@
         DELETE FROM TB_USER 
         WHERE USER_ID = #{userId}
     </delete>
-    
-    
     
 </mapper>
