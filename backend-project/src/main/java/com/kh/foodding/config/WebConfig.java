@@ -17,21 +17,25 @@ public class WebConfig implements WebMvcConfigurer {
     private final List<String> uploadLocations = new ArrayList<>();
 
     public WebConfig() {
-        // 프로젝트 실행 경로(예: backend 프로젝트 루트) 기준
+        // 1. 기존 코드 (프로젝트 내부 uploads) - 건드리지 않음
         Path projectUploads = Paths.get(System.getProperty("user.dir"), "uploads");
         ensureDirectory(projectUploads);
         uploadLocations.add(projectUploads.toUri().toString());
 
-        // 기존 윈도우 배포 경로도 유지 (있을 경우)
+        // 2. 기존 코드 (C:/foodding/uploads) - 건드리지 않음
         Path windowsUploads = Paths.get("C:/foodding/uploads");
         uploadLocations.add(windowsUploads.toUri().toString());
+        
+        // 🚨 [여기만 추가하세요!] 실제 파일이 있는 'profile_images' 폴더를 리스트에 추가
+        Path profileUploads = Paths.get("C:/foodding/profile_images"); 
+        uploadLocations.add(profileUploads.toUri().toString());
     }
 
+    // ... 아래 ensureDirectory랑 addResourceHandlers는 그대로 두세요 ...
     private void ensureDirectory(Path dir) {
         try {
             Files.createDirectories(dir);
         } catch (Exception ignored) {
-            // 디렉터리 생성 실패해도 다른 경로를 사용하도록 무시
         }
     }
 
@@ -42,13 +46,4 @@ public class WebConfig implements WebMvcConfigurer {
             .distinct()
             .forEach(location -> registration.addResourceLocations(location.endsWith("/") ? location : location + "/"));
     }
-
-//    @Override
-//    public void addCorsMappings(CorsRegistry registry) {
-//        registry.addMapping("/**")
-//                .allowedOriginPatterns("http://localhost:5173") // ⭐ 핵심
-//                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-//                .allowedHeaders("*")
-//                .allowCredentials(true);
-//    }
 }

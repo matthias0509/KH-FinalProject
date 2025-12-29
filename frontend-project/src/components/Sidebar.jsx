@@ -11,8 +11,8 @@ const UPLOAD_PATH = "/uploads/";
 
 // 3. 이미지 전체 경로 변환 함수 (핵심 로직)
 const getFullImageUrl = (filename) => {
-    // 파일명이 없으면 null 반환 (-> 나중에 placeholder 처리됨)
-    if (!filename) return null;
+    // 파일명이 없거나 'null' 문자열이면 null 반환
+    if (!filename || filename === "null") return null;
 
     // (1) 소셜 로그인 등으로 이미 http로 시작하는 완벽한 주소인 경우 -> 그대로 사용
     if (filename.startsWith("http")) return filename;
@@ -24,9 +24,6 @@ const getFullImageUrl = (filename) => {
 const Sidebar = ({ userInfo = {} }) => { 
     const navigate = useNavigate();
     const location = useLocation();
-
-    // 디버깅용: 콘솔에서 userInfo.modifyProfile 값이 파일명인지 확인하세요.
-    // console.log("Sidebar userInfo:", userInfo); 
 
     // 1. 닉네임 우선 표시 로직
     const displayName = userInfo.nickname || userInfo.userName || userInfo.name || '사용자';
@@ -82,10 +79,11 @@ const Sidebar = ({ userInfo = {} }) => {
                 )}
             </div>
 
-            {/* 프로필 영역 */}
+            {/* ✅ 프로필 영역 (디자인 수정됨) */}
             <div className="profile-section">
+                
+                {/* 1. 둥근 프로필 이미지 틀 */}
                 <div className="profile-img-wrapper">
-                   {/* 🚨 여기가 가장 중요한 이미지 태그 부분입니다 🚨 */}
                    <img
                     src={
                         // 1. modifyProfile 값이 존재하는지 확인
@@ -99,18 +97,18 @@ const Sidebar = ({ userInfo = {} }) => {
                     className="sidebar-profile-img"
                     // 4. 엑박(404)이 뜨면 기본 이미지로 대체하는 안전장치
                     onError={(e) => {
-                        // 무한루프 방지를 위해 onerror 핸들러 제거 후 src 변경
                         e.target.onerror = null; 
                         e.target.src = "/placeholder.png";
                     }}
                     />
                 </div>
                 
+                {/* 2. 닉네임 (화살표 링크 제거됨) */}
                 <h3 className="username">
-                    {displayName} {isMakerMode ? '메이커' : ''}님 
-                    <Link to="/mypage/profile" className="arrow-link"> &gt;</Link>
+                    {displayName} {isMakerMode ? '메이커' : ''}님
                 </h3>
                 
+                {/* 3. 하단 버튼 (설정 바로가기) */}
                 {isMakerMode ? (
                     <p className="follow-count">팔로워 0</p>
                 ) : (
@@ -118,7 +116,7 @@ const Sidebar = ({ userInfo = {} }) => {
                 )}
             </div>
 
-            {/* 메뉴 리스트 */}
+            {/* 메뉴 리스트 (기존 유지) */}
             <nav className={`menu-list ${isMakerMode ? 'maker-menu' : ''}`}>
                 {isMakerMode ? (
                     /* --- 메이커 모드 메뉴 --- */
