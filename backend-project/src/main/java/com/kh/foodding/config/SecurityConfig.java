@@ -1,7 +1,6 @@
 package com.kh.foodding.config;
 
 import java.util.List;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -19,10 +18,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(cors -> {}) // ⭐ CORS 활성화
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ CORS 설정 연결 명시
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/payment/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll() // ✅ [중요] 이미지 경로 명시적 허용
                 .anyRequest().permitAll()
             )
             .httpBasic(httpBasic -> httpBasic.disable())
@@ -34,15 +34,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
-        config.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
+        // ✅ 프론트엔드 주소 (React)
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000")); 
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(true); // ✅ [중요] 쿠키/인증정보 포함 허용 (false -> true 변경 권장)
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-
         return source;
     }
     
@@ -50,7 +49,4 @@ public class SecurityConfig {
     public BCryptPasswordEncoder bcryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
-    
-    
 }
-

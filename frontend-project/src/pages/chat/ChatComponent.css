@@ -8,6 +8,26 @@
   overflow: hidden;
 }
 
+.chat-page--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-page__loading-content {
+  text-align: center;
+  color: #6b7280;
+}
+
+.chat-page__loading-spinner {
+  margin: 0 auto 8px;
+  animation: spin 1s linear infinite;
+}
+
+.chat-page__loading-text {
+  font-size: 14px;
+}
+
 /* Header */
 .chat-page__header {
   background-color: var(--surface);
@@ -97,6 +117,16 @@
   background-color: #9ca3af;
 }
 
+.chat-page__messages-loading {
+  text-align: center;
+  color: #6b7280;
+  padding: 20px;
+}
+
+.chat-page__messages-loading-text {
+  font-size: 13px;
+}
+
 .chat-page__date {
   text-align: center;
   font-size: 12px;
@@ -120,6 +150,15 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 

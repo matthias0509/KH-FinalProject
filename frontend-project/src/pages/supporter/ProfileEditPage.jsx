@@ -1,260 +1,321 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import Header from '../../components/Header';
-import AppFooter from '../../components/AppFooter';
-import '../../styles/MyPageLayout.css'; // 공통 레이아웃
-import '../../styles/ProfileEditPage.css'; // 전용 CSS
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Header from "../../components/Header";
+import AppFooter from "../../components/AppFooter";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "../../styles/ProfileEditPage.css";
+import { FiCamera, FiTrash2, FiChevronLeft } from "react-icons/fi";
 
-// ===================================================
-// A. 계정 정보 변경 탭 컴포넌트 (AccountSettingsTab)
-// ===================================================
-const AccountSettingsTab = ({ profile, accountSettings, handleAccountChange }) => { // accountSettings 상태와 핸들러 추가
-    return (
-        <div className="form-container account-settings-tab">
-            
-            <h3 className="section-title">로그인 정보</h3>
+// --- 필수 컴포넌트 임포트 (경로 확인 필수) ---
+import InputField from "../../components/Login/InputField";
+import PostCode from "../../components/Login/PostCode";
+import EmailVerificationForm from "../../components/Login/EmailVerificationForm";
 
-            {/* 이름 (변경 가능) */}
-            <div className="form-group">
-                <label className="input-label">이름</label>
-                <input 
-                    type="text" 
-                    name="name"
-                    className="input-field" 
-                    value={accountSettings.name}
-                    onChange={handleAccountChange}
-                />
-            </div>
+const API_BASE_URL = "http://localhost:8001/api/mypage";
+const SERVER_URL = "http://localhost:8001";
 
-            {/* 아이디 (변경 불가) */}
-            <div className="form-group">
-                <label className="input-label">아이디</label>
-                <input 
-                    type="text" 
-                    className="input-field read-only" 
-                    value={profile.userId} // profile에서 userId 가져옴
-                    readOnly
-                />
-            </div>
-
-            {/* 현재 비밀번호 입력 */}
-            <div className="form-group">
-                <label className="input-label">비밀번호</label>
-                <div className="input-row">
-                    <input 
-                        type="password" 
-                        name="password"
-                        className="input-field" 
-                        value={accountSettings.password}
-                        onChange={handleAccountChange}
-                        placeholder="현재 비밀번호를 입력해주세요"
-                    />
-                    <button className="btn-outline">비밀번호 변경</button>
-                </div>
-                <p className="input-guide">비밀번호 변경 시 새로운 페이지로 이동합니다.</p>
-            </div>
-            
-            <div className="divider"></div>
-
-            <h3 className="section-title">연락처 정보</h3>
-
-            {/* 이메일 변경 */}
-            <div className="form-group">
-                <label className="input-label">이메일</label>
-                <div className="input-row">
-                    <input 
-                        type="text" 
-                        className="input-field read-only" 
-                        value={profile.email}
-                        readOnly 
-                    />
-                    <button className="btn-outline">변경</button>
-                </div>
-            </div>
-            
-            {/* 휴대폰 번호 변경 */}
-            <div className="form-group">
-                <label className="input-label">휴대폰 번호</label>
-                <div className="input-row">
-                    <input 
-                        type="text" 
-                        className="input-field read-only" 
-                        value={profile.phone}
-                        readOnly
-                    />
-                    <button className="btn-outline">변경</button>
-                </div>
-            </div>
-
-            <div className="divider"></div>
-            
-            {/* 저장 버튼 그룹 추가 */}
-            <div className="btn-group">
-                <button className="btn-save">변경 사항 저장</button>
-                <button className="btn-cancel">취소</button>
-            </div>
-
-            <h3 className="section-title">계정 관리</h3>
-            
-            {/* 회원 탈퇴 */}
-            <div className="form-group withdrawal-group">
-                <label className="input-label">계정 삭제</label>
-                <div className="input-row">
-                    <span className="info-text">탈퇴 시 모든 데이터는 삭제되며 복구할 수 없습니다.</span>
-                    <button className="btn-delete">회원 탈퇴</button>
-                </div>
-            </div>
-        </div>
-    );
+const getFullImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith("http")) return url;
+  let safeUrl = url;
+  if (!safeUrl.startsWith("/uploads") && !safeUrl.startsWith("/")) {
+    safeUrl = `/uploads/${safeUrl}`;
+  } else if (!safeUrl.startsWith("/")) {
+    safeUrl = `/${safeUrl}`;
+  }
+  return `${SERVER_URL}${safeUrl}`;
 };
 
-
-// ===================================================
-// B. 기본 정보 변경 탭 컴포넌트 (BaseInfoTab)
-//    - 동일
-// ===================================================
-const BaseInfoTab = ({ profile, handleChange }) => {
-    return (
-        <div className="form-container">
-            {/* 프로필 사진 변경 */}
-            <div className="form-group photo-section">
-                <label className="input-label">프로필 사진</label>
-                <div className="photo-wrapper">
-                    <div className="current-photo">😐</div>
-                    <div className="photo-buttons">
-                        <button className="btn-upload">사진 변경</button>
-                        <button className="btn-delete">삭제</button>
-                    </div>
-                </div>
-            </div>
-
-            {/* 닉네임 */}
-            <div className="form-group">
-                <label className="input-label">닉네임</label>
-                <input 
-                    type="text" 
-                    name="nickname"
-                    className="input-field" 
-                    value={profile.nickname} 
-                    onChange={handleChange}
-                />
-                <p className="input-guide">한글, 영문, 숫자 포함 2~10자</p>
-            </div>
-
-            {/* 소개 */}
-            <div className="form-group">
-                <label className="input-label">소개</label>
-                <textarea 
-                    name="intro"
-                    className="input-field textarea-field" 
-                    value={profile.intro}
-                    onChange={handleChange}
-                    placeholder="나를 소개하는 글을 써보세요."
-                />
-            </div>
-
-            <div className="divider"></div>
-
-            {/* 저장 버튼 */}
-            <div className="btn-group">
-                <button className="btn-save">변경 사항 저장</button>
-                <button className="btn-cancel">취소</button>
-            </div>
-        </div>
-    );
-};
-
-
-// ===================================================
-// C. 메인 페이지 컴포넌트 (ProfileEditPage)
-// ===================================================
 const ProfileEditPage = () => {
-    // 탭 상태 관리
-    const [activeTab, setActiveTab] = useState('base'); 
-    
-    // 1. 기본 정보 및 공유 연락처 상태
-    const [profile, setProfile] = useState({
-        nickname: 'juhyeon00',
-        userId: 'juhyeon_main', // 아이디 추가
-        email: 'juhyeon00@example.com',
-        phone: '010-1234-5678',
-        intro: '안녕하세요. 펀딩을 사랑하는 서포터입니다.',
-    });
+  const navigate = useNavigate();
 
-    // 2. 계정 설정 전용 상태 (이름, 비밀번호 등)
-    const [accountSettings, setAccountSettings] = useState({
-        name: '김주현', // 이름 상태 추가
-        password: '', // 비밀번호 입력 필드 상태
-    });
+  // --- 상태 관리 ---
+  const [activeTab, setActiveTab] = useState("base");
+  const [loading, setLoading] = useState(true);
+  
+  // 비밀번호 & 이메일 유효성 상태
+  const [pwdMsg, setPwdMsg] = useState('');
+  const [isPwdValid, setIsPwdValid] = useState(true);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const pwdRegex = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
 
-    // 기본 정보 핸들러
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setProfile({ ...profile, [name]: value });
-    };
+  const [profile, setProfile] = useState({
+    userId: "",
+    name: "",
+    userName: "",
+    nickname: "",
+    email: "",
+    phone: "",
+    postcode: "",
+    mainAddress: "",
+    detailAddress: "",
+    profileImageUrl: "",
+  });
 
-    // 계정 설정 핸들러
-    const handleAccountChange = (e) => {
-        const { name, value } = e.target;
-        setAccountSettings({ ...accountSettings, [name]: value });
-    };
+  const [accountForm, setAccountForm] = useState({
+    newPassword: "",
+    newPasswordConfirm: "",
+    email: "",
+    postcode: "",
+    mainAddress: "",
+    detailAddress: "",
+  });
 
+    const fileInputRef = useRef(null);
+    useEffect(() => {
+    (async () => {
+        try {
+        const res = await axios.get(`${API_BASE_URL}/info`);
+        setProfile(res.data); // 전체 프로필 정보 저장
 
-    return (
-        <div className="page-wrapper">
-            <Header />
-            <div className="mypage-container">
-                {/* --- 사이드바 (동일) --- */}
-                <aside className="sidebar">
-                    <div className="mode-switch">
-                        <Link to="/mypage" className="mode-btn active">서포터</Link>
-                        <Link to="/maker" className="mode-btn link-btn">메이커</Link>
-                    </div>
+        // 수정할 폼에 기존 데이터 채우기
+        setAccountForm({
+            newPassword: "",
+            newPasswordConfirm: "",
+            email: res.data.email || "",
+            postcode: res.data.postcode || "",
+            mainAddress: res.data.mainAddress || "",
+            detailAddress: res.data.detailAddress || "",
+        });
+        } catch (e) {
+        console.error("데이터 로딩 실패:", e);
+        } finally {
+        setLoading(false);
+        }
+    })();
+    }, []);
 
-                    <div className="profile-section">
-                        <div className="profile-img">😐</div>
-                        <h3 className="username">{profile.nickname} <span className="arrow">&gt;</span></h3>
-                        <button className="profile-setting-btn active">내 정보 설정</button>
-                    </div>
-                </aside>
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+  };
 
-                {/* --- 메인 콘텐츠 (설정 폼) --- */}
-                <main className="main-content">
-                    <h2 className="page-title">설정</h2>
+  /** =============== 기본 정보 변경 (닉네임) =============== */
+  const handleUpdateBaseInfo = async () => {
+    try {
+      await axios.post(`${API_BASE_URL}/base/updateInfo`, {
+        userId: profile.userId,
+        userName: profile.userName || profile.name, // ORA-01407 방지
+        nickname: profile.nickname,
+      });
+      toast.success("닉네임이 저장되었습니다.");
+    } catch (e) {
+      toast.error("저장 실패");
+    }
+  };
 
-                    <div className="edit-card">
-                        <div className="card-header-tab">
-                            <span 
-                                className={`tab-item ${activeTab === 'base' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('base')}
-                            >
-                                기본 정보 변경
-                            </span>
-                            <span 
-                                className={`tab-item ${activeTab === 'account' ? 'active' : ''}`}
-                                onClick={() => setActiveTab('account')}
-                            >
-                                계정 정보 변경
-                            </span>
-                        </div>
+  /** =============== 프로필 사진 로직 =============== */
+  const handleProfileImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("profileFile", file);
+    try {
+      await axios.post(`${API_BASE_URL}/base/updateProfileImage`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const res2 = await axios.get(`${API_BASE_URL}/info`);
+      setProfile(res2.data);
+      toast.success("사진이 변경되었습니다.");
+    } catch (e) {
+      toast.error("사진 변경 실패");
+    }
+  };
 
-                        {/* 탭 내용 분기 */}
-                        {activeTab === 'base' ? (
-                            <BaseInfoTab profile={profile} handleChange={handleChange} />
-                        ) : (
-                            <AccountSettingsTab 
-                                profile={profile} 
-                                accountSettings={accountSettings} 
-                                handleAccountChange={handleAccountChange}
-                            />
-                        )}
+  const handleDeleteProfileImage = async () => {
+    if (!window.confirm("프로필 사진을 삭제하시겠습니까?")) return;
+    try {
+      await axios.post(`${API_BASE_URL}/base/deleteProfileImage`);
+      setProfile((prev) => ({ ...prev, profileImageUrl: null }));
+      toast.success("기본 이미지로 변경되었습니다.");
+    } catch (e) {
+      toast.error("사진 삭제 실패");
+    }
+  };
 
-                    </div>
-                </main>
+ /** =============== 계정 정보 저장 (최종 로직) =============== */
+  const handleSaveAccount = async () => {
+    if (accountForm.newPassword && !isPwdValid) {
+      toast.error("비밀번호 형식을 확인해주세요.");
+      return;
+    }
+    if (accountForm.newPassword !== accountForm.newPasswordConfirm) {
+      toast.error("새 비밀번호가 일치하지 않습니다.");
+      return;
+    }
+    // 이메일이 변경되었을 때만 인증 체크
+    if (accountForm.email !== profile.email && !emailVerified) {
+      toast.warning("이메일 변경 시 인증이 필요합니다.");
+      return;
+    }
+
+    try {
+      // 💡 여기서 nickname을 포함해서 보내야 DB 에러(ORA-01407)가 나지 않습니다.
+      await axios.post(`${API_BASE_URL}/account/update`, {
+        userId: profile.userId,
+        userName: profile.userName || profile.name, // 이름 유지
+        nickname: profile.nickname,                // 닉네임 유지 (추가됨!)
+        userPwd: accountForm.newPassword,          // 비밀번호 (입력시에만 처리)
+        email: accountForm.email,
+        postcode: accountForm.postcode,
+        mainAddress: accountForm.mainAddress,
+        detailAddress: accountForm.detailAddress,
+      });
+      
+      toast.success("계정 정보가 수정되었습니다.");
+      
+      // 저장 후 최신 정보를 다시 불러와서 상태 동기화
+      const res = await axios.get(`${API_BASE_URL}/info`);
+      setProfile(res.data);
+    } catch (e) {
+      console.error(e);
+      toast.error("저장 중 오류 발생 (DB 제약조건 확인)");
+    }
+  };
+
+  const handleWithdraw = () => {
+    if (!window.confirm("정말 탈퇴하시겠습니까?")) return;
+    toast.info("회원탈퇴 기능 준비 중");
+  };
+
+  if (loading) return <div>로딩 중...</div>;
+
+  return (
+    <div className="page-wrapper">
+      <ToastContainer position="top-center" autoClose={2000} theme="colored" />
+      <Header />
+
+      <div className="profile-edit-container">
+        <main className="settings-main">
+          <div className="page-header-actions">
+            <button onClick={() => navigate(-1)} className="btn-back-link">
+              <FiChevronLeft className="back-icon" /> 뒤로가기
+            </button>
+          </div>
+
+          <div className="edit-card">
+            <div className="card-header-tab">
+              <span className={`tab-item ${activeTab === "base" ? "active" : ""}`} onClick={() => handleTabChange("base")}>기본 정보</span>
+              <span className={`tab-item ${activeTab === "account" ? "active" : ""}`} onClick={() => handleTabChange("account")}>계정 정보</span>
             </div>
-            <AppFooter />
-        </div>
-    );
+
+            <div className="card-body">
+              {/* --- 기본 정보 탭 --- */}
+              {activeTab === "base" && (
+                <div className="form-container base-info-form">
+                  <div className="photo-section">
+                    <div className="photo-wrapper">
+                      <img src={getFullImageUrl(profile.profileImageUrl) || "/placeholder.png"} alt="프로필" className="current-photo" onError={(e) => (e.target.src = "/placeholder.png")} />
+                    </div>
+                    <div className="photo-buttons">
+                      <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleProfileImageChange} />
+                      <button className="btn-action btn-upload" onClick={() => fileInputRef.current.click()}><FiCamera className="btn-icon" /> 사진 변경</button>
+                      <button className="btn-action btn-delete-photo" onClick={handleDeleteProfileImage}><FiTrash2 className="btn-icon" /> 삭제</button>
+                    </div>
+                  </div>
+                  <InputField label="닉네임" value={profile.nickname || ""} onChange={(e) => setProfile({ ...profile, nickname: e.target.value })} placeholder="닉네임을 입력해주세요" />
+                  <button className="btn-submit btn-save-nickname" onClick={handleUpdateBaseInfo}>닉네임 저장</button>
+                </div>
+              )}
+
+            {/* --- 계정 정보 탭 --- */}
+            {activeTab === "account" && (
+            <div className="form-container account-info-form">
+                {/* 1. 이름 & 아이디 (기존 데이터 고정) */}
+                <InputField label="이름" value={profile.userName || profile.name || ""} readOnly />
+                <InputField label="아이디" value={profile.userId || ""} readOnly />
+                
+                {/* 2. 비밀번호 변경 (입력 시에만 작동) */}
+                <div>
+                <InputField 
+                    label="새 비밀번호" 
+                    type="password" 
+                    placeholder="변경 시에만 입력하세요 (8~16자 영문, 숫자, 특수문자)" 
+                    value={accountForm.newPassword} 
+                    onChange={(e) => {
+                    const val = e.target.value;
+                    setAccountForm({...accountForm, newPassword: val});
+                    if (val && !pwdRegex.test(val)) { 
+                        setPwdMsg("형식이 올바르지 않습니다."); 
+                        setIsPwdValid(false); 
+                    } else { 
+                        setPwdMsg(val ? "사용 가능합니다." : ""); 
+                        setIsPwdValid(true); 
+                    }
+                    }} 
+                />
+                {pwdMsg && <p style={{ fontSize: '12px', color: isPwdValid ? '#2ecc71' : '#ff4757', marginTop: '4px' }}>{pwdMsg}</p>}
+                </div>
+
+                {/* 3. 비밀번호 확인 */}
+                <InputField 
+                label="새 비밀번호 확인" 
+                type="password" 
+                placeholder="새 비밀번호 다시 입력"
+                value={accountForm.newPasswordConfirm} 
+                onChange={(e) => setAccountForm({...accountForm, newPasswordConfirm: e.target.value})}
+                error={accountForm.newPassword && accountForm.newPasswordConfirm && accountForm.newPassword !== accountForm.newPasswordConfirm ? "비밀번호가 일치하지 않습니다." : null} 
+                />
+
+                {/* 4. 전화번호 (기존 데이터 고정) */}
+                <InputField label="전화번호" value={profile.phone || ""} readOnly />
+                
+                {/* 5. 이메일 (기존 데이터가 기본값으로 들어감) */}
+                <EmailVerificationForm 
+                email={accountForm.email} // accountForm에 담긴 기존 이메일이 보임
+                onChange={(e) => setAccountForm({...accountForm, email: e.target.value})} 
+                onVerified={(val) => setEmailVerified(val)} 
+                />
+
+                {/* 6. 주소 (기존 데이터가 기본값으로 들어감) */}
+                <div className="address-section">
+                <div className="postcode-row" style={{display: 'flex', gap: '8px', alignItems: 'flex-end'}}>
+                    <div style={{flex: 1}}>
+                    <InputField 
+                        label="주소" 
+                        value={accountForm.postcode} // 기존 우편번호
+                        readOnly 
+                        placeholder="우편번호" 
+                    />
+                    </div>
+                    <PostCode onComplete={(data) => setAccountForm({
+                    ...accountForm, 
+                    postcode: data.zonecode, 
+                    mainAddress: data.address, 
+                    detailAddress: ''
+                    })} />
+                </div>
+                <InputField 
+                    value={accountForm.mainAddress} // 기존 기본주소
+                    readOnly 
+                    placeholder="기본 주소" 
+                />
+                <InputField 
+                    value={accountForm.detailAddress} // 기존 상세주소
+                    onChange={(e) => setAccountForm({...accountForm, detailAddress: e.target.value})} 
+                    placeholder="상세 주소를 입력하세요" 
+                />
+                </div>
+
+                {/* 하단 버튼 */}
+                <div className="account-action-buttons">
+                <button className="btn-save-account" onClick={handleSaveAccount}>변경사항 저장</button>
+                <button className="btn-cancel-account" onClick={() => navigate(0)}>취소</button>
+                </div>
+                
+                <div className="withdraw-zone">
+                <button className="btn-withdraw-link" onClick={handleWithdraw}>회원탈퇴</button>
+                </div>
+            </div>
+            )}
+            </div>
+          </div>
+        </main>
+      </div>
+      <AppFooter />
+    </div>
+  );
 };
 
 export default ProfileEditPage;

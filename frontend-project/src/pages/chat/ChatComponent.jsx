@@ -1,41 +1,41 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Paperclip, Smile } from 'lucide-react';
+import { X, Send, Paperclip, Smile, Loader } from 'lucide-react';
 import './ChatComponent.css';
 
 const ChatComponent = () => {
-  // creator 상태 추가
   const [creator, setCreator] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: 'creator',
-      text: '안녕하세요! 프로젝트에 관심 가져주셔서 감사합니다. 무엇이든 물어보세요 😊',
-      timestamp: new Date(Date.now() - 60000)
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const messagesEndRef = useRef(null);
 
-  // 부모 창으로부터 creator 데이터 받기
+  // 부모 창으로부터 creator와 userId 데이터 받기
   useEffect(() => {
     const handleMessage = (event) => {
-      // 보안: 같은 origin에서 온 메시지만 처리
       if (event.origin !== window.location.origin) return;
       
       if (event.data.type === 'CREATOR_DATA') {
         setCreator(event.data.creator);
+        setUserId(event.data.userId || 'user_' + Date.now());
       }
     };
     
     window.addEventListener('message', handleMessage);
     
-    // 부모 창에 준비됐다고 알림
     if (window.opener) {
       window.opener.postMessage({ type: 'CHAT_READY' }, window.location.origin);
     }
     
     return () => window.removeEventListener('message', handleMessage);
   }, []);
+
+  // creator와 userId가 설정되면 메시지 불러오기
+  useEffect(() => {
+    if (creator && userId) {
+      loadMessages();
+    }
+  }, [creator, userId]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,26 +45,89 @@ const ChatComponent = () => {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = () => {
+  // 메시지 저장 키 생성
+  const getChatKey = () => {
+    if (!creator || !userId) return null;
+    return `chat:${creator.sellerNo}:${userId}`;
+  };
+
+  // 메시지 불러오기
+  const loadMessages = async () => {
+    setIsLoading(true);
+    try {
+      const chatKey = getChatKey();
+      if (!chatKey) return;
+
+      const result = await window.storage.get(chatKey, true); // shared: true로 변경
+      
+      if (result && result.value) {
+        const savedMessages = JSON.parse(result.value);
+        setMessages(savedMessages);
+      } else {
+        // 첫 방문시 환영 메시지
+        const welcomeMessage = {
+          id: 1,
+          sender: 'creator',
+          text: `안녕하세요! ${creator.name}입니다. 프로젝트에 관심 가져주셔서 감사합니다. 무엇이든 물어보세요 😊`,
+          timestamp: new Date().toISOString()
+        };
+        setMessages([welcomeMessage]);
+        await saveMessages([welcomeMessage]);
+      }
+    } catch (error) {
+      console.error('메시지 로딩 실패:', error);
+      // 에러 발생시 기본 환영 메시지
+      const welcomeMessage = {
+        id: 1,
+        sender: 'creator',
+        text: `안녕하세요! ${creator.name}입니다. 프로젝트에 관심 가져주셔서 감사합니다. 무엇이든 물어보세요 😊`,
+        timestamp: new Date().toISOString()
+      };
+      setMessages([welcomeMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 메시지 저장하기
+  const saveMessages = async (newMessages) => {
+    try {
+      const chatKey = getChatKey();
+      if (!chatKey) return;
+
+      await window.storage.set(chatKey, JSON.stringify(newMessages), true); // shared: true로 변경
+    } catch (error) {
+      console.error('메시지 저장 실패:', error);
+    }
+  };
+
+  const handleSendMessage = async () => {
     if (message.trim()) {
       const newMessage = {
-        id: messages.length + 1,
+        id: Date.now(),
         sender: 'user',
         text: message,
-        timestamp: new Date()
+        timestamp: new Date().toISOString()
       };
-      setMessages([...messages, newMessage]);
+      
+      const updatedMessages = [...messages, newMessage];
+      setMessages(updatedMessages);
       setMessage('');
+      
+      // 메시지 저장
+      await saveMessages(updatedMessages);
 
       // 시뮬레이션: 2초 후 자동 응답
-      setTimeout(() => {
+      setTimeout(async () => {
         const autoReply = {
-          id: messages.length + 2,
+          id: Date.now() + 1,
           sender: 'creator',
           text: '메시지 감사합니다! 곧 답변드리겠습니다.',
-          timestamp: new Date()
+          timestamp: new Date().toISOString()
         };
-        setMessages(prev => [...prev, autoReply]);
+        const messagesWithReply = [...updatedMessages, autoReply];
+        setMessages(messagesWithReply);
+        await saveMessages(messagesWithReply);
       }, 2000);
     }
   };
@@ -76,7 +139,8 @@ const ChatComponent = () => {
     }
   };
 
-  const formatTime = (date) => {
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const ampm = hours >= 12 ? '오후' : '오전';
@@ -88,12 +152,12 @@ const ChatComponent = () => {
     window.close();
   };
 
-  // creator 데이터 로딩 중
-  if (!creator) {
+  if (!creator || !userId) {
     return (
-      <div className="chat-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', color: '#6b7280' }}>
-          <div style={{ fontSize: '14px' }}>로딩 중...</div>
+      <div className="chat-page chat-page--loading">
+        <div className="chat-page__loading-content">
+          <Loader size={32} className="chat-page__loading-spinner" />
+          <div className="chat-page__loading-text">로딩 중...</div>
         </div>
       </div>
     );
@@ -101,7 +165,6 @@ const ChatComponent = () => {
 
   return (
     <div className="chat-page">
-      {/* 나머지 코드는 동일... */}
       {/* Header */}
       <div className="chat-page__header">
         <div className="chat-page__creator">
@@ -122,23 +185,32 @@ const ChatComponent = () => {
 
       {/* Messages */}
       <div className="chat-page__messages">
-        <div className="chat-page__date">오늘</div>
-        {messages.map((msg) => (
-          <div 
-            key={msg.id} 
-            className={`chat-message ${msg.sender === 'user' ? 'chat-message--user' : 'chat-message--creator'}`}
-          >
-            {msg.sender === 'creator' && (
-              <img src={creator.avatar} alt={creator.name} className="chat-message__avatar" />
-            )}
-            <div className="chat-message__content">
-              <div className="chat-message__bubble">
-                {msg.text}
-              </div>
-              <span className="chat-message__time">{formatTime(msg.timestamp)}</span>
-            </div>
+        {isLoading ? (
+          <div className="chat-page__messages-loading">
+            <Loader size={24} className="chat-page__loading-spinner" />
+            <div className="chat-page__messages-loading-text">대화 내역을 불러오는 중...</div>
           </div>
-        ))}
+        ) : (
+          <>
+            <div className="chat-page__date">오늘</div>
+            {messages.map((msg) => (
+              <div 
+                key={msg.id} 
+                className={`chat-message ${msg.sender === 'user' ? 'chat-message--user' : 'chat-message--creator'}`}
+              >
+                {msg.sender === 'creator' && (
+                  <img src={creator.avatar} alt={creator.name} className="chat-message__avatar" />
+                )}
+                <div className="chat-message__content">
+                  <div className="chat-message__bubble">
+                    {msg.text}
+                  </div>
+                  <span className="chat-message__time">{formatTime(msg.timestamp)}</span>
+                </div>
+              </div>
+            ))}
+          </>
+        )}
         <div ref={messagesEndRef} />
       </div>
 

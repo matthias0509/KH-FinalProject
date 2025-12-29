@@ -10,14 +10,12 @@ import lombok.NoArgsConstructor;
 public class MyPage {
     private int userNo;
     private String userId;
-    private String userPwd;      // DB: USER_PWD 
-    private String userName;     // DB: USER_NAME 
+    private String password;
+    private String name;
     private String nickname;
     private String email;
     private String phone;
-    private String modifyProfile; // DB: MODIFY_PROFILE
-    private String postcode;      // DB: POSTCODE
-    private String mainAddress;   // DB: MAIN_ADDRESS
-    private String detailAddress; // DB: DETAIL_ADDRESS
-    private String userRole;      // DB: USER_ROLE
+    private String profileImageUrl; // MODIFY_PROFILE 컬럼 매핑
+    private String role;           // 유저 권한 (supporter/maker)
+    private String intro;          // 소개 (필요 시 사용)
 }

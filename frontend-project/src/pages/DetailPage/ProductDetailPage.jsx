@@ -192,6 +192,12 @@ export default function ProductDetailPage() {
     const left = window.screen.width - width - 100;
     const top = (window.screen.height - height) / 2;
 
+    // 사용자 ID 생성 또는 가져오기 (실제로는 로그인한 사용자 ID를 사용)
+    const userId = localStorage.getItem('userId') || 'user_' + Date.now();
+    if (!localStorage.getItem('userId')) {
+      localStorage.setItem('userId', userId);
+    }
+
     // 강호형
     const chatWindow = window.open(
       `/chat`,
@@ -200,15 +206,30 @@ export default function ProductDetailPage() {
     );
 
     // 창이 로드되면 데이터 전달
-    chatWindow.onload = () => {
-      chatWindow.postMessage(
-        {
-          type: 'CREATOR_DATA',
-          creator: project.creator,
-        },
-        window.location.origin,
-      );
-    };
+    if (chatWindow) {
+      const checkWindow = setInterval(() => {
+        try {
+          if (chatWindow.closed) {
+            clearInterval(checkWindow);
+            return;
+          }
+          chatWindow.postMessage(
+            {
+              type: 'CREATOR_DATA',
+              creator: {
+                ...project.creator,
+                sellerNo: project.sellerNo
+              },
+              userId: userId
+            },
+            window.location.origin
+          );
+          clearInterval(checkWindow);
+        } catch (e) {
+          // 아직 로드 중
+        }
+      }, 100);
+    }
   };
 
   // 처음에 출력 될 정보 useEffect사용
