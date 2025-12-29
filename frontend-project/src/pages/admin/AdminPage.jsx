@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 
 // 💡 사용자가 제공한 import 경로와 컴포넌트 이름 사용
 import UserManagementPage from './UserManagementPage';
-import DashBoardPage from './DashBoardPage'; // DashboardTab 대신 DashBoardPage 사용
+import DashBoardPage from './DashBoardPage';
+import ProjectApprovalPage from './ProjectApprovalPage'; // 👈 import 추가됨
 
 import '../../styles/AdminPage.css'; // 관리자 전용 CSS
 import '../../styles/MyPageLayout.css'; // 공통 레이아웃 (재활용)
@@ -94,19 +95,20 @@ const AdminContent = ({ activeMenu }) => {
          );
     }
 
+    // ✅ [수정됨] 2. 프로젝트 승인/반려 (ProjectApprovalPage 연결)
+    if (activeMenu === 'proj_manage') {
+        return (
+            <main className="main-content admin-main-content">
+                <ProjectApprovalPage />
+            </main>
+        );
+    }
+
     let content;
 
     switch (activeMenu) {
-        // dashboard와 user_manage는 위 if문에서 처리했으므로 switch문에서 제외합니다.
+        // dashboard, user_manage, proj_manage는 위 if문에서 처리했으므로 switch문에서 제외합니다.
         
-        case 'proj_manage':
-            content = (
-                <>
-                    <h2 className="page-title">📝 프로젝트 승인 및 반려</h2>
-                    <p>신청된 프로젝트 목록을 조회하고, 상세 내용을 검토하여 승인하거나 반려합니다. (유스케이스: 펀딩 개설 관리, 프로젝트 승인/반려)</p>
-                </>
-            );
-            break;
         case 'refund_manage':
             content = (
                 <>

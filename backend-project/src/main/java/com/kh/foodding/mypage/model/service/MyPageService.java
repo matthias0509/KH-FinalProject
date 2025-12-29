@@ -85,7 +85,7 @@ public class MyPageService {
         }
 
         // DB 컬럼 MODIFY_PROFILE에 매핑되는 경로
-        String dbPath = "/foodding/uploads/profile/" + storedName;
+        String dbPath = "/uploads/profile/" + storedName;
         int result = mypageDao.updateProfileImage(userId, dbPath);
 
         return (result == 1) ? dbPath : null;
@@ -110,4 +110,6 @@ public class MyPageService {
     public boolean withdrawMember(String userId) {
         return mypageDao.deleteMember(userId) == 1;
     }
+    
+    
 }

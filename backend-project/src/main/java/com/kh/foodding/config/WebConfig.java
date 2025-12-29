@@ -1,8 +1,5 @@
 package com.kh.foodding.config;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -13,20 +10,17 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads");
-        String uploadPath = uploadDir.toFile().getAbsolutePath();
-
+        // 실제 이미지가 저장된 경로
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath + "/");
+                .addResourceLocations("file:/C:/foodding/uploads/");
     }
 
-    // 프로젝트 구동할 때 조건
-    // 전역 설정 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/foodding/**")
-                .allowedOrigins("http://localhost:5173")
-                .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")
+        registry.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:5173") // ⭐ 핵심
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
                 .allowCredentials(true);
     }
 }

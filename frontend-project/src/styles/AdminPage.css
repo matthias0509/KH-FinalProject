@@ -101,3 +101,108 @@
     align-items: center;
     justify-content: center;
 }
+
+/* 프로젝트 심사 모달 스타일 */
+.project-review-modal {
+    max-width: 800px;
+    width: 90%;
+}
+
+.review-section {
+    margin-bottom: 20px;
+}
+
+.review-section h4 {
+    border-left: 4px solid #ff7b00; /* 푸딩 시그니처 컬러 */
+    padding-left: 10px;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.info-item .label {
+    color: #666;
+    font-weight: bold;
+}
+
+/* 썸네일 및 스토리 미리보기 */
+.project-preview {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.preview-thumbnail img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.story-html-viewer {
+    padding: 15px;
+    border: 1px solid #eee;
+    background: #fff;
+    min-height: 200px;
+    /* TipTap 에디터로 작성된 HTML 스타일이 적용되도록 */
+}
+.story-html-viewer img {
+    max-width: 100%;
+}
+
+/* 리워드 리스트 */
+.reward-review-list {
+    list-style: none;
+    padding: 0;
+}
+
+.reward-item {
+    border: 1px solid #eee;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.reward-price {
+    font-weight: bold;
+    color: #ff7b00;
+    font-size: 1.1rem;
+}
+
+.reward-title {
+    font-weight: bold;
+}
+
+.reward-desc {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* 반려 사유 입력창 */
+.reject-input-area {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+}
+
+.input-field.full-width {
+    flex: 1;
+}

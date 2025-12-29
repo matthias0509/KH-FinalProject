@@ -1,5 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom'; // useNavigate 삭제 (안 씀)
+import React, { useState, useEffect } from 'react'; // useState, useEffect 추가
+import { Link } from 'react-router-dom';
+import axios from 'axios'; // axios 추가
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
 import Sidebar from '../components/Sidebar';
@@ -7,10 +8,30 @@ import Sidebar from '../components/Sidebar';
 import '../styles/MyPageLayout.css';
 import '../styles/MyPage.css';
 
-// App.js에서 userInfo를 props로 받아옵니다.
-const MyPage = ({ userInfo }) => {
+const MyPage = ({ userInfo: initialUserInfo }) => {
+    // 1. props로 받은 정보를 초기값으로 설정하되, 내부에서 변경 가능하도록 state로 관리
+    const [userInfo, setUserInfo] = useState(initialUserInfo);
 
-    // --- 가상 데이터 (서버 연동 전까지 사용) ---
+    // 2. 화면이 열릴 때(마운트) 서버에서 최신 정보를 다시 가져옴
+    useEffect(() => {
+        const fetchLatestUserInfo = async () => {
+            try {
+                // ProfileEditPage와 동일한 API 주소 사용
+                const res = await axios.get("http://localhost:8001/foodding/api/mypage/info");
+                setUserInfo(res.data); // 최신 정보로 덮어쓰기
+            } catch (e) {
+                console.error("최신 정보 불러오기 실패", e);
+            }
+        };
+
+        fetchLatestUserInfo();
+    }, []); 
+
+    // 데이터가 없을 경우 방어 코드
+    if (!userInfo) return null;
+
+    // --- (아래부터는 기존 코드와 동일) ---
+    // 가상 데이터 (서버 연동 전까지 사용)
     const fundingHistory = [
         {
             id: 101,
@@ -32,10 +53,9 @@ const MyPage = ({ userInfo }) => {
         <div className="page-wrapper">
             <Header />
             <div className="mypage-container">
-                {/* 사이드바에 유저 정보를 전달하면, 알아서 잠금/해제 처리함 */}
+                {/* 3. 최신화된 userInfo를 Sidebar에 전달 */}
                 <Sidebar userInfo={userInfo} />
             
-                {/* --- 메인 콘텐츠 (Dashboard) --- */}
                 <main className="main-content">
                     <h2 className="greeting">{userInfo.name}님 반가워요! 👋</h2>
 
@@ -44,19 +64,19 @@ const MyPage = ({ userInfo }) => {
                         <div className="activity-item">
                             <span className="icon">🎁</span>
                             <span className="label">후원 참여</span>
-                            <span className="value">{userInfo.stats.fundingCount}</span>
+                            <span className="value">{userInfo.stats?.fundingCount || 0}</span>
                         </div>
                         <div className="divider-vertical"></div>
                         <div className="activity-item">
                             <span className="icon">❤️</span>
                             <span className="label">좋아요</span>
-                            <span className="value">{userInfo.stats.likedCount}</span>
+                            <span className="value">{userInfo.stats?.likedCount || 0}</span>
                         </div>
                         <div className="divider-vertical"></div>
                         <div className="activity-item">
                             <span className="icon">👀</span>
                             <span className="label">팔로잉</span>
-                            <span className="value">{userInfo.stats.followingCount}</span>
+                            <span className="value">{userInfo.stats?.followingCount || 0}</span>
                         </div>
                     </div>
 
@@ -115,7 +135,6 @@ const MyPage = ({ userInfo }) => {
                         </div>
                     </section>
                 </main>
-              
             </div>
             <AppFooter />
         </div>
