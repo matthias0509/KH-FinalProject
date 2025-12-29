@@ -8,6 +8,7 @@ import { fetchProjectAxios } from './DetailApi';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
+import { getLoginUserInfo } from '../../utils/auth';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 const DEFAULT_AVATAR = 'https://placehold.co/80x80?text=Maker';
@@ -523,12 +524,7 @@ export default function ProductDetailPage() {
                   <span className="detail-creator__followers">
                     팔로워 {project.creator.followers.toLocaleString()}명
                   </span>
-                  {project.creator.introduction && (
-                    <p className="detail-creator__intro">{project.creator.introduction}</p>
-                  )}
-                  {project.creator.email && (
-                    <span className="detail-creator__contact">{project.creator.email}</span>
-                  )}
+                  
                 </div>
               </button>
               <div className="detail-creator__actions">
