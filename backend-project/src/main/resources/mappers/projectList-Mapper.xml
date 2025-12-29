@@ -128,4 +128,15 @@
         WHERE PRODUCT_NO = #{productNo}
     </update>
 
+    <select id="selectProjectRewards" parameterType="long" resultType="com.kh.foodding.project.model.vo.ProjectReward">
+        SELECT
+            OPTION_NO AS optionNo,
+            OPTION_NAME AS title,
+            OPTION_PRICE AS price,
+            OPTION_CONTENT AS description
+        FROM TB_OPTION
+        WHERE PRODUCT_NO = #{productNo}
+        ORDER BY OPTION_NO
+    </select>
+
 </mapper>

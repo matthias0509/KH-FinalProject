@@ -115,6 +115,19 @@ const normalizeProjectDetail = (data = {}) => {
       ]
     : projectInit.story;
 
+  const normalizedRewards = Array.isArray(data.rewards)
+    ? data.rewards.map((reward, index) => ({
+        id: reward.optionNo ?? reward.id ?? index,
+        title: reward.title ?? `리워드 ${index + 1}`,
+        price: Number(reward.price) || 0,
+        description: reward.description ?? '',
+        includes: Array.isArray(reward.includes) ? reward.includes : [],
+        shipping:
+          reward.shipping ||
+          (data.shipStartDate ? `${data.shipStartDate}부터 순차 발송` : '배송 일정 미정'),
+      }))
+    : projectInit.rewards;
+
   return {
     ...projectInit,
     ...data,
@@ -134,6 +147,7 @@ const normalizeProjectDetail = (data = {}) => {
     story: storyBlocks,
     timeline: timeline.length ? timeline : projectInit.timeline,
     creator: creator ?? projectInit.creator,
+    rewards: normalizedRewards,
   };
 };
 
@@ -546,17 +560,19 @@ export default function ProductDetailPage() {
               <h3>리워드 선택</h3>
               {/* <div className="detail-rewards detail-rewards--scroll"> */}
                 {project.rewards.map((reward) => (
-                  <div key={reward.id} className="detail-reward">
+                  <div key={reward.id ?? reward.optionNo ?? reward.title} className="detail-reward">
                     <div className="detail-reward__header">
                       <h4>{reward.title}</h4>
                       <span>{currencyFormatter.format(reward.price)}원</span>
                     </div>
-                    <p>{reward.description}</p>
-                    <ul>
-                      {reward.includes.map((include) => (
-                        <li key={include}>{include}</li>
-                      ))}
-                    </ul>
+                    {reward.description && <p>{reward.description}</p>}
+                    {Array.isArray(reward.includes) && reward.includes.length > 0 && (
+                      <ul>
+                        {reward.includes.map((include) => (
+                          <li key={include}>{include}</li>
+                        ))}
+                      </ul>
+                    )}
                     <div className="detail-reward__shipping">배송 예정: {reward.shipping}</div>
                     <button type="button" className="detail-cta detail-cta--outline" onClick={handlePayment}>
                       리워드 선택

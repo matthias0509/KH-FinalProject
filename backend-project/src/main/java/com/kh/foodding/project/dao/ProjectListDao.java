@@ -8,6 +8,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.kh.foodding.project.model.vo.ProjectList;
+import com.kh.foodding.project.model.vo.ProjectReward;
 
 @Repository
 public class ProjectListDao {
@@ -36,6 +37,10 @@ public class ProjectListDao {
         params.put("productNo", productNo);
         params.put("productYn", productYn);
         return sqlSession.update("projectListMapper.updateProductVisibility", params);
+    }
+
+    public List<ProjectReward> selectProjectRewards(SqlSessionTemplate sqlSession, long productNo) {
+        return sqlSession.selectList("projectListMapper.selectProjectRewards", productNo);
     }
 
 }
