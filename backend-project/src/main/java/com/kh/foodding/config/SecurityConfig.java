@@ -21,11 +21,9 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ CORS 설정 연결 명시
             .authorizeHttpRequests(auth -> auth
-
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/payment/**").permitAll()
                 .requestMatchers("/uploads/**").permitAll() // ✅ [중요] 이미지 경로 명시적 허용
-
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/api/**").permitAll()
                 .anyRequest().permitAll()
@@ -46,6 +44,11 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // ✅ [중요] 쿠키/인증정보 포함 허용 (false -> true 변경 권장)
 
+        config.setAllowedOriginPatterns(List.of("http://localhost:5173"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowCredentials(true); // 🔥 반드시 true
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
@@ -53,6 +56,7 @@ public class SecurityConfig {
 
     @Bean
     public BCryptPasswordEncoder bcryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        return new BCryptPasswordEncoder();    
+	}
 }
+
