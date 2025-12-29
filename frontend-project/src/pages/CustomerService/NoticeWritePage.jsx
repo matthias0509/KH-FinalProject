@@ -1,19 +1,15 @@
 import { useState } from 'react';
-import CSLayout from '../../components/CustomerService/CSLayout';
-import InputField from '../../components/Login/InputField'; // 기존 InputField 재활용
-import SubmitButton from '../../components/Login/SubmitButton'; // 기존 SubmitButton 재활용
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './CSStyle.css'; // 공통 스타일 사용
+import { toast, ToastContainer } from 'react-toastify';
 import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
+import CSLayout from '../../components/CustomerService/CSLayout';
+import InputField from '../../components/Login/InputField';
+import SubmitButton from '../../components/Login/SubmitButton';
 
 export default function NoticeWritePage() {
-    const [form, setForm] = useState({
-        title: '',
-        content: '',
-        // 'author'는 백엔드에서 인증된 사용자 정보(관리자)를 통해 자동 처리되거나,
-        // 필요하다면 여기에 추가할 수 있습니다.
-    });
+    const [form, setForm] = useState({ noticeTitle: '', noticeContent: '' });
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
@@ -23,82 +19,66 @@ export default function NoticeWritePage() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!form.title || !form.content) {
-            alert("제목과 내용을 모두 입력해 주세요.");
-            return;
-        }
-
         setIsLoading(true);
-        console.log('--- 공지사항 작성 요청 데이터 ---');
-        console.log(form);
-        
-        // TODO: 여기에 Spring Boot 백엔드 API 호출 로직 구현 (POST 요청)
-        // 예: fetch('/api/admin/notices', { method: 'POST', body: JSON.stringify(form) });
-        
-        // API 통신 시뮬레이션
-        await new Promise(resolve => setTimeout(resolve, 1500)); 
 
+        try {
+            const response = await axios({
+                url: 'http://localhost:8001/foodding/notice/write',
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${sessionStorage.getItem("loginUser")}`
+                },
+                data: form
+            });
+        
+        if (response.data === "success") {
+            alert('공지사항이 등록되었습니다.');
+            navigate('/notice');
+        } else if (response.data === "no_auth") {
+            alert('권한이 없습니다. 관리자만 등록 가능합니다.');
+        } else {
+            alert('등록에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('에러 발생:', error);
+        alert('서버와 통신 중 오류가 발생했습니다.');
+    } finally {
         setIsLoading(false);
-        
-        // 성공 후 처리
-        alert('공지사항이 성공적으로 등록되었습니다.');
-        
-        // 등록 후 공지사항 목록 페이지로 이동
-        navigate('/cs/notice'); 
-    };
+    }
+};
 
     return (
         <div className="app">
             <Header />
-                <CSLayout title="공지사항 작성">
-                    <p style={{ marginBottom: '25px', color: '#666', textAlign: 'center' }}>
-                        새로운 공지사항을 작성하여 사용자들에게 알립니다.
-                    </p>
-
-                    <form onSubmit={handleSubmit} className="notice-write-form">
-                        
-                        {/* 1. 제목 입력 */}
-                        <InputField
-                            label="제목"
-                            id="title"
-                            value={form.title}
+            <CSLayout title="공지사항 작성">
+                <form onSubmit={handleSubmit} className="notice-write-form">
+                    <InputField
+                        label="제목"
+                        id="noticeTitle"
+                        value={form.noticeTitle}
+                        onChange={handleChange}
+                        placeholder="공지사항 제목을 입력하세요"
+                    />
+                    <div className="input-field-group" style={{ marginTop: '16px' }}>
+                        <label htmlFor="content" className="textarea-label" style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>내용</label>
+                        <textarea
+                            id="noticeContent"
+                            className="textarea-input"
+                            value={form.noticeContent}
                             onChange={handleChange}
-                            placeholder="공지사항 제목을 입력하세요"
-                            required
+                            rows="15"
+                            style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '8px' }}
+                            placeholder="공지사항 내용을 작성해 주세요."
                         />
-                        
-                        {/* 2. 내용 입력 (Textarea 스타일 적용) */}
-                        <div className="input-field-group">
-                            <label htmlFor="content" className="textarea-label">내용</label>
-                            <textarea
-                                id="content"
-                                className="textarea-input" // InquiryPage에서 사용한 스타일 재활용
-                                value={form.content}
-                                onChange={handleChange}
-                                rows="15" // 공지사항은 내용이 길 수 있어 행 수 증가
-                                placeholder="공지사항 내용을 자세히 작성해 주세요."
-                                required
-                            />
-                        </div>
-
-                        {/* 3. 제출 버튼 (주황색 스타일) */}
-                        <div style={{ marginTop: '30px', display: 'flex', gap: '10px' }}>
-                            <SubmitButton isLoading={isLoading} style={{ flex: 1 }}>
-                                등록하기
-                            </SubmitButton>
-                            <button 
-                                type="button" 
-                                className="cancel-button" // 회색 버튼 스타일 재활용
-                                onClick={() => navigate('/notice')}
-                                style={{ flex: 1 }}
-                            >
-                                취소
-                            </button>
-                        </div>
-                    </form>
-                </CSLayout>
+                    </div>
+                    <div style={{ marginTop: '30px', display: 'flex', gap: '10px' }}>
+                        <SubmitButton isLoading={isLoading} style={{ flex: 1 }}>등록하기</SubmitButton>
+                        <button type="button" onClick={() => navigate('/notice')} style={{ minWidth: '100px', backgroundColor: '#ccc', border: 'none', borderRadius: '8px', color: 'white', fontWeight: 'bold', cursor: 'pointer' }}>취소</button>
+                    </div>
+                </form>
+            </CSLayout>
             <AppFooter />
+            <ToastContainer />
         </div>
     );
 }

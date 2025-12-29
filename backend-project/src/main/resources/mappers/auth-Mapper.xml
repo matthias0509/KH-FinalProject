@@ -25,7 +25,7 @@
         </resultMap>
     
     <select id="selectMemberForLogin" parameterType="string" resultMap="memberResultSet">
-        SELECT USER_ID, USER_PWD, USER_NAME, USER_ROLE, NICKNAME 
+        SELECT USER_NO, USER_ID, USER_PWD, USER_NAME, USER_ROLE, NICKNAME 
         FROM TB_USER
         WHERE 
             USER_ID = #{userId}

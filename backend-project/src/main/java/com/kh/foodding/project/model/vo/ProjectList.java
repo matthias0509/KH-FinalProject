@@ -28,7 +28,5 @@ public class ProjectList {
     private LocalDateTime createDate;
     private String productYn;
     private Long sellerNo;
-
-
-
+    private SellerProfile sellerProfile;
 }

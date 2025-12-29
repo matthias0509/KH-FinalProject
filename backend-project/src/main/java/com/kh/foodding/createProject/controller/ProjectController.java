@@ -44,23 +44,27 @@ public class ProjectController {
     @Operation(summary="프로젝트 제출 메소드", description="프로젝트 제출 시 상품 테이블에 저장됩니다.")
     @PostMapping("insert")
     public String insertProject(@RequestBody Project p) {
-
-        int result = ProjectService.insertProject(p);
-
-        return (result>0)? "제출 완료했습니다. " : "제출 실패했습니다.";
+        try {
+            int result = ProjectService.insertProject(p);
+            return (result>0)? "제출 완료했습니다. " : "제출 실패했습니다.";
+        } catch (IllegalStateException ex) {
+            return ex.getMessage();
+        }
     }
     
 
      @Operation(summary="프로젝트 임시 저장 메소드", description="프로젝트 임시 저장 시 임시 테이블에 저장됩니다.")
     @PostMapping("imsi")
     public String imsiProject(@RequestBody Project p) {
-
-        int result = ProjectService.imsiProject(p);
-
-        return (result>0)? "임시저장 완료했습니다. " : "임시저장 실패했습니다.";
+        try {
+            int result = ProjectService.imsiProject(p);
+            return (result>0)? "임시저장 완료했습니다. " : "임시저장 실패했습니다.";
+        } catch (IllegalStateException ex) {
+            return ex.getMessage();
+        }
     }
     
-
+    
     @GetMapping("drafts")
     public ArrayList<Project> selectProject(@RequestParam int userNo){
 

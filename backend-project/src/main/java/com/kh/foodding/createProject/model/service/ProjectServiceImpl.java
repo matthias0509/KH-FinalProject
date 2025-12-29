@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kh.foodding.createProject.model.dao.ProjectDao;
 import com.kh.foodding.createProject.model.vo.Project;
+import com.kh.foodding.seller.model.dao.SellerProfileDao;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -18,6 +19,9 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private SqlSessionTemplate sqlSession;
+
+    @Autowired
+    private SellerProfileDao sellerProfileDao;
 
    
     // 제출하기
@@ -31,6 +35,8 @@ public class ProjectServiceImpl implements ProjectService {
         if (p.getUserNo() == null) {
             p.setUserNo(1L); // 유저 번호로 수정 예정
         }
+        Long sellerNo = requireSellerProfile(p.getUserNo());
+        p.setSellerNo(sellerNo);
 
         if (p.getShipStartDate() == null) {
             p.setShipStartDate(p.getFundEndDate());
@@ -64,6 +70,8 @@ public class ProjectServiceImpl implements ProjectService {
         if (p.getUserNo() == null) {
             p.setUserNo(1L); // 유저 번호로 수정
         }
+        Long sellerNo = requireSellerProfile(p.getUserNo());
+        p.setSellerNo(sellerNo);
 
         if (p.getShipStartDate() == null) {
             p.setShipStartDate(p.getFundEndDate());
@@ -118,6 +126,17 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public int deleteProject(int userNo, long tempNo){
         return projectDao.deleteProject(sqlSession, userNo, tempNo);
+    }
+
+    private Long requireSellerProfile(Long userNo) {
+        if (userNo == null) {
+            throw new IllegalStateException("로그인 정보가 필요합니다.");
+        }
+        Long sellerNo = sellerProfileDao.selectSellerNoByUser(sqlSession, userNo);
+        if (sellerNo == null) {
+            throw new IllegalStateException("판매자 전환 승인 후 이용해 주세요.");
+        }
+        return sellerNo;
     }
 
 }

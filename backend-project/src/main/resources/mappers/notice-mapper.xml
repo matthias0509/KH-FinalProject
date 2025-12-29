@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="noticeMapper">
+	<resultMap id="noticeResultSet" type="notice">
+        <id property="noticeNo" column="NOTICE_NO"/>
+        <result property="noticeTitle" column="NOTICE_TITLE"/>
+        <result property="noticeContent" column="NOTICE_CONTENT"/>
+        <result property="noticeCreateDate" column="NOTICE_CREATE_DATE"/>
+        <result property="noticeView" column="NOTICE_VIEW"/>
+        <result property="noticeYn" column="NOTICE_YN"/>
+    </resultMap>
+    
+    <resultMap id="qnaResultSet" type="qna">
+	    <id column="QNA_NO" property="qnaNo"/>
+	    <result column="QNA_TITLE" property="qnaTitle"/>
+	    <result column="QNA_CONTENT" property="qnaContent"/>
+	    <result column="QNA_DATE" property="qnaDate"/>
+	    <result column="ANSWER_CONTENT" property="answerContent"/>
+	    <result column="ANSWER_DATE" property="answerDate"/>
+	</resultMap>
+
+    <select id="selectNoticeList" parameterType="map" resultMap="noticeResultSet">
+    SELECT * FROM (
+        SELECT ROWNUM RNUM, A.* FROM (
+            SELECT NOTICE_NO, NOTICE_TITLE, NOTICE_CREATE_DATE, NOTICE_VIEW
+            FROM NOTICE
+            WHERE NOTICE_YN = 'N'
+            <if test="keyword != null and keyword != ''">
+                AND NOTICE_TITLE LIKE '%' || #{keyword} || '%'
+            </if>
+            ORDER BY NOTICE_NO DESC
+        ) A
+    ) WHERE RNUM BETWEEN #{start} AND #{end}
+</select>
+
+    <select id="selectNoticeDetail" parameterType="_int" resultMap="noticeResultSet">
+        SELECT 
+            NOTICE_NO,
+            NOTICE_TITLE,
+            NOTICE_CONTENT,
+            TO_CHAR(NOTICE_CREATE_DATE, 'YYYY-MM-DD') AS NOTICE_CREATE_DATE,
+            NOTICE_VIEW
+        FROM NOTICE
+        WHERE NOTICE_NO = #{noticeNo}
+          AND NOTICE_YN = 'N'
+    </select>
+
+    <select id="selectNoticeCount" parameterType="string" resultType="_int">
+	    SELECT COUNT(*) 
+	    FROM NOTICE 
+	    WHERE NOTICE_YN = 'N'
+	    <if test="keyword != null and keyword != ''">
+	        AND NOTICE_TITLE LIKE '%' || #{keyword} || '%'
+	    </if>
+	</select>
+
+    <update id="increaseCount" parameterType="_int">
+        UPDATE NOTICE
+           SET NOTICE_VIEW = NOTICE_VIEW + 1
+         WHERE NOTICE_NO = #{noticeNo}
+           AND NOTICE_YN = 'N'
+    </update>
+
+    <insert id="insertNotice" parameterType="notice">
+        INSERT INTO NOTICE (
+            NOTICE_NO,
+            NOTICE_TITLE,
+            NOTICE_CONTENT,
+            NOTICE_CREATE_DATE,
+            NOTICE_VIEW,
+            NOTICE_YN
+        ) VALUES (
+            SEQ_NOTICE_NO.NEXTVAL,
+            #{noticeTitle},
+            #{noticeContent},
+            SYSDATE,
+            0,
+            'N'
+        )
+    </insert>
+    
+    <update id="deleteNotice" parameterType="_int">
+	    UPDATE NOTICE
+	       SET NOTICE_YN = 'Y'
+	     WHERE NOTICE_NO = #{noticeNo}
+	</update>
+    
+    
+    
+    
+    
+    
+	<insert id="insertInquiry" parameterType="qna">
+	    INSERT INTO QNA (
+	        QNA_NO,
+	        QNA_TITLE,
+	        QNA_CONTENT,
+	        QNA_DATE,
+	        USER_NO
+	    ) VALUES (
+	        SEQ_QNA_NO.NEXTVAL,
+	        #{qnaTitle},
+	        #{qnaContent},
+	        SYSDATE,
+	        #{userNo}
+	    )
+	</insert>
+	
+	<select id="selectInquiryList" resultMap="qnaResultSet">
+		SELECT * FROM QNA WHERE USER_NO = #{userNo}
+	</select>
+
+</mapper>

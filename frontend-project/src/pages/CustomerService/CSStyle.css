@@ -221,46 +221,69 @@
 }
 
 /* ---------------------------------- */
-/* 7. 문의 내역 (InquiryHistoryPage) - 공지사항 테이블 스타일로 변경 */
+/* 7. 문의 내역 (InquiryHistoryPage) */
 /* ---------------------------------- */
 
 .inquiry-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: collapse; /* 💡 셀 사이의 틈을 완전히 제거 */
     margin-top: 15px;
+    table-layout: fixed; /* 💡 컬럼 너비를 고정하여 선 어긋남 방지 */
 }
 
-/* 💡 공지사항과 동일한 헤더/셀 스타일 적용 */
-.inquiry-table th, .inquiry-table td {
-    padding: 12px 10px;
-    text-align: center;
-    border-bottom: 1px solid #eee;
-}
-
+/* 헤더 스타일 */
 .inquiry-table th {
-    background-color: #f5f5f5; /* 공지사항 헤더 배경색 */
+    background-color: #f5f5f5;
     font-weight: bold;
     color: #333;
+    padding: 15px 10px;
     border-top: 2px solid #ccc;
+    border-bottom: 1px solid #dbdbdb; /* 헤더 하단 선 */
+    text-align: center;
 }
 
-/* 💡 문의 내역 행 스타일 (클릭 가능) */
+/* 일반 셀 스타일 */
+.inquiry-table td {
+    padding: 15px 10px;
+    text-align: center;
+    vertical-align: middle;
+    /* 💡 모든 td에 동일한 하단 선을 부여하여 끊김 방지 */
+    border-bottom: 1px solid #eee; 
+}
+
+/* 제목 셀 수정 (중요!) */
+.inquiry-title-cell {
+    text-align: left !important;
+    padding-left: 20px !important;
+}
+
+/* 💡 만약 제목 안에 아이콘을 넣고 싶다면 별도의 div에 flex 적용 */
+.inquiry-title-cell > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 행 스타일 */
 .inquiry-row {
     cursor: pointer;
-    transition: background-color 0.1s;
+    transition: background-color 0.2s;
 }
 
-/* 💡 공지사항 hover 스타일 대신 밝은 오렌지 계열 hover 유지 */
 .inquiry-row:hover {
     background-color: #fffaf0; 
 }
 
-/* 💡 제목 셀 스타일 (왼쪽 정렬, 아이콘 정렬) */
-.inquiry-title-cell {
-    display: flex; 
-    align-items: center;
-    text-align: left !important;
-    padding-left: 20px; /* 왼쪽 여백 추가 */
+/* 상세 내용 행 (펼쳐졌을 때) */
+.inquiry-detail-row td {
+    background-color: #fafafa;
+    border-bottom: 1px solid #eee !important;
+    padding: 0; /* 내부 InquiryDetail에서 여백 조절 */
+}
+
+/* 마지막 행 마감 */
+.inquiry-table tbody tr:last-child td {
+    border-bottom: 1px solid #eee;
 }
 
 /* 상태 표시 스타일 (오렌지 색상 유지) */
@@ -284,3 +307,28 @@
     gap: 16px;
     padding: 0 20px;
 }
+
+/* 1. 테이블 행 디자인 수정 */
+.notice-table tbody tr.inquiry-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+/* 2. 각 셀 하단에 보더를 주어 선이 이어지게 만듦 */
+.notice-table tbody tr.inquiry-row td {
+    padding: 20px 10px;
+    border-bottom: 1px solid #eee; /* 💡 점선이 끊긴다면 이 부분을 추가 */
+    vertical-align: middle;
+}
+
+/* 3. 상세 내용 행은 보더를 없애서 자연스럽게 연결 */
+.inquiry-detail-row td {
+    border-bottom: 1px solid #eee !important;
+    background-color: #fafafa; /* 상세 영역 배경색 차별화 */
+}
+
+/* 4. 마지막 줄 보더 정리 */
+.notice-table tbody tr:last-child td {
+    border-bottom: 2px solid #333; /* 테이블 하단 마감선 */
+}
+
