@@ -1,5 +1,6 @@
 package com.kh.foodding.project.model.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.mybatis.spring.SqlSessionTemplate;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.kh.foodding.project.dao.ProjectListDao;
 import com.kh.foodding.project.model.vo.ProjectList;
+import com.kh.foodding.project.model.vo.ProjectReward;
 import com.kh.foodding.seller.model.dao.SellerProfileDao;
 
 @Service
@@ -31,6 +33,8 @@ public class ProjectListServiceImpl implements ProjectListService {
         if (detail.getSellerNo() != null) {
             detail.setSellerProfile(sellerProfileDao.selectSellerProfile(sqlSession, detail.getSellerNo()));
         }
+        List<ProjectReward> rewards = projectListDao.selectProjectRewards(sqlSession, productNo);
+        detail.setRewards(rewards == null ? Collections.emptyList() : rewards);
         return detail;
     }
 
