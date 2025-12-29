@@ -59,11 +59,15 @@ export default function Header() {
             <Link to="/notice" className="header__nav-link">
               공지사항
             </Link>
-
             
             <Link to="/login" className='header__nav-link'>
               (로그인)
             </Link>
+
+             <Link to="/logout" className='header__nav-link'>
+              (로그아웃)
+            </Link>
+            
            
           </nav>
         </div>
