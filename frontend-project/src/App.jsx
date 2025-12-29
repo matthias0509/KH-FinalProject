@@ -36,6 +36,7 @@ import LikeProjectPage from './pages/supporter/LikeProjectPage'
 import FollowProjectPage from './pages/supporter/FollowProjectPage'
 import ProfileEditPage from './pages/supporter/ProfileEditPage'
 import QnAPage from './pages/supporter/QnAPage'
+import ProjectApprovalPage from './pages/admin/ProjectApprovalPage';
 
 
 // 강호형
@@ -55,11 +56,11 @@ import DashBoardPage from './pages/admin/DashBoardPage';
 
 export default function App() {
 
-  // ★ 여기서 유저 정보를 "딱 한 곳"에서 관리합니다 (Single Source of Truth)
+  // ★ 상태 관리 (Single Source of Truth)
   const [userInfo, setUserInfo] = useState({
     name: '푸딩러버',
     profileImg: '🍮',
-    role: 'maker', // 이 값을 'supporter'로 바꾸면 양쪽 다 서포터 모드로 변함!
+    role: 'maker',
     stats: {
         fundingCount: 12,
         followingCount: 5,
@@ -77,15 +78,8 @@ export default function App() {
       <Route path='/imbak' element={<ImbakPage/> }/>
       <Route path="/search" element={<SearchPage />} />
       <Route path="/projects/:ProjectNo" element={<ProductDetailPage />} />
-      {/* path="/projects/:slug 예정 각 상품별 상세페이지 */}
       <Route path='/change' element={<ChangePage/>}/>
-      <Route path="/payment" element={<PaymentComponent />}/>
-
-
-      {/* supper용 사이드바*/}
-      <Route path="/mypage" element={<MyPage userInfo={userInfo} />} />
-      <Route path="/maker" element={<MakerPage userInfo={userInfo} />} />
-
+      
       {/* 박성진 */}
       <Route path="/notice" element={<NoticePage />}/>  
       <Route path="/login" element={<LoginPage />} />
@@ -101,43 +95,48 @@ export default function App() {
       <Route path="/notice/edit/:noticeNo" element={<NoticeEditPage />} />
 
       
-      {/* 박주현 */}
-      <Route path="/mypage" element={<MyPage />} />
-      <Route path="/maker" element={<MakerPage />} />
+      {/* ======================================================= */}
+      {/* ★ [박주현] 마이페이지 (서포터) 경로 수정 완료 ★ */}
+      {/* 사이드바 링크(/mypage/xxx)와 여기 path를 일치시켰습니다. */}
+      {/* ======================================================= */}
+      <Route path="/mypage" element={<MyPage userInfo={userInfo} />} />
+      
+      {/* 사이드바가 /mypage/profile 로 보내니까 여기도 맞춰야 함 */}
+      <Route path="/mypage/profile" element={<ProfileEditPage />} />
+      <Route path="/mypage/history" element={<FundingHistoryPage />} />
+      <Route path="/mypage/cancel" element={<FundingCancelPage />} />
+      <Route path="/mypage/detail" element={<FundingDetailPage />} />
+      <Route path="/mypage/like" element={<LikeProjectPage />} />
+      <Route path="/mypage/follow" element={<FollowProjectPage />} />
+      <Route path="/mypage/qna" element={<QnAPage />} />
+      <Route path="/mypage/chat" element={<ChatComponent />} />
 
-      <Route path="/profile" element={<ProfileEditPage />} />
-      <Route path="/history" element={<FundingHistoryPage />} />
-      <Route path="/cancel" element={<FundingCancelPage />} />
-      <Route path="/detail" element={<FundingDetailPage />} />
-      <Route path="/like" element={<LikeProjectPage />} />
-      <Route path="/follow" element={<FollowProjectPage />} />
-      <Route path="/chat" element={<ChatComponent />} />
-      <Route path="/qna" element={<QnAPage />} />
 
-      {/* maker용 사이드바*/} 
+      {/* ======================================================= */}
+      {/* ★ [메이커] 경로 설정 */}
+      {/* ======================================================= */}
+      <Route path="/maker" element={<MakerPage userInfo={userInfo} />} />
       <Route path="/maker/chat-history" element={<ChatHistoryPage userInfo={userInfo}/>} />
       <Route path="/maker/project" element={<ProjectPage userInfo={userInfo}/>} />
       <Route path="/maker/settlement" element={<SettlementPage userInfo={userInfo}/>} />
+
 
       {/* 관리자 전용 */}
       <Route path="/adminpage" element={<AdminPage />} />
       <Route path="/adminlogin" element={<AdminLoginPage />} />
       <Route path="/usermanagement" element={<UserManagementPage />} />
       <Route path="/dashboard" element={<DashBoardPage />} />
+      <Route path="/projectapproval" element={<ProjectApprovalPage />} />
+      
 
-
-
-
-      <Route path="/chat-history" element={<ChatHistoryPage />} />
-      <Route path="/qna" element={<QnAPage />} />
-
-
-      {/* 강호형 */}
-
+      {/* 강호형 - 결제 관련 */}
       <Route path='/payment' element={<PaymentComponent/>}/>
-      <Route path="/chat" element={<ChatComponent />} />
       <Route path="/payment/success" element={<PaymentSuccess />}/>
       <Route path="/payment/fail" element={<PaymentFail />}/>
+
+      {/* 기타 공통 */}
+      <Route path="/chat" element={<ChatComponent />} />
+      
     </Routes>
   );
 }

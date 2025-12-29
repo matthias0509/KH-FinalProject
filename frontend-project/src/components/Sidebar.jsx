@@ -1,25 +1,38 @@
-import React from 'react';
+import React, { useMemo } from 'react'; // useMemo 추가
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import '../styles/MyPageLayout.css'; // 공통 스타일
+import '../styles/MyPageLayout.css'; 
 
-// userInfo prop에 기본값 {}을 설정하여, userInfo가 undefined일 때 구조분해 오류 방지
+// 서버 주소
+const SERVER_URL = "http://localhost:8001/foodding";
+
+// 이미지 전체 경로 변환 함수
+const getFullImageUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith("http")) return url;
+    return `${SERVER_URL}${url}`;
+};
+
 const Sidebar = ({ userInfo = {} }) => { 
-    // userInfo 객체가 없거나 role이 없을 경우를 대비하여 기본값 설정
-    const userRole = userInfo.role || 'supporter';
-    const userName = userInfo.name || '사용자';
-
     const navigate = useNavigate();
     const location = useLocation();
 
-    // 현재 경로가 '/maker'로 시작하는지 확인하여 모드 결정
+    // 1. 닉네임 우선 표시 로직
+    const displayName = userInfo.nickname || userInfo.userName || userInfo.name || '사용자';
+    const userRole = userInfo.role || 'supporter';
     const isMakerMode = location.pathname.startsWith('/maker');
 
-    // 현재 경로와 메뉴 링크가 일치하는지 확인하는 함수
+    // ✅ 수정 포인트: 이미지 캐시 버스터 최적화 (useMemo)
+    // 컴포넌트가 처음 마운트되거나, profileImageUrl 자체가 바뀔 때만 시간을 갱신합니다.
+    // 단순히 메뉴를 클릭하거나 다른 상태가 변할 때는 이미지를 다시 불러오지 않아 깜빡임을 방지합니다.
+    const imageTimestamp = useMemo(() => Date.now(), [userInfo.profileImageUrl]);
+
+    // 메뉴 활성화 로직
     const isActive = (path) => {
-        return location.pathname === path ? 'active-menu' : '';
+        if (path === '/mypage' && location.pathname === '/mypage') return 'active-menu';
+        if (path !== '/mypage' && location.pathname.startsWith(path)) return 'active-menu';
+        return '';
     };
 
-    // 메이커 버튼 핸들러 (권한 체크)
     const handleMakerClick = () => {
         if (userRole !== 'maker') {
             if (window.confirm("메이커 권한이 없습니다.\n관리자에게 권한을 신청하시겠습니까?")) {
@@ -32,7 +45,7 @@ const Sidebar = ({ userInfo = {} }) => {
 
     return (
         <aside className="sidebar">
-            {/* 1. 모드 전환 스위치 */}
+            {/* 모드 전환 스위치 */}
             <div className="mode-switch">
                 <Link 
                     to="/mypage" 
@@ -58,26 +71,42 @@ const Sidebar = ({ userInfo = {} }) => {
                 )}
             </div>
 
-            {/* 2. 프로필 영역 (공통) */}
+            {/* 프로필 영역 */}
             <div className="profile-section">
-                <div className="profile-img">{userInfo.profileImg || '☺'}</div>
+                <div className="profile-img-wrapper">
+                   <img
+                    src={
+                        userInfo.profileImageUrl
+                            // ✅ 여기서 useMemo로 만든 고정된 타임스탬프를 사용
+                            ? `${getFullImageUrl(userInfo.profileImageUrl)}?t=${imageTimestamp}`
+                            : "/placeholder.png"
+                    }
+                    alt="프로필"
+                    className="sidebar-profile-img"
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/placeholder.png";
+                    }}
+                    />
+                </div>
+                
                 <h3 className="username">
-                    {userName} {isMakerMode ? '메이커' : ''}님 <span className="arrow">&gt;</span>
+                    {displayName} {isMakerMode ? '메이커' : ''}님 
+                    <Link to="/mypage/profile" className="arrow-link"> &gt;</Link>
                 </h3>
+                
                 {isMakerMode ? (
                     <p className="follow-count">팔로워 0</p>
                 ) : (
-                    <Link to="/profile" className="profile-setting-btn">내 정보 설정</Link>
+                    <Link to="/mypage/profile" className="profile-setting-btn">내 정보 설정</Link>
                 )}
             </div>
 
-            {/* 3. 메뉴 리스트 (조건부 렌더링) */}
+            {/* 메뉴 리스트 */}
             <nav className={`menu-list ${isMakerMode ? 'maker-menu' : ''}`}>
                 {isMakerMode ? (
                     /* --- 메이커 모드 메뉴 --- */
                     <>
-                        {/* ⚠️ 요청에 따라 '메이커 페이지 만들기' 배너 영역을 완전히 제거했습니다. */}
-
                         <p className="menu-category">나의 문의 관리</p>
                         <ul>
                             <li className={isActive('/maker/chat-history')}>
@@ -90,7 +119,6 @@ const Sidebar = ({ userInfo = {} }) => {
                                 <Link to='/maker/project'>내 프로젝트</Link>
                             </li>
                         </ul>
-
                         <p className="menu-category">비즈센터</p>
                         <ul>
                             <li className={isActive('/maker/settlement')}>
@@ -99,39 +127,35 @@ const Sidebar = ({ userInfo = {} }) => {
                         </ul>
                     </>
                 ) : (
-                    /* --- 서포터 모드 메뉴 (기존 유지) --- */
+                    /* --- 서포터 모드 메뉴 --- */
                     <>
                         <p className="menu-category">나의 후원 활동</p>
                         <ul>
-                            <li className={isActive('/history')}>
-                                <Link to='/history'>
-                                    후원 내역 조회 
-                                </Link>
+                            <li className={isActive('/mypage/history')}>
+                                <Link to='/mypage/history'>후원 내역 조회</Link>
                             </li>
-                            <li className={isActive('/cancel')}>
-                                <Link to='/cancel'>
-                                    후원 취소/환불 내역
-                                </Link>
+                            <li className={isActive('/mypage/cancel')}>
+                                <Link to='/mypage/cancel'>후원 취소/환불 내역</Link>
                             </li>
                         </ul>
 
                         <p className="menu-category">관심 활동</p>
                         <ul>
-                            <li className={isActive('/like')}>
-                                <Link to='/like'>좋아요한 프로젝트</Link>
+                            <li className={isActive('/mypage/like')}>
+                                <Link to='/mypage/like'>좋아요한 프로젝트</Link>
                             </li>
-                            <li className={isActive('/follow')}>
-                                <Link to='/follow'>팔로우 목록 조회</Link>
+                            <li className={isActive('/mypage/follow')}>
+                                <Link to='/mypage/follow'>팔로우 목록 조회</Link>
                             </li>
                         </ul>
 
                         <p className="menu-category">문의</p>
                         <ul>
-                            <li className={isActive('/chat')}>
-                                <Link to='/chat'>1:1 채팅 내역</Link>
+                            <li className={isActive('/mypage/chat')}>
+                                <Link to='/mypage/chat'>1:1 채팅 내역</Link>
                             </li>
-                            <li className={isActive('/qna')}>
-                                <Link to='/qna'>나의 문의(Q&A)</Link>
+                            <li className={isActive('/mypage/qna')}>
+                                <Link to='/mypage/qna'>나의 문의(Q&A)</Link>
                             </li>
                             <li>
                                 <Link to='/help'>고객센터</Link>

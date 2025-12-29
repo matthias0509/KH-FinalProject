@@ -13,20 +13,23 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads");
-        String uploadPath = uploadDir.toFile().getAbsolutePath();
+        // 실제 이미지가 저장된 경로 (로컬 프로젝트 폴더 기준 경로 포함)
+        Path projectUploads = Paths.get(System.getProperty("user.dir"), "uploads")
+                                   .toAbsolutePath();
 
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + uploadPath + "/");
+                .addResourceLocations(
+                        projectUploads.toUri().toString(),
+                        "file:/C:/foodding/uploads/"
+                );
     }
 
-    // 프로젝트 구동할 때 조건
-    // 전역 설정 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/foodding/**")
-                .allowedOrigins("http://localhost:5173")
-                .allowedMethods("GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS")
+        registry.addMapping("/**")
+                .allowedOriginPatterns("http://localhost:5173") // ⭐ 핵심
+                .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
                 .allowCredentials(true);
     }
 }

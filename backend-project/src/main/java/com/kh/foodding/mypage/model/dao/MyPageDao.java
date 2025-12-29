@@ -67,6 +67,10 @@ public interface MyPageDao {
     // 8. 회원 탈퇴 (데이터 삭제)
 
     int deleteMember(String userId); 
+    
+    int updateNickname(@Param("userId") String userId,
+            @Param("nickname") String nickname);
+
 
 }
 

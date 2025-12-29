@@ -74,7 +74,7 @@ public class MyPageController {
     public ResponseEntity<?> updateProfileImage(@RequestPart("profileFile") MultipartFile file, Principal principal) {
         String userId = (principal != null) ? principal.getName() : "testUser";
         String url = mypageService.updateProfileImage(userId, file);
-        return (url != null) ? ResponseEntity.ok(Map.of("imageUrl", url, "message", "업로드 성공")) : ResponseEntity.internalServerError().body(Map.of("message", "업로드 실패"));
+        return (url != null) ? ResponseEntity.ok(Map.of("profileImageUrl", url, "message", "업로드 성공")) : ResponseEntity.internalServerError().body(Map.of("message", "업로드 실패"));
     }
 
     @PostMapping("/base/deleteProfileImage")
@@ -82,4 +82,6 @@ public class MyPageController {
         String userId = (principal != null) ? principal.getName() : "testUser";
         return (mypageService.deleteProfileImage(userId)) ? ResponseEntity.ok(Map.of("message", "삭제 완료")) : ResponseEntity.internalServerError().body(Map.of("message", "삭제 실패"));
     }
+    
+    
 }

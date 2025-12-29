@@ -110,10 +110,6 @@ export default function Header() {
             <Heart size={20} color="#6b7280" />
           </button>
 
-          <Link to="/mypage" className="icon-button" aria-label="마이 페이지">
-            <User size={20} color="#6b7280" />
-          </Link>
-
         
           <a href="/mypage" type="button" className="icon-button" aria-label="마이 페이지">
             <User size={20} color="#6b7280" />
