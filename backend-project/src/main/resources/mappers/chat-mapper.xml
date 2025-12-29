@@ -1,20 +1,17 @@
-<!-- ChatMapper.xml -->
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.foodding.dao.ChatDAO">
-    
-    <!-- Chatroom ResultMap -->
-    <resultMap id="chatroomMap" type="com.foodding.vo.Chatroom">
+<mapper namespace="chatMapper">
+
+    <resultMap id="chatroomMap" type="com.kh.foodding.chat.model.vo.Chatroom">
         <id property="chatroomNo" column="CHATROOM_NO"/>
         <result property="chatroomCreateDate" column="CHATROOM_CREATE_DATE"/>
         <result property="buyer" column="BUYER"/>
         <result property="seller" column="SELLER"/>
     </resultMap>
-    
-    <!-- Message ResultMap -->
-    <resultMap id="messageMap" type="com.foodding.vo.Message">
+
+    <resultMap id="messageMap" type="com.kh.foodding.chat.model.vo.Message">
         <id property="msgNo" column="MSG_NO"/>
         <result property="msgContent" column="MSG_CONTENT"/>
         <result property="sendDate" column="SEND_DATE"/>
@@ -23,10 +20,10 @@
         <result property="sender" column="SENDER"/>
         <result property="chatroomNo" column="CHATROOM_NO"/>
     </resultMap>
-    
+
     <!-- 채팅방 조회 -->
     <select id="selectChatroom" parameterType="map" resultMap="chatroomMap">
-        SELECT 
+        SELECT
             CHATROOM_NO,
             CHATROOM_CREATE_DATE,
             BUYER,
@@ -35,9 +32,9 @@
         WHERE BUYER = #{buyer}
           AND SELLER = #{seller}
     </select>
-    
+
     <!-- 채팅방 생성 -->
-    <insert id="insertChatroom" parameterType="com.foodding.vo.Chatroom">
+    <insert id="insertChatroom" parameterType="com.kh.foodding.chat.model.vo.Chatroom">
         INSERT INTO CHATROOM (
             CHATROOM_NO,
             CHATROOM_CREATE_DATE,
@@ -50,9 +47,9 @@
             #{seller}
         )
     </insert>
-    
+
     <!-- 메시지 저장 -->
-    <insert id="insertMessage" parameterType="com.foodding.vo.Message">
+    <insert id="insertMessage" parameterType="com.kh.foodding.chat.model.vo.Message">
         INSERT INTO MESSAGE (
             MSG_NO,
             MSG_CONTENT,
@@ -71,10 +68,10 @@
             #{chatroomNo}
         )
     </insert>
-    
+
     <!-- 메시지 조회 -->
     <select id="selectMessageList" parameterType="long" resultMap="messageMap">
-        SELECT 
+        SELECT
             MSG_NO,
             MSG_CONTENT,
             SEND_DATE,
@@ -86,5 +83,5 @@
         WHERE CHATROOM_NO = #{chatroomNo}
         ORDER BY SEND_DATE ASC
     </select>
-    
+
 </mapper>

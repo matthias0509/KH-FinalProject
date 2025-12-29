@@ -62,6 +62,7 @@ const mapCreatorFromSeller = (seller) => {
       introduction: '',
       email: '',
       phone: '',
+      userNo: null, // 추가
     };
   }
   const avatar = resolveProjectImageUrl(seller.profileImage) || DEFAULT_AVATAR;
@@ -73,6 +74,7 @@ const mapCreatorFromSeller = (seller) => {
     introduction: seller.introduction ?? '',
     email: seller.email ?? '',
     phone: seller.phone ?? '',
+    userNo: seller.userNo, // 판매자의 USER_NO 추가
   };
 };
 
@@ -206,27 +208,48 @@ export default function ProductDetailPage() {
     navigate('/payment')
   }
 
-  // 클릭 시 채팅 나옴
   const handleOpenChat = () => {
+    // 로그인한 사용자 정보 가져오기
+    const loginUserStr = localStorage.getItem('loginUser');
+    const loginUser = JSON.parse(loginUserStr || '{}');
+    const buyerNo = loginUser.userNo;
+    
+    console.log('buyerNo:', buyerNo);
+    console.log('project:', project);
+    console.log('project.creator:', project.creator);
+    console.log('project.sellerProfile:', project.sellerProfile);
+    
+    if (!buyerNo) {
+      toast.error('로그인이 필요한 서비스입니다.');
+      navigate('/login');
+      return;
+    }
+
+    // 판매자의 USER_NO 가져오기
+    const sellerUserNo = project.sellerProfile?.userNo || project.creator?.userNo;
+    console.log('sellerUserNo:', sellerUserNo);
+    
+    if (!sellerUserNo) {
+      toast.error('판매자 정보를 찾을 수 없습니다.');
+      console.error('판매자 정보 없음!');
+      return;
+    }
+
     const width = 400;
     const height = 650;
     const left = window.screen.width - width - 100;
     const top = (window.screen.height - height) / 2;
 
-    // 사용자 ID 생성 또는 가져오기 (실제로는 로그인한 사용자 ID를 사용)
-    const userId = localStorage.getItem('userId') || 'user_' + Date.now();
-    if (!localStorage.getItem('userId')) {
-      localStorage.setItem('userId', userId);
-    }
-
-    // 강호형
+    console.log('채팅창 열기 시도...');
+    
     const chatWindow = window.open(
       `/chat`,
       'ChatWindow',
       `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no`
     );
 
-    // 창이 로드되면 데이터 전달
+    console.log('chatWindow:', chatWindow);
+
     if (chatWindow) {
       const checkWindow = setInterval(() => {
         try {
@@ -234,20 +257,19 @@ export default function ProductDetailPage() {
             clearInterval(checkWindow);
             return;
           }
+          console.log('데이터 전달 시도...');
           chatWindow.postMessage(
             {
               type: 'CREATOR_DATA',
-              creator: {
-                ...project.creator,
-                sellerNo: project.sellerNo
-              },
-              userId: userId
+              creator: project.creator,
+              buyerNo: buyerNo,
+              sellerNo: sellerUserNo
             },
             window.location.origin
           );
           clearInterval(checkWindow);
         } catch (e) {
-          // 아직 로드 중
+          console.error('데이터 전달 오류:', e);
         }
       }, 100);
     }
