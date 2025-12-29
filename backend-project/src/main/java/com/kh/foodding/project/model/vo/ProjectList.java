@@ -3,6 +3,8 @@ package com.kh.foodding.project.model.vo;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,4 +31,5 @@ public class ProjectList {
     private String productYn;
     private Long sellerNo;
     private SellerProfile sellerProfile;
+    private List<ProjectReward> rewards = Collections.emptyList();
 }

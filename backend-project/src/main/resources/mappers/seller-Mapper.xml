@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="sellerMapper">
 
     <select id="selectSellerNoByUser" parameterType="long" resultType="long">
@@ -25,9 +25,9 @@
 
     <select id="selectSellerProfile" parameterType="long" resultType="com.kh.foodding.project.model.vo.SellerProfile">
         SELECT
-            sp.SELLER_NO,
-            sp.USER_NO,
-            sp.INTRODUCTION,
+            sp.SELLER_NO AS sellerNo,
+            sp.USER_NO AS userNo,
+            sp.INTRODUCTION AS introduction,
             u.USER_NAME AS sellerName,
             u.NICKNAME,
             u.EMAIL,

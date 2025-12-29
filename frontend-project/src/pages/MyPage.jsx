@@ -1,37 +1,65 @@
-import React, { useState, useEffect } from 'react'; // useState, useEffect 추가
-import { Link } from 'react-router-dom';
-import axios from 'axios'; // axios 추가
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+// 컴포넌트 import (경로는 프로젝트 구조에 맞게 확인해주세요)
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
 import Sidebar from '../components/Sidebar';
 
+// CSS import
 import '../styles/MyPageLayout.css';
 import '../styles/MyPage.css';
 
-const MyPage = ({ userInfo: initialUserInfo }) => {
-    // 1. props로 받은 정보를 초기값으로 설정하되, 내부에서 변경 가능하도록 state로 관리
-    const [userInfo, setUserInfo] = useState(initialUserInfo);
+const MyPage = () => {
+    const navigate = useNavigate();
+    
+    // 1. 상태 관리
+    const [userInfo, setUserInfo] = useState(null); // 사용자 정보
+    const [loading, setLoading] = useState(true);   // 로딩 상태
 
-    // 2. 화면이 열릴 때(마운트) 서버에서 최신 정보를 다시 가져옴
+    // 2. 데이터 가져오기 (마운트 시 실행)
     useEffect(() => {
-        const fetchLatestUserInfo = async () => {
+        const fetchUserInfo = async () => {
             try {
-                // ProfileEditPage와 동일한 API 주소 사용
-                const res = await axios.get("http://localhost:8001/foodding/api/mypage/info");
-                setUserInfo(res.data); // 최신 정보로 덮어쓰기
-            } catch (e) {
-                console.error("최신 정보 불러오기 실패", e);
+                // 저장된 토큰 가져오기 (로그인 시 저장한 키 이름: 'token' 또는 'accessToken')
+                const token = localStorage.getItem('token'); 
+
+                // 토큰이 없으면 로그인 페이지로 리다이렉트
+                if (!token) {
+                    alert("로그인이 필요한 서비스입니다.");
+                    navigate('/login');
+                    return;
+                }
+
+                // 서버 요청 (헤더에 토큰 포함)
+                const response = await axios.get("http://localhost:8001/foodding/api/mypage/info", {
+                    headers: {
+                        'Authorization': `Bearer ${token}` // ✅ 핵심: JWT 토큰 전송
+                    }
+                });
+
+                // 받아온 데이터 저장
+                setUserInfo(response.data);
+                
+            } catch (error) {
+                console.error("내 정보 불러오기 실패:", error);
+                
+                // 401 에러(인증 실패) 시 처리
+                if (error.response && error.response.status === 401) {
+                    alert("로그인 정보가 만료되었습니다. 다시 로그인해주세요.");
+                    localStorage.removeItem('token'); // 만료된 토큰 삭제
+                    navigate('/login');
+                }
+            } finally {
+                setLoading(false); // 로딩 종료
             }
         };
 
-        fetchLatestUserInfo();
-    }, []); 
+        fetchUserInfo();
+    }, [navigate]);
 
-    // 데이터가 없을 경우 방어 코드
-    if (!userInfo) return null;
-
-    // --- (아래부터는 기존 코드와 동일) ---
-    // 가상 데이터 (서버 연동 전까지 사용)
+    // 3. 가상 데이터 (추후 서버 API가 준비되면 이 부분도 axios로 가져오게 수정)
     const fundingHistory = [
         {
             id: 101,
@@ -49,21 +77,44 @@ const MyPage = ({ userInfo: initialUserInfo }) => {
         { id: 3, title: '비건 쌀 쿠키', percent: 240, img: 'https://via.placeholder.com/150' },
     ];
 
+    // 4. 렌더링 로직
+    
+    // 로딩 중일 때 표시할 화면
+    if (loading) {
+        return (
+            <div className="page-wrapper">
+                <Header />
+                <div className="mypage-container" style={{ minHeight: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                    <p>내 정보를 불러오는 중입니다...</p>
+                </div>
+                <AppFooter />
+            </div>
+        );
+    }
+
+    // 데이터 로드 실패 혹은 데이터가 없을 때
+    if (!userInfo) return null;
+
     return (
         <div className="page-wrapper">
             <Header />
+            
             <div className="mypage-container">
-                {/* 3. 최신화된 userInfo를 Sidebar에 전달 */}
+                {/* ✅ 서버에서 가져온 userInfo를 사이드바에 전달 */}
                 <Sidebar userInfo={userInfo} />
             
                 <main className="main-content">
-                    <h2 className="greeting">{userInfo.name}님 반가워요! 👋</h2>
+                    {/* 사용자 이름 표시 */}
+                    <h2 className="greeting">
+                        {userInfo.userName || userInfo.name || userInfo.nickname}님 반가워요! 👋
+                    </h2>
 
                     {/* 활동 현황 배너 */}
                     <div className="activity-banner">
                         <div className="activity-item">
                             <span className="icon">🎁</span>
                             <span className="label">후원 참여</span>
+                            {/* userInfo 내부에 stats 객체가 없어도 에러 안 나게 처리 (?.) */}
                             <span className="value">{userInfo.stats?.fundingCount || 0}</span>
                         </div>
                         <div className="divider-vertical"></div>
@@ -84,7 +135,7 @@ const MyPage = ({ userInfo: initialUserInfo }) => {
                     <section className="section-block">
                         <div className="section-header">
                             <h3>최근 후원 내역</h3>
-                            <Link to="/history" className="more-link">더보기 &gt;</Link>
+                            <Link to="/mypage/history" className="more-link">더보기 &gt;</Link>
                         </div>
                         
                         {fundingHistory.length > 0 ? (
@@ -117,7 +168,7 @@ const MyPage = ({ userInfo: initialUserInfo }) => {
                     <section className="section-block">
                         <div className="section-header">
                             <h3>좋아요한 프로젝트 ❤️</h3>
-                            <Link to="/like" className="more-link">전체보기 &gt;</Link>
+                            <Link to="/mypage/like" className="more-link">전체보기 &gt;</Link>
                         </div>
                         <div className="card-list">
                             {likedProjects.map((item) => (
@@ -136,6 +187,7 @@ const MyPage = ({ userInfo: initialUserInfo }) => {
                     </section>
                 </main>
             </div>
+            
             <AppFooter />
         </div>
     );

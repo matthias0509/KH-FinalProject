@@ -5,9 +5,18 @@ import AppFooter from '../../components/AppFooter';
 
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchProjectAxios } from './DetailApi';
+import {
+  fetchProjectLikeStatus,
+  likeProject,
+  unlikeProject,
+  fetchSellerFollowStatus,
+  followSeller,
+  unfollowSeller,
+} from '../../api/interactionApi';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
+import { getLoginUserInfo } from '../../utils/auth';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 const DEFAULT_AVATAR = 'https://placehold.co/80x80?text=Maker';
@@ -114,6 +123,19 @@ const normalizeProjectDetail = (data = {}) => {
       ]
     : projectInit.story;
 
+  const normalizedRewards = Array.isArray(data.rewards)
+    ? data.rewards.map((reward, index) => ({
+        id: reward.optionNo ?? reward.id ?? index,
+        title: reward.title ?? `리워드 ${index + 1}`,
+        price: Number(reward.price) || 0,
+        description: reward.description ?? '',
+        includes: Array.isArray(reward.includes) ? reward.includes : [],
+        shipping:
+          reward.shipping ||
+          (data.shipStartDate ? `${data.shipStartDate}부터 순차 발송` : '배송 일정 미정'),
+      }))
+    : projectInit.rewards;
+
   return {
     ...projectInit,
     ...data,
@@ -133,6 +155,7 @@ const normalizeProjectDetail = (data = {}) => {
     story: storyBlocks,
     timeline: timeline.length ? timeline : projectInit.timeline,
     creator: creator ?? projectInit.creator,
+    rewards: normalizedRewards,
   };
 };
 
@@ -150,7 +173,9 @@ export default function ProductDetailPage() {
   const progressRate = fundingGoal ? Math.round((fundingRaised / fundingGoal) * 100) : 0;
   const progressWidth = Math.min(progressRate, 100);
   const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
   const [activeDetailTab, setActiveDetailTab] = useState('story');
   const [reviewPage, setReviewPage] = useState(1);
   const rewardSectionRef = useRef(null);
@@ -173,15 +198,60 @@ export default function ProductDetailPage() {
 
   const navigate = useNavigate();
 
-  // 좋아요 기능 추가 예정
-  const toggleLike = () => {
-    setIsLiked((prev) => !prev);
+  const ensureLogin = () => {
+    const loginInfo = getLoginUserInfo();
+    if (!loginInfo?.token) {
+      toast.error('로그인이 필요한 서비스입니다.');
+      navigate('/login');
+      return null;
+    }
+    return loginInfo;
   };
 
+  const handleLikeToggle = async () => {
+    if (!project.productNo) {
+      toast.error('프로젝트 정보를 불러오는 중입니다.');
+      return;
+    }
 
-  // 팔로우 기능 추가 예정
-  const toggleFollow = () => {
-    setIsFollowing((prev) => !prev);
+    const loginInfo = ensureLogin();
+    if (!loginInfo) {
+      return;
+    }
+
+    try {
+      const status = isLiked
+        ? await unlikeProject(project.productNo)
+        : await likeProject(project.productNo);
+      setIsLiked(Boolean(status?.liked));
+      setLikeCount(status?.likeCount ?? likeCount);
+    } catch (error) {
+      console.error('좋아요 처리 실패', error);
+      toast.error('좋아요 처리 중 문제가 발생했습니다.');
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!project.sellerNo) {
+      toast.error('판매자 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    const loginInfo = ensureLogin();
+    if (!loginInfo) {
+      return;
+    }
+
+    try {
+      const status = isFollowing
+        ? await unfollowSeller(project.sellerNo)
+        : await followSeller(project.sellerNo);
+      setIsFollowing(Boolean(status?.following));
+      setFollowerCount(status?.followerCount ?? followerCount);
+    } catch (error) {
+      console.error('팔로우 처리 실패', error);
+      toast.error('팔로우 처리 중 문제가 발생했습니다.');
+    }
   };
 
 
@@ -209,25 +279,44 @@ export default function ProductDetailPage() {
   }
 
   const handleOpenChat = () => {
-    // 로그인한 사용자 정보 가져오기
-    const loginUserStr = localStorage.getItem('loginUser');
-    const loginUser = JSON.parse(loginUserStr || '{}');
-    const buyerNo = loginUser.userNo;
-    
-    console.log('buyerNo:', buyerNo);
-    console.log('project:', project);
-    console.log('project.creator:', project.creator);
+    // JWT 토큰에서 사용자 정보 가져오기 (Base64URL 안전 유틸 사용)
+    const loginInfo = getLoginUserInfo();
+
+    console.log('=== 디버깅 시작 ===');
+    console.log('전체 project:', project);
     console.log('project.sellerProfile:', project.sellerProfile);
+    console.log('project.sellerProfile?.userNo:', project.sellerProfile?.userNo);
+    console.log('project.creator:', project.creator);
+    console.log('project.creator?.userNo:', project.creator?.userNo);
     
-    if (!buyerNo) {
+    if (!loginInfo?.token) {
       toast.error('로그인이 필요한 서비스입니다.');
       navigate('/login');
       return;
     }
 
+    const payload = loginInfo.payload;
+    const buyerNo =
+      loginInfo.userNo ||
+      payload?.userNo ||
+      payload?.sub ||
+      payload?.id ||
+      null;
+
+    if (!buyerNo) {
+      console.error('토큰 확인 실패: 사용자 번호 파싱 불가', payload);
+      toast.error('로그인 정보가 올바르지 않습니다.');
+      navigate('/login');
+      return;
+    }
+
+    console.log('Token payload:', payload);
+    console.log('buyerNo:', buyerNo);
+
     // 판매자의 USER_NO 가져오기
     const sellerUserNo = project.sellerProfile?.userNo || project.creator?.userNo;
     console.log('sellerUserNo:', sellerUserNo);
+    console.log('=== 디버깅 끝 ===');
     
     if (!sellerUserNo) {
       toast.error('판매자 정보를 찾을 수 없습니다.');
@@ -257,7 +346,7 @@ export default function ProductDetailPage() {
             clearInterval(checkWindow);
             return;
           }
-          console.log('데이터 전달 시도...');
+          console.log('데이터 전달 시도...', { buyerNo, sellerUserNo });
           chatWindow.postMessage(
             {
               type: 'CREATOR_DATA',
@@ -298,6 +387,46 @@ export default function ProductDetailPage() {
     };
     api();
   }, [ProjectNo, navigate]);
+
+  useEffect(() => {
+    if (!project.productNo) {
+      setIsLiked(false);
+      setLikeCount(0);
+      return;
+    }
+
+    const loadLikeStatus = async () => {
+      try {
+        const status = await fetchProjectLikeStatus(project.productNo);
+        setIsLiked(Boolean(status?.liked));
+        setLikeCount(status?.likeCount ?? 0);
+      } catch (error) {
+        console.error('좋아요 상태 조회 실패', error);
+      }
+    };
+
+    loadLikeStatus();
+  }, [project.productNo]);
+
+  useEffect(() => {
+    if (!project.sellerNo) {
+      setIsFollowing(false);
+      setFollowerCount(0);
+      return;
+    }
+
+    const loadFollowStatus = async () => {
+      try {
+        const status = await fetchSellerFollowStatus(project.sellerNo);
+        setIsFollowing(Boolean(status?.following));
+        setFollowerCount(status?.followerCount ?? 0);
+      } catch (error) {
+        console.error('팔로우 상태 조회 실패', error);
+      }
+    };
+
+    loadFollowStatus();
+  }, [project.sellerNo]);
 
   if (loadError) {
     return (
@@ -360,7 +489,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 className={`detail-cta detail-cta--ghost${isLiked ? ' is-active' : ''}`}
-                onClick={toggleLike}
+                onClick={handleLikeToggle}
                 aria-pressed={isLiked}
               >
                 <Heart
@@ -369,7 +498,7 @@ export default function ProductDetailPage() {
                   fill={isLiked ? '#ef4444' : 'none'}
                   color={isLiked ? '#b91c1c' : '#6b7280'}
                 />
-                {isLiked ? '좋아요' : '좋아요'}
+                좋아요 {likeCount.toLocaleString()}개
               </button>
             </div>
           </div>
@@ -506,7 +635,7 @@ export default function ProductDetailPage() {
                 <div>
                   <h4>{project.creator.name}</h4>
                   <span className="detail-creator__followers">
-                    팔로워 {project.creator.followers.toLocaleString()}명
+                    팔로워 {followerCount.toLocaleString()}명
                   </span>
                   
                 </div>
@@ -515,7 +644,7 @@ export default function ProductDetailPage() {
                 <button
                   type="button"
                   className={`detail-cta detail-cta--follow${isFollowing ? ' is-active' : ''}`}
-                  onClick={toggleFollow}
+                  onClick={handleFollowToggle}
                   aria-pressed={isFollowing}
                 >
                   {isFollowing ? '팔로잉' : '팔로우'}
@@ -530,17 +659,19 @@ export default function ProductDetailPage() {
               <h3>리워드 선택</h3>
               {/* <div className="detail-rewards detail-rewards--scroll"> */}
                 {project.rewards.map((reward) => (
-                  <div key={reward.id} className="detail-reward">
+                  <div key={reward.id ?? reward.optionNo ?? reward.title} className="detail-reward">
                     <div className="detail-reward__header">
                       <h4>{reward.title}</h4>
                       <span>{currencyFormatter.format(reward.price)}원</span>
                     </div>
-                    <p>{reward.description}</p>
-                    <ul>
-                      {reward.includes.map((include) => (
-                        <li key={include}>{include}</li>
-                      ))}
-                    </ul>
+                    {reward.description && <p>{reward.description}</p>}
+                    {Array.isArray(reward.includes) && reward.includes.length > 0 && (
+                      <ul>
+                        {reward.includes.map((include) => (
+                          <li key={include}>{include}</li>
+                        ))}
+                      </ul>
+                    )}
                     <div className="detail-reward__shipping">배송 예정: {reward.shipping}</div>
                     <button type="button" className="detail-cta detail-cta--outline" onClick={handlePayment}>
                       리워드 선택

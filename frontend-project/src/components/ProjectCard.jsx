@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { fetchProjectLikeStatus, likeProject, unlikeProject } from '../api/interactionApi';
+import { getLoginUserInfo } from '../utils/auth';
 import { getProjectDetailPath } from '../utils/projectPaths';
 
 export default function ProjectCard({
@@ -17,15 +20,72 @@ export default function ProjectCard({
   const daysLabel =
     variant === 'featured' ? `${safeDaysLeft}일 남음` : `${safeDaysLeft}일`;
   const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(Number(project.likeCount) || 0);
+  const projectId = project?.id ?? project?.productNo ?? project?.projectNo;
   const detailPath = getProjectDetailPath(project);
   const imageSrc = project.image || project.heroImage || '';
   const categoryLabel = project.category ?? '기타';
   const title = project.title ?? '프로젝트';
 
-  const toggleLike = (event) => {
+  useEffect(() => {
+    let isMounted = true;
+    if (hideWish || !projectId) {
+      setLiked(false);
+      setLikeCount(0);
+      return undefined;
+    }
+
+    const loadLikeStatus = async () => {
+      try {
+        const status = await fetchProjectLikeStatus(projectId);
+        if (!isMounted) {
+          return;
+        }
+        setLiked(Boolean(status?.liked));
+        setLikeCount(status?.likeCount ?? 0);
+      } catch (error) {
+        console.error('프로젝트 카드 좋아요 상태 조회 실패', error);
+      }
+    };
+
+    loadLikeStatus();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [hideWish, projectId]);
+
+  const ensureLogin = () => {
+    const info = getLoginUserInfo();
+    if (!info?.token) {
+      toast.error('좋아요 기능은 로그인이 필요합니다.');
+      return null;
+    }
+    return info;
+  };
+
+  const toggleLike = async (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setLiked((prev) => !prev);
+
+    if (!projectId) {
+      toast.error('프로젝트 정보를 불러오지 못했습니다.');
+      return;
+    }
+
+    const userInfo = ensureLogin();
+    if (!userInfo) {
+      return;
+    }
+
+    try {
+      const status = liked ? await unlikeProject(projectId) : await likeProject(projectId);
+      setLiked(Boolean(status?.liked));
+      setLikeCount(status?.likeCount ?? likeCount);
+    } catch (error) {
+      console.error('프로젝트 카드 좋아요 처리 실패', error);
+      toast.error('좋아요 처리 중 오류가 발생했습니다.');
+    }
   };
 
   const cardContent = (
@@ -36,7 +96,7 @@ export default function ProjectCard({
           <button
             type="button"
             className={`project-card__wish${liked ? ' is-active' : ''}`}
-            aria-label={liked ? '관심 프로젝트 설정됨' : '관심 프로젝트 설정'}
+            aria-label={liked ? '관심 프로젝트 해제' : '관심 프로젝트 설정'}
             aria-pressed={liked}
             onClick={toggleLike}
           >

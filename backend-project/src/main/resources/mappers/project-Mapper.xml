@@ -123,7 +123,7 @@
                     ORIGIN_THUMBNAIL,
                     TEMP_STORY_HTML,
                     TEMP_STORY_JSON,
-                    SELLER_NO
+                    USER_NO
                 ) VALUES (
                     #{tempNo},
                     #{title},
@@ -136,7 +136,7 @@
                     NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
                     #{content.html},
                     #{content.json},
-                    #{sellerNo}
+                    #{userNo}
                 )
             </insert>
             <!-- 옵션 임시저장 -->
@@ -173,9 +173,7 @@
                         TEMP_STORY_JSON
                     FROM TEMPORARY
                     WHERE TEMP_STATUS = 'Y' 
-                        AND SELLER_NO = (
-                        SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
-                    )
+                        AND USER_NO = #{userNo}
                     ORDER BY TEMP_NO DESC
            </select>
 
@@ -200,10 +198,10 @@
 		        U.PHONE AS SELLER_PHONE,
 		        U.MODIFY_PROFILE AS SELLER_PROFILE_IMAGE
 		    FROM TEMPORARY T
-		    LEFT JOIN SELLER_PROFILE SP ON T.SELLER_NO = SP.SELLER_NO
-		    LEFT JOIN TB_USER U ON SP.USER_NO = U.USER_NO
+		    LEFT JOIN SELLER_PROFILE SP ON SP.USER_NO = T.USER_NO
+		    LEFT JOIN TB_USER U ON U.USER_NO = T.USER_NO
 		    WHERE T.TEMP_NO = #{tempNo}
-		      AND SP.USER_NO = #{userNo}
+		      AND T.USER_NO = #{userNo}
 		</select>
 
             <!-- 임시 저장 옵션 불러오기 -->
@@ -232,9 +230,7 @@
                             TEMP_STORY_JSON = #{content.json},
                             UPDATE_DATE = SYSDATE
                     WHERE TEMP_NO = #{tempNo}
-                        AND SELLER_NO = (
-                            SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
-                        )
+                        AND USER_NO = #{userNo}
             </update>
 
             <!-- 임시저장 목록 조회 프로젝트 삭제 -->
@@ -243,9 +239,7 @@
                     SET TEMP_STATUS = 'N',
                         UPDATE_DATE = SYSDATE
                     WHERE TEMP_NO = #{tempNo}
-                    AND SELLER_NO = (
-                        SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{userNo}
-                    )
+                    AND USER_NO = #{userNo}
             </update>
 
             <delete id="deleteTempOptions" parameterType="long">

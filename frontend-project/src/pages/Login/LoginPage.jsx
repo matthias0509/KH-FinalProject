@@ -57,6 +57,10 @@ export default function LoginPage() {
             
             if (jwtToken) { // JWT 문자열이 있으면 성공으로 판단
                 toast.info("로그인에 성공했습니다!");
+
+                // ✅ [범인 검거] 이 줄을 꼭 추가해야 합니다!! 
+            // 받아온 토큰을 브라우저 저장소에 'token'이라는 이름으로 저장합니다.
+            localStorage.setItem("token", jwtToken);
                 
                 // 💡 State 업데이트: 순수 토큰 문자열을 setCurrentUser에 전달
                 setCurrentUser(jwtToken);

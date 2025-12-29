@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="searchLogMapper">
+
+    <insert id="insertSearchLog" parameterType="map">
+        INSERT INTO SEARCH_LOG (
+            LOG_ID,
+            KEYWORD,
+            SEARCHED_AT
+        ) VALUES (
+            SEQ_SEARCH_LOG_ID.NEXTVAL,
+            #{keyword},
+            SYSDATE
+        )
+    </insert>
+
+    <select id="selectTrendingKeywords" parameterType="map" resultType="com.kh.foodding.search.dto.TrendingKeyword">
+        SELECT keyword, search_count AS count
+        FROM (
+            SELECT
+                KEYWORD AS keyword,
+                COUNT(*) AS search_count,
+                MAX(SEARCHED_AT) AS last_searched
+            FROM SEARCH_LOG
+            WHERE SEARCHED_AT >= SYSDATE - (#{windowMinutes} / (24 * 60))
+            GROUP BY KEYWORD
+            ORDER BY search_count DESC, last_searched DESC
+        )
+        WHERE ROWNUM &lt;= #{limit}
+    </select>
+
+</mapper>
