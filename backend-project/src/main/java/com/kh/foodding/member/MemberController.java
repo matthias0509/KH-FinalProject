@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +30,7 @@ public class MemberController {
     // 💡 반환 타입을 ResponseEntity<String>으로 변경
     public ResponseEntity<String> insertMember(
         @ModelAttribute Member m, 
-        @RequestPart(value = "upfile", required = false) MultipartFile upfile
+        @RequestParam(value = "upfile", required = false) MultipartFile upfile
     ) {
         
         m.setUserRole("USER");

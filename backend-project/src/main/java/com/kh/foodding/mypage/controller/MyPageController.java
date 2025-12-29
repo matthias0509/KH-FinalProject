@@ -29,8 +29,28 @@ public class MyPageController {
     // 1. 회원 정보 조회 (주소 포함)
     @GetMapping("/info")
     public ResponseEntity<?> getInfo(Principal principal) {
+    	
+    	// 🔍 [진단 로그] 이 부분이 범인을 알려줍니다.
+        System.out.println("=====================================");
+        System.out.println("1. 컨트롤러 진입 성공");
+        if (principal != null) {
+            System.out.println("2. 배달된 아이디(Principal): " + principal.getName());
+        } else {
+            System.out.println("2. 배달 사고 발생! (Principal is NULL)");
+        }
+        System.out.println("=====================================");
+        
         String userId = (principal != null) ? principal.getName() : "testUser";
         MyPage info = mypageService.selectMemberInfo(userId);
+        
+     // 🔍 [진단 로그] 제발 찍혀라
+        System.out.println("============================================");
+        if (info != null) {
+            System.out.println(">>> DB에서 가져온 프로필 값: " + info.getModifyProfile());
+        } else {
+            System.out.println(">>> info 객체가 NULL 입니다.");
+        }
+        System.out.println("============================================");
 
         return (info != null)
             ? ResponseEntity.ok(info)

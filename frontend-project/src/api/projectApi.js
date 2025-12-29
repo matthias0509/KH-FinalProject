@@ -2,10 +2,12 @@ import axios from 'axios';
 
 const PROJECT_API_BASE_URL = 'http://localhost:8001/foodding/project';
 
-export const fetchProjectList = async (limit = 12) => {
-  const response = await axios.get(`${PROJECT_API_BASE_URL}/list`, {
-    params: { limit },
-  });
+export const fetchProjectList = async (limit = 12, keyword) => {
+  const params = { limit };
+  if (keyword && keyword.trim()) {
+    params.keyword = keyword.trim();
+  }
+  const response = await axios.get(`${PROJECT_API_BASE_URL}/list`, { params });
   return response.data ?? [];
 };
 

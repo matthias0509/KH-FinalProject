@@ -46,7 +46,7 @@ export default function InquiryPage() {
 
             if (response.data === "success") {
                 alert('문의가 성공적으로 접수되었습니다.');
-                navigate('/inquiries');
+                navigate(-1);
             } else {
                 alert('접수 중 오류가 발생했습니다.');
             }

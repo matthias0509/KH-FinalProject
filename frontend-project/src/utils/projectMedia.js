@@ -1,5 +1,25 @@
-const API_BASE_URL = 'http://localhost:8001/foodding';
+const DEFAULT_API_BASE_URL = 'http://localhost:8001/foodding';
 const PLACEHOLDER_IMAGE = 'https://via.placeholder.com/400x300?text=Foodding';
+
+const resolveApiBaseUrl = () => {
+  const env = typeof import.meta !== 'undefined' ? import.meta.env ?? {} : {};
+  const configured =
+    env.VITE_UPLOAD_BASE_URL || env.VITE_API_BASE_URL || env.VITE_BACKEND_URL;
+  if (configured && typeof configured === 'string') {
+    return configured.replace(/\/$/, '');
+  }
+
+  if (typeof window !== 'undefined' && window.__FOODDING_API_BASE_URL__) {
+    const candidate = String(window.__FOODDING_API_BASE_URL__).trim();
+    if (candidate) {
+      return candidate.replace(/\/$/, '');
+    }
+  }
+
+  return DEFAULT_API_BASE_URL;
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 const sanitizeRelativePath = (rawPath) => {
   if (!rawPath) {

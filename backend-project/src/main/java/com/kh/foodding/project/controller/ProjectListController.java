@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kh.foodding.project.dto.ProductVisibilityUpdateRequest;
 import com.kh.foodding.project.model.service.ProjectListService;
 import com.kh.foodding.project.model.vo.ProjectList;
+import com.kh.foodding.search.model.service.SearchLogService;
 
 
 @CrossOrigin(origins = "http://localhost:5173")
@@ -24,6 +25,9 @@ import com.kh.foodding.project.model.vo.ProjectList;
 public class ProjectListController {
     @Autowired
     private ProjectListService projectListService;
+    
+    @Autowired
+    private SearchLogService searchLogService;
 
     // 프로젝트 상세 조회용
     @GetMapping("detail/{productNo}")
@@ -37,8 +41,14 @@ public class ProjectListController {
 
     // 프로젝트 목록 조회용
     @GetMapping("list")
-    public ResponseEntity<List<ProjectList>> selectList(@RequestParam(defaultValue = "12") int limit) {
-        List<ProjectList> projects = projectListService.selectRecentProjects(limit);
+    public ResponseEntity<List<ProjectList>> selectList(
+        @RequestParam(defaultValue = "12") int limit,
+        @RequestParam(required = false) String keyword
+    ) {
+        List<ProjectList> projects = projectListService.selectRecentProjects(limit, keyword);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            searchLogService.recordKeyword(keyword);
+        }
         return ResponseEntity.ok(projects);
     }
 

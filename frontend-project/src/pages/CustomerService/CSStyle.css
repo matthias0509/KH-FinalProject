@@ -237,7 +237,6 @@
     font-weight: bold;
     color: #333;
     padding: 15px 10px;
-    border-top: 2px solid #ccc;
     border-bottom: 1px solid #dbdbdb; /* 헤더 하단 선 */
     text-align: center;
 }
@@ -331,4 +330,8 @@
 .notice-table tbody tr:last-child td {
     border-bottom: 2px solid #333; /* 테이블 하단 마감선 */
 }
+
+
+
+
 

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.foodding.admin.model.dao.DashboardDao">
+
+    <select id="selectChartStats" parameterType="com.kh.foodding.admin.vo.Dashboard$Search" 
+            resultType="com.kh.foodding.admin.vo.Dashboard$Result">
+        SELECT 
+            <choose>
+                <when test="periodType == 'daily'">TO_CHAR(ORDER_DATE, 'MM/DD')</when>
+                <when test="periodType == 'monthly'">TO_CHAR(ORDER_DATE, 'YYYY-MM')</when>
+                <when test="periodType == 'yearly'">TO_CHAR(ORDER_DATE, 'YYYY')</when>
+                <otherwise>TO_CHAR(ORDER_DATE, 'YYYY-MM')</otherwise>
+            </choose> AS label,
+            
+            SUM(ORDER_AMOUNT) AS totalAmount,
+            COUNT(DISTINCT USER_NO) AS supporterCount
+            
+        FROM ORDERS
+        WHERE ORDER_STATUS = 'PAY'
+        <if test="startDate != null and endDate != null">
+            AND ORDER_DATE BETWEEN TO_DATE(#{startDate}, 'YYYY-MM-DD') 
+                               AND TO_DATE(#{endDate}, 'YYYY-MM-DD') + 0.99999
+        </if>
+        GROUP BY 
+            <choose>
+                <when test="periodType == 'daily'">TO_CHAR(ORDER_DATE, 'MM/DD')</when>
+                <when test="periodType == 'monthly'">TO_CHAR(ORDER_DATE, 'YYYY-MM')</when>
+                <when test="periodType == 'yearly'">TO_CHAR(ORDER_DATE, 'YYYY')</when>
+                <otherwise>TO_CHAR(ORDER_DATE, 'YYYY-MM')</otherwise>
+            </choose>
+        ORDER BY label ASC
+    </select>
+
+    <select id="selectSummaryStats" resultType="com.kh.foodding.admin.vo.Dashboard$Result">
+        SELECT 
+            (SELECT ROUND(AVG(ORDER_AMOUNT), 0) FROM ORDERS WHERE ORDER_STATUS = 'PAY') AS avgFundingAmount,
+            (SELECT COUNT(DISTINCT USER_NO) FROM ORDERS WHERE ORDER_STATUS = 'PAY') AS totalSupporters,
+            (SELECT COUNT(*) FROM SELLER_PROFILE) AS totalCreators,
+
+            ROUND((SELECT COUNT(*) FROM PRODUCT WHERE PRODUCT_STATUS = 'SUCCESS') / 
+                  NULLIF((SELECT COUNT(*) FROM PRODUCT WHERE PRODUCT_STATUS IN ('SUCCESS', 'FAIL')), 0) * 100, 1) AS successRate,
+            
+            ROUND((SELECT COUNT(*) FROM PRODUCT WHERE PRODUCT_STATUS = 'FAIL') / 
+                  NULLIF((SELECT COUNT(*) FROM PRODUCT WHERE PRODUCT_STATUS IN ('SUCCESS', 'FAIL')), 0) * 100, 1) AS failRate,
+
+            ROUND((SELECT AVG(CURRENT_AMOUNT / NULLIF(TARGET_AMOUNT, 0) * 100) 
+                   FROM PRODUCT WHERE TARGET_AMOUNT > 0 AND PRODUCT_STATUS != 'OPEN'), 0) AS achieveRate
+        FROM DUAL
+    </select>
+
+</mapper>

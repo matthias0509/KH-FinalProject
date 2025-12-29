@@ -15,10 +15,15 @@ import EmailVerificationForm from "../../components/Login/EmailVerificationForm"
 const API_BASE_URL = "http://localhost:8001/foodding/api/mypage";
 const SERVER_URL = "http://localhost:8001/foodding";
 
-const getFullImageUrl = (url) => {
-  if (!url || url === "null") return null;   // ❗ null은 그냥 null
-  if (url.startsWith("http")) return url;
-  return `${SERVER_URL}${url}`;
+// ✅ 1. 업로드 경로 상수 추가 (Sidebar와 동일하게!)
+const UPLOAD_PATH = "/uploads/";
+
+// ✅ 2. 이미지 주소 변환 함수 수정 (Sidebar와 로직 통일)
+const getFullImageUrl = (filename) => {
+  if (!filename || filename === "null") return null;
+  if (filename.startsWith("http")) return filename;
+  // 서버주소 + /uploads/ + 파일명
+  return `${SERVER_URL}${UPLOAD_PATH}${filename}`;
 };
 
 const ProfileEditPage = () => {
@@ -27,7 +32,6 @@ const ProfileEditPage = () => {
 
   // --- 상태 관리 ---
   const [activeTab, setActiveTab] = useState("base");
-  // 💡 로딩 상태 변수는 있지만, 화면 전체를 가리지는 않습니다.
   const [loading, setLoading] = useState(true);
   
   const [pwdMsg, setPwdMsg] = useState('');
@@ -37,18 +41,36 @@ const ProfileEditPage = () => {
 
   const [profile, setProfile] = useState({
     userId: "", name: "", userName: "", nickname: "", email: "", phone: "",
-    postcode: "", mainAddress: "", detailAddress: "", profileImageUrl: "",
+    postcode: "", mainAddress: "", detailAddress: "", 
+    modifyProfile: "", // ✅ 변수명 변경 (profileImageUrl -> modifyProfile)
   });
 
   const [accountForm, setAccountForm] = useState({
     newPassword: "", newPasswordConfirm: "", email: "", postcode: "", mainAddress: "", detailAddress: "",
   });
 
+  const getAuthHeader = () => {
+    const token = localStorage.getItem('token'); 
+    return { Authorization: `Bearer ${token}` };
+  };
+
   useEffect(() => {
     (async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/info`);
-        setProfile(res.data);
+        const token = localStorage.getItem('token');
+        if (!token) {
+            alert("로그인이 필요합니다.");
+            navigate('/login');
+            return;
+        }
+
+        const res = await axios.get(`${API_BASE_URL}/info`, {
+            headers: getAuthHeader()
+        });
+
+        // DB에서 가져온 modifyProfile 값을 state에 저장
+        setProfile(res.data); 
+        
         setAccountForm({
           newPassword: "", newPasswordConfirm: "",
           email: res.data.email || "",
@@ -58,11 +80,15 @@ const ProfileEditPage = () => {
         });
       } catch (e) {
         console.error("데이터 로딩 실패:", e);
+        if (e.response && e.response.status === 401) {
+            alert("로그인 세션이 만료되었습니다.");
+            navigate('/login');
+        }
       } finally {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [navigate]);
 
   const handleTabChange = (tab) => setActiveTab(tab);
 
@@ -72,6 +98,8 @@ const ProfileEditPage = () => {
         userId: profile.userId,
         userName: profile.userName || profile.name,
         nickname: profile.nickname,
+      }, {
+        headers: getAuthHeader()
       });
       toast.success("닉네임이 저장되었습니다.");
     } catch (e) {
@@ -79,46 +107,49 @@ const ProfileEditPage = () => {
     }
   };
 
- const handleProfileImageChange = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+  const handleProfileImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const formData = new FormData();
-  formData.append("profileFile", file); // ⭐ 서버와 이름 일치
+    const formData = new FormData();
+    formData.append("profileFile", file);
 
-  try {
-    const res = await axios.post(
-      "http://localhost:8001/foodding/api/mypage/base/updateProfileImage",
-      formData,
-      {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/base/updateProfileImage`,
+        formData,
+        {
+          headers: { 
+            "Content-Type": "multipart/form-data",
+            ...getAuthHeader()
+          },
+        }
+      );
 
-    // ⭐ 여기 핵심
-    setProfile(prev => ({
-      ...prev,
-      profileImageUrl: res.data.profileImageUrl,
-    }));
+      // ✅ 수정 포인트: 컨트롤러가 반환한 값을 modifyProfile에 저장
+      // (컨트롤러가 Map으로 "profileImageUrl" 키로 줬다면 res.data.profileImageUrl 사용)
+      setProfile(prev => ({
+        ...prev,
+        modifyProfile: res.data.profileImageUrl, 
+      }));
 
-    toast.success("사진이 변경되었습니다.");
-  } catch (e) {
-    toast.error("사진 변경 실패");
-  } finally {
-    e.target.value = "";
-  }
-};
-
-
-
-
+      toast.success("사진이 변경되었습니다.");
+    } catch (e) {
+      console.error(e);
+      toast.error("사진 변경 실패");
+    } finally {
+      e.target.value = "";
+    }
+  };
 
   const handleDeleteProfileImage = async () => {
     if (!window.confirm("프로필 사진을 삭제하시겠습니까?")) return;
     try {
-      await axios.post(`${API_BASE_URL}/base/deleteProfileImage`);
-      setProfile((prev) => ({ ...prev, profileImageUrl: null }));
+      await axios.post(`${API_BASE_URL}/base/deleteProfileImage`, {}, { 
+        headers: getAuthHeader()
+      });
+      // ✅ 수정 포인트: modifyProfile을 null로 변경
+      setProfile((prev) => ({ ...prev, modifyProfile: null }));
       toast.success("기본 이미지로 변경되었습니다.");
     } catch (e) { toast.error("사진 삭제 실패"); }
   };
@@ -138,10 +169,16 @@ const ProfileEditPage = () => {
         postcode: accountForm.postcode,
         mainAddress: accountForm.mainAddress,
         detailAddress: accountForm.detailAddress,
+      }, {
+        headers: getAuthHeader()
       });
+
       toast.success("계정 정보가 수정되었습니다.");
-      const res = await axios.get(`${API_BASE_URL}/info`);
+      
+      const res = await axios.get(`${API_BASE_URL}/info`, { headers: getAuthHeader() });
       setProfile(res.data);
+      setAccountForm(prev => ({ ...prev, newPassword: "", newPasswordConfirm: "" }));
+
     } catch (e) { toast.error("저장 중 오류 발생"); }
   };
 
@@ -150,8 +187,8 @@ const ProfileEditPage = () => {
     toast.info("회원탈퇴 기능 준비 중");
   };
 
-  // 💡 로딩 화면 리턴 제거함 -> 바로 아래 JSX 렌더링
-  
+  if (loading) return <div style={{padding:'50px', textAlign:'center'}}>정보를 불러오는 중입니다...</div>;
+
   return (
     <div className="page-wrapper">
       <ToastContainer position="top-center" autoClose={2000} theme="colored" />
@@ -176,15 +213,19 @@ const ProfileEditPage = () => {
                 <div className="form-container base-info-form">
                   <div className="photo-section">
                     <div className="photo-wrapper">
+                      {/* ✅ 3. 이미지 태그 수정 (Sidebar와 동일하게!) */}
                       <img
                         src={
-                          profile.profileImageUrl
-                            ? `${getFullImageUrl(profile.profileImageUrl)}?t=${Date.now()}`
+                          profile.modifyProfile
+                            ? `${getFullImageUrl(profile.modifyProfile)}?t=${Date.now()}`
                             : "/placeholder.png"
                         }
                         alt="프로필"
                         className="current-photo"
-                        onError={(e) => (e.currentTarget.src = "/placeholder.png")}
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "/placeholder.png";
+                        }}
                       />
 
                     </div>

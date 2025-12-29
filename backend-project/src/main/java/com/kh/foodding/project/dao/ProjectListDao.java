@@ -20,9 +20,10 @@ public class ProjectListDao {
         return sqlSession.selectOne("projectListMapper.selectProject", params);
     }
 
-    public List<ProjectList> selectRecentProjects(SqlSessionTemplate sqlSession, int limit) {
+    public List<ProjectList> selectRecentProjects(SqlSessionTemplate sqlSession, int limit, String keyword) {
         Map<String, Object> params = new HashMap<>();
         params.put("limit", limit);
+        params.put("keyword", keyword);
         return sqlSession.selectList("projectListMapper.selectRecentProjects", params);
     }
 
