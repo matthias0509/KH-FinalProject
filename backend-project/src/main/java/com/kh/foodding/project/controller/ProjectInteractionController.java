@@ -66,7 +66,13 @@ public class ProjectInteractionController {
             @PathVariable long sellerNo,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
         int userNo = requireUserNo(authorizationHeader);
-        return ResponseEntity.ok(interactionService.follow(sellerNo, userNo));
+        try {
+            return ResponseEntity.ok(interactionService.follow(sellerNo, userNo));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @DeleteMapping("/seller/{sellerNo}/followers")
@@ -74,7 +80,11 @@ public class ProjectInteractionController {
             @PathVariable long sellerNo,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
         int userNo = requireUserNo(authorizationHeader);
-        return ResponseEntity.ok(interactionService.unfollow(sellerNo, userNo));
+        try {
+            return ResponseEntity.ok(interactionService.unfollow(sellerNo, userNo));
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage(), e);
+        }
     }
 
     private Integer resolveUserNo(String authorizationHeader) {
