@@ -8,6 +8,7 @@ import { fetchProjectAxios } from './DetailApi';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
+import { getLoginUserInfo } from '../../utils/auth';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 const DEFAULT_AVATAR = 'https://placehold.co/80x80?text=Maker';
@@ -62,6 +63,7 @@ const mapCreatorFromSeller = (seller) => {
       introduction: '',
       email: '',
       phone: '',
+      userNo: null, // 추가
     };
   }
   const avatar = resolveProjectImageUrl(seller.profileImage) || DEFAULT_AVATAR;
@@ -73,6 +75,7 @@ const mapCreatorFromSeller = (seller) => {
     introduction: seller.introduction ?? '',
     email: seller.email ?? '',
     phone: seller.phone ?? '',
+    userNo: seller.userNo, // 판매자의 USER_NO 추가
   };
 };
 
@@ -112,6 +115,19 @@ const normalizeProjectDetail = (data = {}) => {
       ]
     : projectInit.story;
 
+  const normalizedRewards = Array.isArray(data.rewards)
+    ? data.rewards.map((reward, index) => ({
+        id: reward.optionNo ?? reward.id ?? index,
+        title: reward.title ?? `리워드 ${index + 1}`,
+        price: Number(reward.price) || 0,
+        description: reward.description ?? '',
+        includes: Array.isArray(reward.includes) ? reward.includes : [],
+        shipping:
+          reward.shipping ||
+          (data.shipStartDate ? `${data.shipStartDate}부터 순차 발송` : '배송 일정 미정'),
+      }))
+    : projectInit.rewards;
+
   return {
     ...projectInit,
     ...data,
@@ -131,6 +147,7 @@ const normalizeProjectDetail = (data = {}) => {
     story: storyBlocks,
     timeline: timeline.length ? timeline : projectInit.timeline,
     creator: creator ?? projectInit.creator,
+    rewards: normalizedRewards,
   };
 };
 
@@ -206,30 +223,86 @@ export default function ProductDetailPage() {
     navigate('/payment')
   }
 
-  // 클릭 시 채팅 나옴
   const handleOpenChat = () => {
+    // JWT 토큰에서 사용자 정보 가져오기
+    const token = sessionStorage.getItem("loginUser");
+    
+    console.log('=== 디버깅 시작 ===');
+    console.log('전체 project:', project);
+    console.log('project.sellerProfile:', project.sellerProfile);
+    console.log('project.sellerProfile?.userNo:', project.sellerProfile?.userNo);
+    console.log('project.creator:', project.creator);
+    console.log('project.creator?.userNo:', project.creator?.userNo);
+    
+    if (!token) {
+      toast.error('로그인이 필요한 서비스입니다.');
+      navigate('/login');
+      return;
+    }
+
+    let buyerNo;
+    try {
+      // JWT 토큰 디코딩
+      const payload = JSON.parse(window.atob(token.split('.')[1]));
+      buyerNo = payload.userNo || payload.sub || payload.id; // 토큰 구조에 따라 키가 다를 수 있음
+      console.log('Token payload:', payload);
+      console.log('buyerNo:', buyerNo);
+    } catch (e) {
+      console.error("토큰 확인 실패", e);
+      toast.error('로그인 정보가 올바르지 않습니다.');
+      navigate('/login');
+      return;
+    }
+
+    // 판매자의 USER_NO 가져오기
+    const sellerUserNo = project.sellerProfile?.userNo || project.creator?.userNo;
+    console.log('sellerUserNo:', sellerUserNo);
+    console.log('=== 디버깅 끝 ===');
+    
+    if (!sellerUserNo) {
+      toast.error('판매자 정보를 찾을 수 없습니다.');
+      console.error('판매자 정보 없음!');
+      return;
+    }
+
     const width = 400;
     const height = 650;
     const left = window.screen.width - width - 100;
     const top = (window.screen.height - height) / 2;
 
-    // 강호형
+    console.log('채팅창 열기 시도...');
+    
     const chatWindow = window.open(
       `/chat`,
       'ChatWindow',
       `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no`
     );
 
-    // 창이 로드되면 데이터 전달
-    chatWindow.onload = () => {
-      chatWindow.postMessage(
-        {
-          type: 'CREATOR_DATA',
-          creator: project.creator,
-        },
-        window.location.origin,
-      );
-    };
+    console.log('chatWindow:', chatWindow);
+
+    if (chatWindow) {
+      const checkWindow = setInterval(() => {
+        try {
+          if (chatWindow.closed) {
+            clearInterval(checkWindow);
+            return;
+          }
+          console.log('데이터 전달 시도...', { buyerNo, sellerUserNo });
+          chatWindow.postMessage(
+            {
+              type: 'CREATOR_DATA',
+              creator: project.creator,
+              buyerNo: buyerNo,
+              sellerNo: sellerUserNo
+            },
+            window.location.origin
+          );
+          clearInterval(checkWindow);
+        } catch (e) {
+          console.error('데이터 전달 오류:', e);
+        }
+      }, 100);
+    }
   };
 
   // 처음에 출력 될 정보 useEffect사용
@@ -465,12 +538,7 @@ export default function ProductDetailPage() {
                   <span className="detail-creator__followers">
                     팔로워 {project.creator.followers.toLocaleString()}명
                   </span>
-                  {project.creator.introduction && (
-                    <p className="detail-creator__intro">{project.creator.introduction}</p>
-                  )}
-                  {project.creator.email && (
-                    <span className="detail-creator__contact">{project.creator.email}</span>
-                  )}
+                  
                 </div>
               </button>
               <div className="detail-creator__actions">
@@ -492,17 +560,19 @@ export default function ProductDetailPage() {
               <h3>리워드 선택</h3>
               {/* <div className="detail-rewards detail-rewards--scroll"> */}
                 {project.rewards.map((reward) => (
-                  <div key={reward.id} className="detail-reward">
+                  <div key={reward.id ?? reward.optionNo ?? reward.title} className="detail-reward">
                     <div className="detail-reward__header">
                       <h4>{reward.title}</h4>
                       <span>{currencyFormatter.format(reward.price)}원</span>
                     </div>
-                    <p>{reward.description}</p>
-                    <ul>
-                      {reward.includes.map((include) => (
-                        <li key={include}>{include}</li>
-                      ))}
-                    </ul>
+                    {reward.description && <p>{reward.description}</p>}
+                    {Array.isArray(reward.includes) && reward.includes.length > 0 && (
+                      <ul>
+                        {reward.includes.map((include) => (
+                          <li key={include}>{include}</li>
+                        ))}
+                      </ul>
+                    )}
                     <div className="detail-reward__shipping">배송 예정: {reward.shipping}</div>
                     <button type="button" className="detail-cta detail-cta--outline" onClick={handlePayment}>
                       리워드 선택

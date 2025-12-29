@@ -93,6 +93,9 @@ public class MemberController {
     @PostMapping("/updatePassword")
     public String updatePassword(@RequestBody Member m) {
     	// System.out.println(m);
+    	
+    	String encodedPassword = bCryptPasswordEncoder.encode(m.getUserPwd());
+        m.setUserPwd(encodedPassword);
     	int result = memberService.updatePassword(m);
     	if (result>0) {
     		return "success";

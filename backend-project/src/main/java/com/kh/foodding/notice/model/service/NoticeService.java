@@ -9,4 +9,5 @@ public interface NoticeService {
 	int insertNotice(Notice notice);
 	Notice selectNoticeDetail(int noticeNo);
 	int deleteNotice(int noticeNo);
+	int updateNotice(Notice notice);
 }

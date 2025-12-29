@@ -25,9 +25,9 @@
 
     <select id="selectSellerProfile" parameterType="long" resultType="com.kh.foodding.project.model.vo.SellerProfile">
         SELECT
-            sp.SELLER_NO,
-            sp.USER_NO,
-            sp.INTRODUCTION,
+            sp.SELLER_NO AS sellerNo,
+            sp.USER_NO AS userNo,
+            sp.INTRODUCTION AS introduction,
             u.USER_NAME AS sellerName,
             u.NICKNAME,
             u.EMAIL,
