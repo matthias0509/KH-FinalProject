@@ -57,16 +57,11 @@ public class MyPageService {
             return null;
         }
 
-<<<<<<< HEAD
         // 4. 브라우저에서 접근할 URL 경로 (WebConfig 설정 필요)
         // 💡 "/foodding/uploads/"로 시작하게 맞춥니다.
         String dbPath = "http://localhost:8001/foodding/uploads/profile/" + storedFileName;
 
         // 5. DB에 URL 경로 저장
-=======
-        // DB 컬럼 MODIFY_PROFILE에 매핑되는 경로
-        String dbPath = "/uploads/profile/" + storedName;
->>>>>>> b21c34a0f086799c3e56286fd412f90bd76873c4
         int result = mypageDao.updateProfileImage(userId, dbPath);
         return result == 1 ? dbPath : null;
     }
@@ -118,7 +113,6 @@ public class MyPageService {
         return mypageDao.deleteMember(userId) == 1;
     }
     
-<<<<<<< HEAD
     /**
      * 💡 비밀번호 확인 전용 메서드 (모달 인증용)
      */
@@ -134,7 +128,4 @@ public class MyPageService {
         // 3. BCryptPasswordEncoder를 이용한 대조
         return passwordEncoder.matches(rawPassword, storedHashedPassword);
     }
-=======
-    
->>>>>>> b21c34a0f086799c3e56286fd412f90bd76873c4
 }
