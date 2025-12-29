@@ -22,3 +22,20 @@ export const updateProjectVisibility = async (productNo, productYn) => {
   });
   return response.data;
 };
+
+export const fetchProjectReviewList = async (status = 'WAITING') => {
+  const response = await axios.get(`${PROJECT_API_BASE_URL}/admin/review`, {
+    params: { status },
+  });
+  return response.data ?? [];
+};
+
+export const fetchProjectReviewDetail = async (productNo) => {
+  const response = await axios.get(`${PROJECT_API_BASE_URL}/admin/review/${productNo}`);
+  return response.data;
+};
+
+export const reviewProjectSubmission = async (productNo, payload) => {
+  const response = await axios.patch(`${PROJECT_API_BASE_URL}/admin/review/${productNo}`, payload);
+  return response.data;
+};
