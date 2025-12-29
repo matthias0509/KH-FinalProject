@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Search, User, Heart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { fetchTrendingKeywords } from '../api/searchApi';
 
-const trendingKeywords = [
+const fallbackKeywords = [
   '친환경 랩',
   '저당 간식',
   '비건 초콜릿',
@@ -19,7 +20,38 @@ const trendingKeywords = [
 export default function Header() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [trendingKeywords, setTrendingKeywords] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let active = true;
+
+    const loadTrendingKeywords = async () => {
+      try {
+        const data = await fetchTrendingKeywords();
+        if (!active) {
+          return;
+        }
+        if (Array.isArray(data) && data.length > 0) {
+          setTrendingKeywords(data.map((item) => item.keyword));
+        }
+      } catch (error) {
+        console.error('실시간 검색어 조회 실패', error);
+      }
+    };
+
+    loadTrendingKeywords();
+    const interval = setInterval(loadTrendingKeywords, 60000);
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const displayedKeywords = useMemo(() => {
+    return trendingKeywords.length ? trendingKeywords : fallbackKeywords;
+  }, [trendingKeywords]);
 
   const handleSuggestionClick = (keyword) => {
     setSearchTerm(keyword);
@@ -27,7 +59,8 @@ export default function Header() {
   };
 
   const runSearch = () => {
-    const keyword = (searchTerm.trim() || trendingKeywords[0]) ?? '';
+    const defaultKeyword = displayedKeywords[0] || '';
+    const keyword = (searchTerm.trim() || defaultKeyword).trim();
     if (!keyword) return;
     setSearchTerm(keyword);
     setShowSuggestions(false);
@@ -92,7 +125,7 @@ export default function Header() {
             </button>
             {showSuggestions && (
               <div className="search-suggestions">
-                {trendingKeywords.map((keyword, index) => (
+                {displayedKeywords.map((keyword, index) => (
                   <button
                     key={keyword}
                     type="button"

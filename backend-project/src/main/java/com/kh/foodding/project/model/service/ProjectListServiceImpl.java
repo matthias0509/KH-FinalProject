@@ -39,9 +39,13 @@ public class ProjectListServiceImpl implements ProjectListService {
     }
 
     @Override
-    public List<ProjectList> selectRecentProjects(int limit) {
+    public List<ProjectList> selectRecentProjects(int limit, String keyword) {
         int normalizedLimit = limit <= 0 ? 12 : Math.min(limit, 40);
-        return projectListDao.selectRecentProjects(sqlSession, normalizedLimit);
+        String normalizedKeyword = keyword == null ? null : keyword.trim();
+        if (normalizedKeyword != null && normalizedKeyword.isEmpty()) {
+            normalizedKeyword = null;
+        }
+        return projectListDao.selectRecentProjects(sqlSession, normalizedLimit, normalizedKeyword);
     }
 
     @Override
