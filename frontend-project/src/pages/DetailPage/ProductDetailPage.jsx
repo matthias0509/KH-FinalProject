@@ -209,18 +209,32 @@ export default function ProductDetailPage() {
   }
 
   const handleOpenChat = () => {
-    // 로그인한 사용자 정보 가져오기
-    const loginUserStr = localStorage.getItem('loginUser');
-    const loginUser = JSON.parse(loginUserStr || '{}');
-    const buyerNo = loginUser.userNo;
+    // JWT 토큰에서 사용자 정보 가져오기
+    const token = sessionStorage.getItem("loginUser");
     
-    console.log('buyerNo:', buyerNo);
-    console.log('project:', project);
-    console.log('project.creator:', project.creator);
+    console.log('=== 디버깅 시작 ===');
+    console.log('전체 project:', project);
     console.log('project.sellerProfile:', project.sellerProfile);
+    console.log('project.sellerProfile?.userNo:', project.sellerProfile?.userNo);
+    console.log('project.creator:', project.creator);
+    console.log('project.creator?.userNo:', project.creator?.userNo);
     
-    if (!buyerNo) {
+    if (!token) {
       toast.error('로그인이 필요한 서비스입니다.');
+      navigate('/login');
+      return;
+    }
+
+    let buyerNo;
+    try {
+      // JWT 토큰 디코딩
+      const payload = JSON.parse(window.atob(token.split('.')[1]));
+      buyerNo = payload.userNo || payload.sub || payload.id; // 토큰 구조에 따라 키가 다를 수 있음
+      console.log('Token payload:', payload);
+      console.log('buyerNo:', buyerNo);
+    } catch (e) {
+      console.error("토큰 확인 실패", e);
+      toast.error('로그인 정보가 올바르지 않습니다.');
       navigate('/login');
       return;
     }
@@ -228,6 +242,7 @@ export default function ProductDetailPage() {
     // 판매자의 USER_NO 가져오기
     const sellerUserNo = project.sellerProfile?.userNo || project.creator?.userNo;
     console.log('sellerUserNo:', sellerUserNo);
+    console.log('=== 디버깅 끝 ===');
     
     if (!sellerUserNo) {
       toast.error('판매자 정보를 찾을 수 없습니다.');
@@ -257,7 +272,7 @@ export default function ProductDetailPage() {
             clearInterval(checkWindow);
             return;
           }
-          console.log('데이터 전달 시도...');
+          console.log('데이터 전달 시도...', { buyerNo, sellerUserNo });
           chatWindow.postMessage(
             {
               type: 'CREATOR_DATA',
