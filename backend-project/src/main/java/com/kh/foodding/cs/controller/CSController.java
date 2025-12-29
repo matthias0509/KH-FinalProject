@@ -47,5 +47,16 @@ public class CSController {
 		
 		return csService.selectInquiryList(userNo);
 	}
+	
+	@GetMapping("/list/admin")
+	public List<Qna> selectAdminInquiryList(@RequestHeader("Authorization") String token){
+		return csService.selectAdminInquiryList();
+	}
+	
+	@PostMapping("/answer")
+	public String updateInquiryAnswer(@RequestHeader("Authorization") String token, @RequestBody Qna qna) {
+		int result = csService.updateInquiryAnswer(qna);
+		return result > 0 ? "success" : "fail";
+	}
 
 }

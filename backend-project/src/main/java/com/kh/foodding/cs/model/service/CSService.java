@@ -8,4 +8,6 @@ public interface CSService {
 	int insertInquiry(Qna qna);
 
 	List<Qna> selectInquiryList(int userNo);
+	List<Qna> selectAdminInquiryList();
+	int updateInquiryAnswer(Qna qna);
 }

@@ -116,7 +116,31 @@
 	</insert>
 	
 	<select id="selectInquiryList" resultMap="qnaResultSet">
-		SELECT * FROM QNA WHERE USER_NO = #{userNo}
+		SELECT * FROM QNA 
+		 WHERE USER_NO = #{userNo}
+		 ORDER BY QNA_NO DESC
 	</select>
+		
+
+	<select id="selectAdminInquiryList" resultMap="qnaResultSet">
+	    SELECT 
+	        QNA_NO,
+	        QNA_TITLE,
+	        QNA_CONTENT,
+	        QNA_DATE,
+	        ANSWER_CONTENT,
+	        ANSWER_DATE,
+	        M.USER_ID
+	    FROM QNA Q
+	    JOIN TB_USER M ON (Q.USER_NO = M.USER_NO)
+	    ORDER BY CASE WHEN ANSWER_CONTENT IS NULL THEN 0 ELSE 1 END, QNA_DATE DESC
+	</select>
+	
+	<update id="updateInquiryAnswer" parameterType="qna">
+	    UPDATE QNA
+	       SET ANSWER_CONTENT = #{answerContent},
+	           ANSWER_DATE = SYSDATE
+	     WHERE QNA_NO = #{qnaNo}
+	</update>
 
 </mapper>

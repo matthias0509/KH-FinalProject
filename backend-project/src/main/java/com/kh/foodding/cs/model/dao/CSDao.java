@@ -20,4 +20,12 @@ public class CSDao {
 	public List<Qna> selectInquiryList(int userNo){
 		return sqlSession.selectList("noticeMapper.selectInquiryList", userNo);
 	}
+	
+	public List<Qna> selectAdminInquiryList(){
+		return sqlSession.selectList("noticeMapper.selectAdminInquiryList");
+	}
+	
+	public int updateInquiryAnswer(Qna qna) {
+		return sqlSession.update("noticeMapper.updateInquiryAnswer", qna);
+	}
 }

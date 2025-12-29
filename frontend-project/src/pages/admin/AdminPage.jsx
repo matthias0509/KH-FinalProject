@@ -14,6 +14,8 @@ import SellerApplicationAdmin from './SellerApplicationAdmin';
 import '../../styles/AdminPage.css'; // 관리자 전용 CSS
 import '../../styles/MyPageLayout.css'; // 공통 레이아웃 (재활용)
 
+import InquiryManagement from './InquiryManagement';
+
 
 // ===================================================
 // A. 관리자 사이드바 컴포넌트
@@ -109,6 +111,11 @@ const AdminContent = ({ activeMenu }) => {
         );
     }
 
+    // 💡 문의 관리 컴포넌트 추가
+    if (activeMenu === 'inquiry_manage') {
+        return <main className="main-content admin-main-content"><InquiryManagement /></main>;
+    }
+
     let content;
 
     switch (activeMenu) {
@@ -163,7 +170,7 @@ const AdminContent = ({ activeMenu }) => {
             content = (
                 <>
                     <h2 className="page-title">💬 문의 관리 (Q&A/1:1 채팅)</h2>
-                    <p>사용자 Q&A 및 1:1 채팅 내역을 통합 조회하고 답변 처리합니다. (유스케이스: Q&A 조회, 1:1 채팅 조회)</p>
+                    < InquiryManagement />
                 </>
             );
             break;
