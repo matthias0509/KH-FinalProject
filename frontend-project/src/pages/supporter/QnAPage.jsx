@@ -10,20 +10,22 @@ import '../../styles/QnA.css';
 
 const QnAPage = () => {
     const navigate = useNavigate();
-    const [inquiries, setInquiries] = useState([]); // 전체 데이터
-    const [filteredList, setFilteredList] = useState([]); // 화면에 보일 데이터
+    const [inquiries, setInquiries] = useState([]); 
+    const [filteredList, setFilteredList] = useState([]); 
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('전체'); // 필터 상태
-    const [openId, setOpenId] = useState(null); // 토글 상태
+    const [activeTab, setActiveTab] = useState('전체'); 
+    const [openId, setOpenId] = useState(null); 
 
-    // 임시 사용자 정보 (Sidebar용)
+    // 💡 페이지네이션 관련 상태
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 7; // 한 페이지에 7개씩
+
     const userInfo = {
         name: '푸딩러버',
         profileImg: '🍮',
         role: 'supporter'
     };
 
-    // 1. DB 데이터 불러오기
     const fetchInquiries = async () => {
         const token = sessionStorage.getItem("loginUser");
         if (!token) {
@@ -39,7 +41,7 @@ const QnAPage = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setInquiries(response.data);
-            setFilteredList(response.data); // 초기값은 전체 리스트
+            setFilteredList(response.data);
         } catch (error) {
             console.error("문의 내역 로딩 실패:", error);
         } finally {
@@ -51,19 +53,26 @@ const QnAPage = () => {
         fetchInquiries();
     }, []);
 
-    // 2. 탭 필터링 로직
     useEffect(() => {
+        let list = [];
         if (activeTab === '전체') {
-            setFilteredList(inquiries);
+            list = inquiries;
         } else if (activeTab === '답변대기') {
-            setFilteredList(inquiries.filter(item => !item.answerContent));
+            list = inquiries.filter(item => !item.answerContent);
         } else if (activeTab === '답변완료') {
-            setFilteredList(inquiries.filter(item => item.answerContent));
+            list = inquiries.filter(item => item.answerContent);
         }
-        setOpenId(null); // 탭 변경 시 열려있던 상세창 닫기
+        setFilteredList(list);
+        setCurrentPage(1); // 💡 탭 변경 시 1페이지로 리셋
+        setOpenId(null); 
     }, [activeTab, inquiries]);
 
-    // 상세 토글 함수
+    // 💡 페이지네이션 계산 로직
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = filteredList.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+
     const toggleDetail = (id) => {
         setOpenId(openId === id ? null : id);
     };
@@ -76,6 +85,7 @@ const QnAPage = () => {
 
                 <main className="main-content">
                     <h2 className="page-title">나의 문의(Q&A)</h2>
+                    <br />
 
                     <div className="filter-container">
                         <div className="filter-tabs">
@@ -97,55 +107,79 @@ const QnAPage = () => {
                     <div className="qna-list-container">
                         {loading ? (
                             <div className="empty-state"><p>로딩 중...</p></div>
-                        ) : filteredList.length > 0 ? (
-                            filteredList.map((item) => (
-                                <React.Fragment key={item.qnaNo}>
-                                    {/* 문의 아이템 상단 */}
-                                    <div 
-                                        className={`qna-item ${openId === item.qnaNo ? 'open' : ''}`} 
-                                        onClick={() => toggleDetail(item.qnaNo)}
-                                    >
-                                        <div className="qna-header">
-                                            <div className="qna-meta">
-                                                <span className="qna-type">[1:1 문의]</span>
+                        ) : currentItems.length > 0 ? (
+                            <>
+                                {currentItems.map((item) => (
+                                    <React.Fragment key={item.qnaNo}>
+                                        <div 
+                                            className={`qna-item ${openId === item.qnaNo ? 'open' : ''}`} 
+                                            onClick={() => toggleDetail(item.qnaNo)}
+                                        >
+                                            <div className="qna-header">
+                                                <div className="qna-meta">
+                                                    <span className="qna-type">[1:1 문의]</span>
+                                                </div>
+                                                <span className="qna-date">작성일: {item.qnaDate}</span>
                                             </div>
-                                            <span className="qna-date">작성일: {item.qnaDate}</span>
+                                            <div className="qna-body">
+                                                <h3 className="qna-title">
+                                                    <span className="lock-icon">🔒</span> {item.qnaTitle}
+                                                </h3>
+                                                <span className={`qna-status ${item.answerContent ? 'done' : 'wait'}`}>
+                                                    {item.answerContent ? "답변완료" : "답변대기"}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="qna-body">
-                                            <h3 className="qna-title">
-                                                <span className="lock-icon">🔒</span> {item.qnaTitle}
-                                            </h3>
-                                            <span className={`qna-status ${item.answerContent ? 'done' : 'wait'}`}>
-                                                {item.answerContent ? "답변완료" : "답변대기"}
-                                            </span>
-                                        </div>
-                                    </div>
 
-                                    {/* 토글되는 상세 내용 영역 */}
-                                    {openId === item.qnaNo && (
-                                        <div className="qna-detail-expanded">
-                                            <div className="user-question">
-                                                <div className="qna-icon">Q</div>
-                                                <div className="content-text">{item.qnaContent}</div>
-                                            </div>
-                                            
-                                            <div className="admin-answer">
-                                                <div className="qna-icon">A</div>
-                                                <div className="content-text">
-                                                    {item.answerContent ? (
-                                                        <>
-                                                            <div className="answer-date">답변일: {item.answerDate}</div>
-                                                            <div className="answer-body">{item.answerContent}</div>
-                                                        </>
-                                                    ) : (
-                                                        <p className="wait-msg">담당자가 확인 중입니다. 잠시만 기다려 주세요.</p>
-                                                    )}
+                                        {openId === item.qnaNo && (
+                                            <div className="qna-detail-expanded">
+                                                <div className="user-question">
+                                                    <div className="qna-icon">Q</div>
+                                                    <div className="content-text">{item.qnaContent}</div>
+                                                </div>
+                                                <div className="admin-answer">
+                                                    <div className="qna-icon">A</div>
+                                                    <div className="content-text">
+                                                        {item.answerContent ? (
+                                                            <>
+                                                                <div className="answer-date">답변일: {item.answerDate}</div>
+                                                                <div className="answer-body">{item.answerContent}</div>
+                                                            </>
+                                                        ) : (
+                                                            <p className="wait-msg">담당자가 확인 중입니다. 잠시만 기다려 주세요.</p>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    )}
-                                </React.Fragment>
-                            ))
+                                        )}
+                                    </React.Fragment>
+                                ))}
+
+                                {/* 💡 페이지네이션 UI 추가 */}
+                                <div className="qna-pagination">
+                                    <button 
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(prev => prev - 1)}
+                                    >
+                                        &lt;
+                                    </button>
+                                    {[...Array(totalPages)].map((_, i) => (
+                                        <button 
+                                            key={i + 1}
+                                            className={currentPage === i + 1 ? 'active' : ''}
+                                            onClick={() => setCurrentPage(i + 1)}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
+                                    <button 
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                    >
+                                        &gt;
+                                    </button>
+                                </div>
+                            </>
                         ) : (
                             <div className="empty-state">
                                 <p>{activeTab} 내역이 없습니다.</p>
