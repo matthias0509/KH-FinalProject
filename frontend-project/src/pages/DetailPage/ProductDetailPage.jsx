@@ -224,9 +224,9 @@ export default function ProductDetailPage() {
   }
 
   const handleOpenChat = () => {
-    // JWT 토큰에서 사용자 정보 가져오기
-    const token = sessionStorage.getItem("loginUser");
-    
+    // JWT 토큰에서 사용자 정보 가져오기 (Base64URL 안전 유틸 사용)
+    const loginInfo = getLoginUserInfo();
+
     console.log('=== 디버깅 시작 ===');
     console.log('전체 project:', project);
     console.log('project.sellerProfile:', project.sellerProfile);
@@ -234,25 +234,29 @@ export default function ProductDetailPage() {
     console.log('project.creator:', project.creator);
     console.log('project.creator?.userNo:', project.creator?.userNo);
     
-    if (!token) {
+    if (!loginInfo?.token) {
       toast.error('로그인이 필요한 서비스입니다.');
       navigate('/login');
       return;
     }
 
-    let buyerNo;
-    try {
-      // JWT 토큰 디코딩
-      const payload = JSON.parse(window.atob(token.split('.')[1]));
-      buyerNo = payload.userNo || payload.sub || payload.id; // 토큰 구조에 따라 키가 다를 수 있음
-      console.log('Token payload:', payload);
-      console.log('buyerNo:', buyerNo);
-    } catch (e) {
-      console.error("토큰 확인 실패", e);
+    const payload = loginInfo.payload;
+    const buyerNo =
+      loginInfo.userNo ||
+      payload?.userNo ||
+      payload?.sub ||
+      payload?.id ||
+      null;
+
+    if (!buyerNo) {
+      console.error('토큰 확인 실패: 사용자 번호 파싱 불가', payload);
       toast.error('로그인 정보가 올바르지 않습니다.');
       navigate('/login');
       return;
     }
+
+    console.log('Token payload:', payload);
+    console.log('buyerNo:', buyerNo);
 
     // 판매자의 USER_NO 가져오기
     const sellerUserNo = project.sellerProfile?.userNo || project.creator?.userNo;

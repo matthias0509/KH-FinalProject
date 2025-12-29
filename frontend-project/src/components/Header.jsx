@@ -59,10 +59,7 @@ export default function Header() {
             <Link to="/notice" className="header__nav-link">
               공지사항
             </Link>
-           
-            <Link to="/change" className='header__nav-link'>
-              (메이커 전환)
-            </Link>
+
             
             <Link to="/login" className='header__nav-link'>
               (로그인)
