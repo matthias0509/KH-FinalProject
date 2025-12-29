@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="projectReviewMapper">
+
+    <resultMap id="projectReviewSummaryMap" type="com.kh.foodding.project.dto.ProjectReviewSummary">
+        <id property="productNo" column="PRODUCT_NO" />
+        <result property="productTitle" column="PRODUCT_TITLE" />
+        <result property="category" column="CATEGORY" />
+        <result property="targetAmount" column="TARGET_AMOUNT" />
+        <result property="currentAmount" column="CURRENT_AMOUNT" />
+        <result property="fundStartDate" column="FUND_START_DATE" />
+        <result property="fundEndDate" column="FUND_END_DATE" />
+        <result property="shipStartDate" column="SHIP_START_DATE" />
+        <result property="createDate" column="CREATE_DATE" />
+        <result property="productStatus" column="PRODUCT_STATUS" />
+        <result property="approvalStatus" column="APPROVAL_STATUS" />
+        <result property="productYn" column="PRODUCT_YN" />
+        <result property="sellerNo" column="SELLER_NO" />
+        <result property="sellerName" column="SELLER_NAME" />
+        <result property="sellerNickname" column="SELLER_NICKNAME" />
+        <result property="sellerEmail" column="SELLER_EMAIL" />
+        <result property="sellerPhone" column="SELLER_PHONE" />
+    </resultMap>
+
+    <resultMap id="projectReviewDetailMap" type="com.kh.foodding.project.dto.ProjectReviewDetail" extends="projectReviewSummaryMap">
+        <result property="productDesc" column="PRODUCT_DESC" />
+        <result property="storyHtml" column="STORY_HTML" />
+        <result property="storyJson" column="STORY_JSON" />
+        <result property="originThumbnail" column="ORIGIN_THUMBNAIL" />
+        <result property="modifyThumbnail" column="MODIFY_THUMBNAIL" />
+        <result property="rejectReason" column="REJECT_REASON" />
+    </resultMap>
+
+    <sql id="projectReviewBaseSelect">
+        SELECT
+            p.PRODUCT_NO,
+            p.PRODUCT_TITLE,
+            p.PRODUCT_DESC,
+            p.STORY_HTML,
+            p.STORY_JSON,
+            p.TARGET_AMOUNT,
+            p.CURRENT_AMOUNT,
+            p.FUND_START_DATE,
+            p.FUND_END_DATE,
+            p.SHIP_START_DATE,
+            p.PRODUCT_STATUS,
+            p.CATEGORY,
+            p.ORIGIN_THUMBNAIL,
+            p.MODIFY_THUMBNAIL,
+            p.CREATE_DATE,
+            p.PRODUCT_YN,
+            p.SELLER_NO,
+            p.REJECT_REASON,
+            u.USER_NAME AS SELLER_NAME,
+            u.NICKNAME AS SELLER_NICKNAME,
+            u.EMAIL AS SELLER_EMAIL,
+            u.PHONE AS SELLER_PHONE,
+            CASE
+                WHEN p.PRODUCT_STATUS = 'FAIL' THEN 'REJECT'
+                WHEN NVL(p.PRODUCT_YN, 'N') = 'N' THEN 'WAITING'
+                ELSE p.PRODUCT_STATUS
+            END AS APPROVAL_STATUS
+        FROM PRODUCT p
+        LEFT JOIN SELLER_PROFILE sp ON p.SELLER_NO = sp.SELLER_NO
+        LEFT JOIN TB_USER u ON sp.USER_NO = u.USER_NO
+    </sql>
+
+    <select id="selectProjects" parameterType="map" resultMap="projectReviewSummaryMap">
+        <include refid="projectReviewBaseSelect" />
+        <where>
+            <choose>
+                <when test="status == 'WAITING'">
+                    NVL(p.PRODUCT_YN, 'N') = 'N'
+                </when>
+                <when test="status == 'OPEN'">
+                    p.PRODUCT_STATUS = 'OPEN'
+                    AND NVL(p.PRODUCT_YN, 'N') = 'Y'
+                </when>
+                <when test="status == 'REJECT'">
+                    p.PRODUCT_STATUS = 'FAIL'
+                </when>
+                <otherwise>
+                    1 = 1
+                </otherwise>
+            </choose>
+        </where>
+        ORDER BY p.CREATE_DATE DESC
+    </select>
+
+    <select id="selectProjectDetail" parameterType="long" resultMap="projectReviewDetailMap">
+        <include refid="projectReviewBaseSelect" />
+        WHERE p.PRODUCT_NO = #{productNo}
+    </select>
+
+    <select id="selectProjectRewards" parameterType="long" resultType="com.kh.foodding.project.dto.ProjectReviewReward">
+        SELECT
+            OPTION_NAME AS title,
+            OPTION_PRICE AS price,
+            OPTION_CONTENT AS description
+        FROM TB_OPTION
+        WHERE PRODUCT_NO = #{productNo}
+        ORDER BY OPTION_NO
+    </select>
+
+    <update id="approveProject" parameterType="long">
+        UPDATE PRODUCT
+        SET PRODUCT_STATUS = 'OPEN',
+            PRODUCT_YN = 'Y',
+            REJECT_REASON = NULL
+        WHERE PRODUCT_NO = #{productNo}
+    </update>
+
+    <update id="rejectProject" parameterType="map">
+        UPDATE PRODUCT
+        SET PRODUCT_STATUS = 'FAIL',
+            PRODUCT_YN = 'N',
+            REJECT_REASON = #{reason}
+        WHERE PRODUCT_NO = #{productNo}
+    </update>
+
+</mapper>
