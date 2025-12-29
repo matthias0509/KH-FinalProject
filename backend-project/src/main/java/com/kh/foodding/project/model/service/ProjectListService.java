@@ -9,8 +9,8 @@ public interface ProjectListService{
     // 상세조회용
     ProjectList selectDetail(long productNo);
 
-    // 목록 조회용
-    List<ProjectList> selectRecentProjects(int limit);
+    // 목록 / 검색 조회용
+    List<ProjectList> selectRecentProjects(int limit, String keyword);
 
     // 관리자용 전체 조회
     List<ProjectList> selectAllProjects(String status);

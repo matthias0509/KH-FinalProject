@@ -89,6 +89,11 @@
                 SELLER_NO AS PRODUCT_SELLER_NO
             FROM PRODUCT
             WHERE PRODUCT_YN = 'Y' OR PRODUCT_YN IS NULL
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    UPPER(PRODUCT_TITLE) LIKE '%' || UPPER(#{keyword}) || '%'
+                )
+            </if>
             ORDER BY CREATE_DATE DESC
         ) project_list
         WHERE ROWNUM &lt;= #{limit}

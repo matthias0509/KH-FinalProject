@@ -5,6 +5,14 @@ import AppFooter from '../../components/AppFooter';
 
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchProjectAxios } from './DetailApi';
+import {
+  fetchProjectLikeStatus,
+  likeProject,
+  unlikeProject,
+  fetchSellerFollowStatus,
+  followSeller,
+  unfollowSeller,
+} from '../../api/interactionApi';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
@@ -165,7 +173,9 @@ export default function ProductDetailPage() {
   const progressRate = fundingGoal ? Math.round((fundingRaised / fundingGoal) * 100) : 0;
   const progressWidth = Math.min(progressRate, 100);
   const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
   const [activeDetailTab, setActiveDetailTab] = useState('story');
   const [reviewPage, setReviewPage] = useState(1);
   const rewardSectionRef = useRef(null);
@@ -188,15 +198,60 @@ export default function ProductDetailPage() {
 
   const navigate = useNavigate();
 
-  // 좋아요 기능 추가 예정
-  const toggleLike = () => {
-    setIsLiked((prev) => !prev);
+  const ensureLogin = () => {
+    const loginInfo = getLoginUserInfo();
+    if (!loginInfo?.token) {
+      toast.error('로그인이 필요한 서비스입니다.');
+      navigate('/login');
+      return null;
+    }
+    return loginInfo;
   };
 
+  const handleLikeToggle = async () => {
+    if (!project.productNo) {
+      toast.error('프로젝트 정보를 불러오는 중입니다.');
+      return;
+    }
 
-  // 팔로우 기능 추가 예정
-  const toggleFollow = () => {
-    setIsFollowing((prev) => !prev);
+    const loginInfo = ensureLogin();
+    if (!loginInfo) {
+      return;
+    }
+
+    try {
+      const status = isLiked
+        ? await unlikeProject(project.productNo)
+        : await likeProject(project.productNo);
+      setIsLiked(Boolean(status?.liked));
+      setLikeCount(status?.likeCount ?? likeCount);
+    } catch (error) {
+      console.error('좋아요 처리 실패', error);
+      toast.error('좋아요 처리 중 문제가 발생했습니다.');
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!project.sellerNo) {
+      toast.error('판매자 정보를 찾을 수 없습니다.');
+      return;
+    }
+
+    const loginInfo = ensureLogin();
+    if (!loginInfo) {
+      return;
+    }
+
+    try {
+      const status = isFollowing
+        ? await unfollowSeller(project.sellerNo)
+        : await followSeller(project.sellerNo);
+      setIsFollowing(Boolean(status?.following));
+      setFollowerCount(status?.followerCount ?? followerCount);
+    } catch (error) {
+      console.error('팔로우 처리 실패', error);
+      toast.error('팔로우 처리 중 문제가 발생했습니다.');
+    }
   };
 
 
@@ -224,9 +279,9 @@ export default function ProductDetailPage() {
   }
 
   const handleOpenChat = () => {
-    // JWT 토큰에서 사용자 정보 가져오기
-    const token = sessionStorage.getItem("loginUser");
-    
+    // JWT 토큰에서 사용자 정보 가져오기 (Base64URL 안전 유틸 사용)
+    const loginInfo = getLoginUserInfo();
+
     console.log('=== 디버깅 시작 ===');
     console.log('전체 project:', project);
     console.log('project.sellerProfile:', project.sellerProfile);
@@ -234,25 +289,29 @@ export default function ProductDetailPage() {
     console.log('project.creator:', project.creator);
     console.log('project.creator?.userNo:', project.creator?.userNo);
     
-    if (!token) {
+    if (!loginInfo?.token) {
       toast.error('로그인이 필요한 서비스입니다.');
       navigate('/login');
       return;
     }
 
-    let buyerNo;
-    try {
-      // JWT 토큰 디코딩
-      const payload = JSON.parse(window.atob(token.split('.')[1]));
-      buyerNo = payload.userNo || payload.sub || payload.id; // 토큰 구조에 따라 키가 다를 수 있음
-      console.log('Token payload:', payload);
-      console.log('buyerNo:', buyerNo);
-    } catch (e) {
-      console.error("토큰 확인 실패", e);
+    const payload = loginInfo.payload;
+    const buyerNo =
+      loginInfo.userNo ||
+      payload?.userNo ||
+      payload?.sub ||
+      payload?.id ||
+      null;
+
+    if (!buyerNo) {
+      console.error('토큰 확인 실패: 사용자 번호 파싱 불가', payload);
       toast.error('로그인 정보가 올바르지 않습니다.');
       navigate('/login');
       return;
     }
+
+    console.log('Token payload:', payload);
+    console.log('buyerNo:', buyerNo);
 
     // 판매자의 USER_NO 가져오기
     const sellerUserNo = project.sellerProfile?.userNo || project.creator?.userNo;
@@ -329,6 +388,46 @@ export default function ProductDetailPage() {
     api();
   }, [ProjectNo, navigate]);
 
+  useEffect(() => {
+    if (!project.productNo) {
+      setIsLiked(false);
+      setLikeCount(0);
+      return;
+    }
+
+    const loadLikeStatus = async () => {
+      try {
+        const status = await fetchProjectLikeStatus(project.productNo);
+        setIsLiked(Boolean(status?.liked));
+        setLikeCount(status?.likeCount ?? 0);
+      } catch (error) {
+        console.error('좋아요 상태 조회 실패', error);
+      }
+    };
+
+    loadLikeStatus();
+  }, [project.productNo]);
+
+  useEffect(() => {
+    if (!project.sellerNo) {
+      setIsFollowing(false);
+      setFollowerCount(0);
+      return;
+    }
+
+    const loadFollowStatus = async () => {
+      try {
+        const status = await fetchSellerFollowStatus(project.sellerNo);
+        setIsFollowing(Boolean(status?.following));
+        setFollowerCount(status?.followerCount ?? 0);
+      } catch (error) {
+        console.error('팔로우 상태 조회 실패', error);
+      }
+    };
+
+    loadFollowStatus();
+  }, [project.sellerNo]);
+
   if (loadError) {
     return (
       <div className="app">
@@ -390,7 +489,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 className={`detail-cta detail-cta--ghost${isLiked ? ' is-active' : ''}`}
-                onClick={toggleLike}
+                onClick={handleLikeToggle}
                 aria-pressed={isLiked}
               >
                 <Heart
@@ -399,7 +498,7 @@ export default function ProductDetailPage() {
                   fill={isLiked ? '#ef4444' : 'none'}
                   color={isLiked ? '#b91c1c' : '#6b7280'}
                 />
-                {isLiked ? '좋아요' : '좋아요'}
+                좋아요 {likeCount.toLocaleString()}개
               </button>
             </div>
           </div>
@@ -536,7 +635,7 @@ export default function ProductDetailPage() {
                 <div>
                   <h4>{project.creator.name}</h4>
                   <span className="detail-creator__followers">
-                    팔로워 {project.creator.followers.toLocaleString()}명
+                    팔로워 {followerCount.toLocaleString()}명
                   </span>
                   
                 </div>
@@ -545,7 +644,7 @@ export default function ProductDetailPage() {
                 <button
                   type="button"
                   className={`detail-cta detail-cta--follow${isFollowing ? ' is-active' : ''}`}
-                  onClick={toggleFollow}
+                  onClick={handleFollowToggle}
                   aria-pressed={isFollowing}
                 >
                   {isFollowing ? '팔로잉' : '팔로우'}
