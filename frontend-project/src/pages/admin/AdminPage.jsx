@@ -5,7 +5,6 @@ import React, { useState } from 'react';
 // 💡 사용자가 제공한 import 경로와 컴포넌트 이름 사용
 import UserManagementPage from './UserManagementPage';
 
-import DashBoardPage from './DashBoardPage';
 import ProjectApprovalPage from './ProjectApprovalPage'; // 👈 import 추가됨
 
 import DashBoardPage from './DashBoardPage'; // DashboardTab 대신 DashBoardPage 사용
