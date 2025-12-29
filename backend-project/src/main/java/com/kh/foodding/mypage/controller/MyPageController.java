@@ -1,14 +1,19 @@
 package com.kh.foodding.mypage.controller;
 
-import java.security.Principal; 
-import java.util.Map;
+import java.security.Principal;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.foodding.mypage.model.service.MyPageService;
 import com.kh.foodding.mypage.model.vo.MyPage; 
@@ -81,7 +86,6 @@ public class MyPageController {
             Principal principal) {
         
         String userId = (principal != null) ? principal.getName() : "testUser";
-<<<<<<< HEAD
 
         if (file == null || file.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
@@ -93,10 +97,6 @@ public class MyPageController {
         } else {
             return ResponseEntity.internalServerError().body(Map.of("message", "업로드 실패"));
         }
-=======
-        String url = mypageService.updateProfileImage(userId, file);
-        return (url != null) ? ResponseEntity.ok(Map.of("profileImageUrl", url, "message", "업로드 성공")) : ResponseEntity.internalServerError().body(Map.of("message", "업로드 실패"));
->>>>>>> b21c34a0f086799c3e56286fd412f90bd76873c4
     }
 
     /**

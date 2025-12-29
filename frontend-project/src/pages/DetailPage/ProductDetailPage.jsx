@@ -8,6 +8,7 @@ import { fetchProjectAxios } from './DetailApi';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
+import { getLoginUserInfo } from '../../utils/auth';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
 const DEFAULT_AVATAR = 'https://placehold.co/80x80?text=Maker';
@@ -210,9 +211,8 @@ export default function ProductDetailPage() {
 
   const handleOpenChat = () => {
     // 로그인한 사용자 정보 가져오기
-    const loginUserStr = localStorage.getItem('loginUser');
-    const loginUser = JSON.parse(loginUserStr || '{}');
-    const buyerNo = loginUser.userNo;
+    const loginUser = getLoginUserInfo();
+    const buyerNo = loginUser?.userNo;
     
     console.log('buyerNo:', buyerNo);
     console.log('project:', project);
