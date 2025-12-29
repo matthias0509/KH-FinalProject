@@ -465,12 +465,7 @@ export default function ProductDetailPage() {
                   <span className="detail-creator__followers">
                     팔로워 {project.creator.followers.toLocaleString()}명
                   </span>
-                  {project.creator.introduction && (
-                    <p className="detail-creator__intro">{project.creator.introduction}</p>
-                  )}
-                  {project.creator.email && (
-                    <span className="detail-creator__contact">{project.creator.email}</span>
-                  )}
+                  
                 </div>
               </button>
               <div className="detail-creator__actions">
