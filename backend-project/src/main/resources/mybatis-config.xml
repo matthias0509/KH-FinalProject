@@ -21,6 +21,9 @@
         
         <typeAlias type="com.kh.foodding.notice.model.vo.Notice" alias="notice" />
         
+        <typeAlias type="com.kh.foodding.chat.model.vo.Chatroom" alias="Chatroom"/>
+		<typeAlias type="com.kh.foodding.chat.model.vo.Message" alias="Message"/>
+        
         <package name="com.kh.foodding" />
         
     </typeAliases>
