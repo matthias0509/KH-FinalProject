@@ -23,16 +23,18 @@
         FROM TB_USER
         WHERE USER_ID = #{userId}
     </select>
-
-	<update id="updateMemberInfo" parameterType="com.kh.foodding.mypage.model.vo.MyPage">
-	    UPDATE TB_USER
-	    SET 
-	        USER_NAME = #{userName},  NICKNAME = #{nickname},
-	        POSTCODE = #{postcode},
-	        MAIN_ADDRESS = #{mainAddress},
-	        DETAIL_ADDRESS = #{detailAddress}
-	    WHERE USER_ID = #{userId}
-	</update>
+		
+		<update id="updateMemberInfo" parameterType="com.kh.foodding.mypage.model.vo.MyPage">
+		    UPDATE TB_USER
+		    <set>
+		        <if test="userName != null">USER_NAME = #{userName},</if>
+		        <if test="nickname != null">NICKNAME = #{nickname},</if>
+		        <if test="postcode != null">POSTCODE = #{postcode},</if>
+		        <if test="mainAddress != null">MAIN_ADDRESS = #{mainAddress},</if>
+		        <if test="detailAddress != null">DETAIL_ADDRESS = #{detailAddress},</if>
+		    </set>
+		    WHERE USER_ID = #{userId}
+		</update>
 
     <update id="updatePassword">
         UPDATE TB_USER
@@ -62,5 +64,7 @@
         DELETE FROM TB_USER 
         WHERE USER_ID = #{userId}
     </delete>
+    
+    
     
 </mapper>

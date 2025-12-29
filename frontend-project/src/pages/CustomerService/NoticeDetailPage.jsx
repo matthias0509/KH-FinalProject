@@ -1,14 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
 import CSLayout from '../../components/CustomerService/CSLayout';
+import { toast, ToastContainer } from 'react-toastify';
 
 export default function NoticeDetailPage() {
     const { noticeNo } = useParams(); 
     const [notice, setNotice] = useState(null);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // 수정 후 메시지 표시
+    useEffect(() => {
+        if (location.state?.message === '수정 완료') {
+            toast.success('공지사항이 성공적으로 수정되었습니다!');
+            window.history.replaceState({}, document.title); // 메시지 중복 표시 방지
+        }
+    }, [location]);
 
     // 💡 1. 관리자 권한 확인
     const token = sessionStorage.getItem("loginUser");
@@ -103,6 +113,7 @@ export default function NoticeDetailPage() {
                 </div>
             </CSLayout>
             <AppFooter />
+            <ToastContainer />
         </div>
     );
 }

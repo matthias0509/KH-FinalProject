@@ -81,6 +81,7 @@ public class MyPageController {
             Principal principal) {
         
         String userId = (principal != null) ? principal.getName() : "testUser";
+<<<<<<< HEAD
 
         if (file == null || file.isEmpty()) {
             return ResponseEntity.badRequest().body(Map.of("message", "파일이 없습니다."));
@@ -92,6 +93,10 @@ public class MyPageController {
         } else {
             return ResponseEntity.internalServerError().body(Map.of("message", "업로드 실패"));
         }
+=======
+        String url = mypageService.updateProfileImage(userId, file);
+        return (url != null) ? ResponseEntity.ok(Map.of("profileImageUrl", url, "message", "업로드 성공")) : ResponseEntity.internalServerError().body(Map.of("message", "업로드 실패"));
+>>>>>>> b21c34a0f086799c3e56286fd412f90bd76873c4
     }
 
     /**
@@ -143,4 +148,6 @@ public class MyPageController {
             return ResponseEntity.badRequest().body(Map.of("message", "탈퇴 처리 실패"));
         }
     }
+    
+    
 }
