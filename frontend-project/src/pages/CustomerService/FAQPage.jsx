@@ -100,10 +100,9 @@ export default function FAQPage() {
                             </div>
                         ))}
                     </div>
-                    
-                    <div className="faq-bottom-link"> {/* 💡 클래스 적용 */}
+                    <br />
+                    <div className="faq-header"> {/* 💡 클래스 적용 */}
                         <p>찾으시는 답변이 없다면, 1:1 문의를 이용해 주세요.</p>
-                        <InquiryButton />
                     </div>
                 </CSLayout>
             <AppFooter />
