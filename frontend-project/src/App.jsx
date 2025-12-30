@@ -51,6 +51,7 @@ import AdminPage from './pages/admin/AdminPage';
 import AdminLoginPage from './pages/admin/AdminLoginPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import DashBoardPage from './pages/admin/DashBoardPage';
+import ChatListPage from './pages/chat/ChatListPage';
 
 
 
@@ -109,7 +110,6 @@ export default function App() {
       <Route path="/mypage/like" element={<LikeProjectPage />} />
       <Route path="/mypage/follow" element={<FollowProjectPage />} />
       <Route path="/mypage/qna" element={<QnAPage />} />
-      <Route path="/mypage/chat" element={<ChatComponent />} />
 
 
       {/* ======================================================= */}
@@ -134,8 +134,9 @@ export default function App() {
       <Route path="/payment/success" element={<PaymentSuccess />}/>
       <Route path="/payment/fail" element={<PaymentFail />}/>
 
-      {/* 기타 공통 */}
+      {/* 채팅 관련 */}
       <Route path="/chat" element={<ChatComponent />} />
+      <Route path="/mypage/chat" element={<ChatListPage />} />
       
     </Routes>
   );
