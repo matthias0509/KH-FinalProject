@@ -3,7 +3,7 @@ import { X, Send, Paperclip, Smile, Loader } from 'lucide-react';
 import './ChatComponent.css';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8001';
+const API_BASE_URL = 'http://localhost:8001/foodding';
 
 const ChatComponent = () => {
   const [creator, setCreator] = useState(null);

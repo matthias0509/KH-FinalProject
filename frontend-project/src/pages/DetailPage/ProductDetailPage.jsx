@@ -293,15 +293,12 @@ export default function ProductDetailPage() {
 
 
   const handleOpenChat = () => {
-    // JWT 토큰에서 사용자 정보 가져오기 (Base64URL 안전 유틸 사용)
     const loginInfo = getLoginUserInfo();
 
     console.log('=== 디버깅 시작 ===');
     console.log('전체 project:', project);
     console.log('project.sellerProfile:', project.sellerProfile);
-    console.log('project.sellerProfile?.userNo:', project.sellerProfile?.userNo);
     console.log('project.creator:', project.creator);
-    console.log('project.creator?.userNo:', project.creator?.userNo);
     
     if (!loginInfo?.token) {
       toast.error('로그인이 필요한 서비스입니다.');
@@ -310,12 +307,7 @@ export default function ProductDetailPage() {
     }
 
     const payload = loginInfo.payload;
-    const buyerNo =
-      loginInfo.userNo ||
-      payload?.userNo ||
-      payload?.sub ||
-      payload?.id ||
-      null;
+    const buyerNo = loginInfo.userNo || payload?.userNo || payload?.sub || payload?.id || null;
 
     if (!buyerNo) {
       console.error('토큰 확인 실패: 사용자 번호 파싱 불가', payload);
@@ -327,7 +319,6 @@ export default function ProductDetailPage() {
     console.log('Token payload:', payload);
     console.log('buyerNo:', buyerNo);
 
-    // 판매자의 USER_NO 가져오기
     const sellerUserNo = project.sellerProfile?.userNo || project.creator?.userNo;
     console.log('sellerUserNo:', sellerUserNo);
     console.log('=== 디버깅 끝 ===');
@@ -354,25 +345,64 @@ export default function ProductDetailPage() {
     console.log('chatWindow:', chatWindow);
 
     if (chatWindow) {
+      let messageCount = 0;
+      const maxAttempts = 20; // 2초 동안 시도 (100ms * 20)
+      
+      // CHAT_READY 메시지 리스너 추가
+      const handleChatReady = (event) => {
+        if (event.data.type === 'CHAT_READY') {
+          console.log('채팅창 준비 완료!');
+          // 준비 완료 메시지를 받으면 즉시 데이터 전송
+          const dataToSend = {
+            type: 'CREATOR_DATA',
+            creator: {
+              name: project.creator.name,
+              avatar: project.creator.avatar
+            },
+            buyerNo: buyerNo,
+            sellerNo: sellerUserNo
+          };
+          console.log('데이터 전송:', dataToSend);
+          chatWindow.postMessage(dataToSend, window.location.origin);
+          window.removeEventListener('message', handleChatReady);
+        }
+      };
+      
+      window.addEventListener('message', handleChatReady);
+      
+      // 백업: interval로도 계속 시도 (CHAT_READY를 못 받을 경우 대비)
       const checkWindow = setInterval(() => {
         try {
           if (chatWindow.closed) {
             clearInterval(checkWindow);
+            window.removeEventListener('message', handleChatReady);
             return;
           }
-          console.log('데이터 전달 시도...', { buyerNo, sellerUserNo });
+          
+          messageCount++;
+
           chatWindow.postMessage(
             {
               type: 'CREATOR_DATA',
-              creator: project.creator,
+              creator: {
+                name: project.creator.name,
+                avatar: project.creator.avatar
+              },
               buyerNo: buyerNo,
               sellerNo: sellerUserNo
             },
             window.location.origin
           );
-          clearInterval(checkWindow);
+          
+          // 최대 시도 횟수에 도달하면 interval 정리
+          if (messageCount >= maxAttempts) {
+            clearInterval(checkWindow);
+            window.removeEventListener('message', handleChatReady);
+          }
         } catch (e) {
           console.error('데이터 전달 오류:', e);
+          clearInterval(checkWindow);
+          window.removeEventListener('message', handleChatReady);
         }
       }, 100);
     }

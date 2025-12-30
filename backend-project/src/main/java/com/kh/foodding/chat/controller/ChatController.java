@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/chat")
-@CrossOrigin(origins = "*")
+// @CrossOrigin 어노테이션 제거!
 public class ChatController {
     
     @Autowired
