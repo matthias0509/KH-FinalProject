@@ -14,4 +14,7 @@ public interface ChatService {
     
     // 채팅방 목록 조회 추가
     List<Map<String, Object>> getChatroomList(Long userNo);
+    
+    // 메시지 읽음 처리 추가
+    int markMessagesAsRead(Long chatroomNo, Long receiverNo);
 }

@@ -135,6 +135,24 @@ const ChatComponent = () => {
     }
   };
 
+  // 메시지 읽음 처리 함수 추가
+  const markMessagesAsRead = async (chatroomNo) => {
+      try {
+          console.log('📖 메시지 읽음 처리:', { chatroomNo, currentUserNo });
+          
+          await axios.post(`${API_BASE_URL}/chat/messages/read`, null, {
+              params: {
+                  chatroomNo: chatroomNo,
+                  userNo: currentUserNo
+              }
+          });
+          
+          console.log('✅ 읽음 처리 완료');
+      } catch (error) {
+          console.error('❌ 읽음 처리 실패:', error);
+      }
+  };
+
   // 메시지 서버로 전송
   const sendMessageToServer = async (senderNo, msgContent) => {
     try {

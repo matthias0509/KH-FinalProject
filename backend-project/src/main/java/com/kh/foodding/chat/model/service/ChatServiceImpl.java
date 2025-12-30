@@ -71,4 +71,13 @@ public class ChatServiceImpl implements ChatService {
     public List<Map<String, Object>> getChatroomList(Long userNo) {
         return chatDao.selectChatroomListByUser(sqlSession, userNo);
     }
+    
+    @Override
+    public int markMessagesAsRead(Long chatroomNo, Long receiverNo) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chatroomNo", chatroomNo);
+        params.put("receiverNo", receiverNo);
+        
+        return chatDao.updateMessagesToRead(sqlSession, params);
+    }
 }

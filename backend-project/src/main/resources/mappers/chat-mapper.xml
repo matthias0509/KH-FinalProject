@@ -84,7 +84,7 @@
         ORDER BY SEND_DATE ASC
     </select>
     
-    <!-- 사용자의 채팅방 목록 조회 (최근 메시지 포함) - FIXED -->
+    <!-- 사용자의 채팅방 목록 조회 (최근 메시지 포함)	 - FIXED -->
     <select id="selectChatroomListByUser" parameterType="long" resultType="map">
 	    SELECT 
 	        cr.CHATROOM_NO,
@@ -117,5 +117,14 @@
 	    WHERE cr.BUYER = #{userNo} OR cr.SELLER = #{userNo}
 	    ORDER BY cr.CHATROOM_CREATE_DATE DESC
 	</select>
+	
+	<!-- 메시지 읽음 처리 -->
+	<update id="updateMessagesToRead" parameterType="map">
+	    UPDATE MESSAGE
+	    SET READ_YN = 'Y'
+	    WHERE CHATROOM_NO = #{chatroomNo}
+	      AND RECEIVER = #{receiverNo}
+	      AND READ_YN = 'N'
+	</update>
 
 </mapper>

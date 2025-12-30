@@ -152,23 +152,42 @@ const ChatListPage = () => {
     initialize();
   }, []);
 
-  const handleChatroomClick = (chatroom) => {
+  const handleChatroomClick = async (chatroom) => {
     if (!currentUserNo) {
-      alert('사용자 정보를 불러오지 못했습니다');
-      return;
+        alert('사용자 정보를 불러오지 못했습니다');
+        return;
     }
 
-    // BUYER와 SELLER 값을 명확하게 사용
     const buyerNo = chatroom.BUYER;
     const sellerNo = chatroom.SELLER;
     
     console.log('💬 채팅방 열기:', {
-      chatroomNo: chatroom.CHATROOM_NO,
-      currentUserNo,
-      buyerNo,
-      sellerNo,
-      otherUserNo: chatroom.OTHER_USER_NO
+        chatroomNo: chatroom.CHATROOM_NO,
+        currentUserNo,
+        buyerNo,
+        sellerNo,
+        otherUserNo: chatroom.OTHER_USER_NO
     });
+    
+    try {
+        await axios.post(`${API_BASE_URL}/chat/messages/read`, null, {
+            params: {
+                chatroomNo: chatroom.CHATROOM_NO,
+                userNo: currentUserNo
+            }
+        });
+        console.log('✅ 읽음 처리 완료');
+        
+        // 🔥 읽음 처리 후 채팅방 목록 새로고침
+        const response = await axios.get(`${API_BASE_URL}/chat/rooms`, {
+            params: { userNo: currentUserNo }
+        });
+        if (Array.isArray(response.data)) {
+            setChatrooms(response.data);
+        }
+    } catch (error) {
+        console.error('❌ 읽음 처리 실패:', error);
+    }
     
     const width = 400;
     const height = 650;
@@ -176,29 +195,29 @@ const ChatListPage = () => {
     const top = (window.screen.height - height) / 2;
 
     const chatWindow = window.open(
-      `/chat`,
-      'ChatWindow',
-      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no`
+        `/chat`,
+        'ChatWindow',
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no`
     );
 
-    if (chatWindow) {
-      setTimeout(() => {
-        chatWindow.postMessage(
-          {
-            type: 'CREATOR_DATA',
-            creator: {
-              name: chatroom.OTHER_USER_NAME || '사용자',
-              avatar: chatroom.OTHER_USER_AVATAR || 'https://placehold.co/80x80?text=User'
-            },
-            buyerNo: buyerNo,
-            sellerNo: sellerNo,
-            currentUserNo: currentUserNo
-          },
-          window.location.origin
-        );
-      }, 500);
-    }
-  };
+        if (chatWindow) {
+            setTimeout(() => {
+                chatWindow.postMessage(
+                    {
+                        type: 'CREATOR_DATA',
+                        creator: {
+                            name: chatroom.OTHER_USER_NAME || '사용자',
+                            avatar: chatroom.OTHER_USER_AVATAR || 'https://placehold.co/80x80?text=User'
+                        },
+                        buyerNo: buyerNo,
+                        sellerNo: sellerNo,
+                        currentUserNo: currentUserNo
+                    },
+                    window.location.origin
+                );
+            }, 500);
+        }
+    };
 
   const formatTime = (dateString) => {
     if (!dateString) return '';

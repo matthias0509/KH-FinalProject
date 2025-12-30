@@ -50,4 +50,21 @@ public class ChatController {
         System.out.println("조회된 채팅방 수: " + (chatrooms != null ? chatrooms.size() : 0)); // 로그 추가
         return ResponseEntity.ok(chatrooms);
     }
+    
+    // 메시지 읽음 처리
+    @PostMapping("/messages/read")
+    public ResponseEntity<Map<String, Object>> markMessagesAsRead(
+            @RequestParam Long chatroomNo,
+            @RequestParam Long userNo) {
+        
+        System.out.println("메시지 읽음 처리 - chatroomNo: " + chatroomNo + ", userNo: " + userNo);
+        
+        int result = chatService.markMessagesAsRead(chatroomNo, userNo);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", result > 0);
+        response.put("updatedCount", result);
+        
+        return ResponseEntity.ok(response);
+    }
 }
