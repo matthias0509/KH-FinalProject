@@ -21,3 +21,5 @@ NOCACHE;
 -- 기존 DB에 DROP 문이 필요하다면 아래를 참고하세요.
 -- DROP TABLE SEARCH_LOG;
 -- DROP SEQUENCE SEQ_SEARCH_LOG_ID;
+
+COMMIT;
