@@ -46,52 +46,9 @@ public class AuthController {
 		// 1. 아이디로 DB에서 회원 정보 조회
 		Member loginUser = authService.login(m.getUserId());
 	
-		System.out.println("사용자 입력 비밀번호 (평문): " + m.getUserPwd());
-	    System.out.println("DB 해시 비밀번호: " + loginUser.getUserPwd());
-	
-		if ((loginUser != null)
-	
-		&& (bcryptPasswordEncoder.matches(m.getUserPwd(), loginUser.getUserPwd()))) {
-	
-	
-			// 2 문자열 타입의 비밀 키를 서명을 위한 Key 객체로 가공
-		
-			Key key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
-		
-		
-			// 3 JWT 생성
-		
-			String jwt = Jwts.builder()
-		
-			.setSubject(loginUser.getUserId()) // 회원을 구분하는 고유값
-		
-			.claim("name", loginUser.getUserName()) // 회원의 이름
-		
-			.claim("role", loginUser.getUserRole()) // 회원의 권한
-			
-			.claim("userNo", loginUser.getUserNo())
-			
-			.claim("userRole", loginUser.getUserRole())
-		
-			.setIssuedAt(new Date()) // JWT 발급시간
-		
-			// 1시간 (60분 * 60초 * 1000ms) 뒤 만료 설정
-		
-			.setExpiration(new Date(System.currentTimeMillis() + 1 * 60 * 60 * 1000))
-		
-			.signWith(key, SignatureAlgorithm.HS256) // 서명 시 필요한 키, 알고리즘 지정
-		
-			.compact(); // 최종 토큰 문자열 생성
-		
-		
-			// 4. 응답 데이터 리턴
-		
-			return jwt;
-
-
-		} else {
-
-			return null;
+		if (loginUser == null) {
+			System.out.println("❌ 로그인 실패: 해당 아이디(" + m.getUserId() + ")를 가진 유저가 DB에 없음");
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
 		}
 
 		System.out.println("DB에 저장된 암호화 PW: " + loginUser.getUserPwd());
