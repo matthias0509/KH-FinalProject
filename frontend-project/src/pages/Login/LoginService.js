@@ -11,6 +11,17 @@ export const login = async (userId, userPwd) => {
         
         // 백엔드가 { token: "...", user: {...} } 객체를 준다고 가정
         if (response.data && response.data.token) {
+            // ✅ sessionStorage에 JWT 토큰 저장 (추가)
+            sessionStorage.setItem('loginUser', response.data.token);
+            
+            // ✅ localStorage에도 저장 (추가)
+            localStorage.setItem('token', response.data.token);
+            
+            // ✅ user 정보가 있으면 저장 (추가)
+            if (response.data.user) {
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+            }
+            
             return response.data; // { token, user } 객체 전체 반환
         }
 
@@ -30,11 +41,12 @@ export const login = async (userId, userPwd) => {
 export const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    sessionStorage.removeItem('loginUser');
 };
 
 // 현재 사용자 정보 가져오기 (토큰 여부만 체크하는 경우)
 export const getCurrentUser = () => {
-    return localStorage.getItem("token");
+    return sessionStorage.getItem('loginUser') || localStorage.getItem("token"); // ✅ sessionStorage 우선 확인으로 수정
 };
 
 // (선택사항) 만약 사용자 객체 정보가 필요하다면 아래 함수 추가

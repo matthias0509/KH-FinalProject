@@ -35,34 +35,63 @@ const PaymentComponent = () => {
   const clientKey = 'test_ck_6BYq7GWPVvNRd1OJ7eqmVNE5vbo1';
   const customerKey = `customer_${Date.now()}`;
 
-  // 로그인 정보 확인 useEffect 추가
+  // ✅ 한글을 지원하는 base64 디코딩 함수
+  const base64UrlDecode = (str) => {
+    try {
+      // Base64 URL을 일반 Base64로 변환
+      let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+      
+      // atob로 디코딩 후 UTF-8로 변환
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      console.error('Base64 디코딩 실패:', e);
+      return null;
+    }
+  };
+
+  // 로그인 정보 확인 useEffect
   useEffect(() => {
     console.log('=== PaymentComponent 로그인 정보 확인 ===');
     
-    // sessionStorage 확인
     const loginUser = sessionStorage.getItem('loginUser');
     console.log('1. sessionStorage.loginUser (raw):', loginUser);
     
-    // localStorage 확인
-    const loginUserLocal = localStorage.getItem('loginUser');
-    console.log('2. localStorage.loginUser (raw):', loginUserLocal);
+    const loginUserLocal = localStorage.getItem('token');
+    console.log('2. localStorage.token (raw):', loginUserLocal);
     
-    // JWT 토큰 디코딩
-    if (loginUser) {
-      try {
-        const payload = JSON.parse(window.atob(loginUser.split('.')[1]));
-        console.log('3. JWT 디코딩 결과:', payload);
-        console.log('4. userNo:', payload.userNo || payload.sub || payload.id);
-        console.log('5. 전체 payload keys:', Object.keys(payload));
-      } catch (e) {
-        console.error('JWT 디코딩 실패:', e);
-        console.log('토큰 형식이 JWT가 아닐 수 있습니다. 원본 값:', loginUser);
+    const token = loginUser || loginUserLocal;
+    
+    if (token) {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const payload = base64UrlDecode(parts[1]);
+        
+        if (payload) {
+          console.log('3. JWT 디코딩 결과:', payload);
+          console.log('4. 사용 가능한 필드들:', Object.keys(payload));
+          
+          const userNo = payload.userNo || 
+                         payload.sub || 
+                         payload.id || 
+                         payload.user_no || 
+                         payload.userId ||
+                         payload.user_id ||
+                         payload.no;
+                         
+          console.log('5. 추출된 userNo:', userNo);
+        }
       }
     } else {
-      console.log('⚠️ sessionStorage에 loginUser가 없습니다');
+      console.log('⚠️ sessionStorage와 localStorage 모두에 토큰이 없습니다');
     }
     
-    // 모든 sessionStorage 키 확인
     console.log('6. 전체 sessionStorage keys:', Object.keys(sessionStorage));
     console.log('7. 전체 localStorage keys:', Object.keys(localStorage));
     
@@ -146,27 +175,60 @@ const PaymentComponent = () => {
       return;
     }
 
-    if (!tossPayments) {
-      alert('결제 시스템을 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+    // ✅ sessionStorage와 localStorage 둘 다 확인
+    let loginUser = sessionStorage.getItem('loginUser') || localStorage.getItem('token');
+    console.log('결제 시 loginUser:', loginUser);
+    
+    if (!loginUser) {
+      alert('로그인이 필요합니다. 다시 로그인해주세요.');
+      navigate('/login');
+      return;
+    }
+    
+    let userNo = null;
+    try {
+      const parts = loginUser.split('.');
+      if (parts.length !== 3) {
+        throw new Error('올바르지 않은 JWT 형식입니다.');
+      }
+      
+      const payload = base64UrlDecode(parts[1]);
+      
+      if (!payload) {
+        throw new Error('JWT 디코딩 실패');
+      }
+      
+      console.log('JWT payload 전체:', payload);
+      console.log('사용 가능한 필드들:', Object.keys(payload));
+      
+      userNo = payload.userNo || 
+               payload.sub || 
+               payload.id || 
+               payload.user_no || 
+               payload.userId ||
+               payload.user_id ||
+               payload.no;
+      
+      console.log('추출된 userNo:', userNo);
+      
+      if (!userNo) {
+        console.error('❌ JWT에서 userNo를 찾을 수 없습니다!');
+        console.error('JWT payload:', payload);
+        alert('사용자 정보를 확인할 수 없습니다. 다시 로그인해주세요.');
+        navigate('/login');
+        return;
+      }
+    } catch (e) {
+      console.error('JWT 파싱 실패:', e);
+      console.error('loginUser 값:', loginUser);
+      alert('인증 정보가 올바르지 않습니다. 다시 로그인해주세요.');
+      navigate('/login');
       return;
     }
 
-    // 로그인 정보 확인
-    const loginUser = sessionStorage.getItem('loginUser');
-    console.log('결제 시 loginUser:', loginUser);
-    
-    let userNo = 1; // 기본값
-    if (loginUser) {
-      try {
-        const payload = JSON.parse(window.atob(loginUser.split('.')[1]));
-        console.log('결제 시 JWT payload:', payload);
-        userNo = payload.userNo || payload.sub || payload.id || 1;
-        console.log('추출된 userNo:', userNo);
-      } catch (e) {
-        console.error('JWT 파싱 실패:', e);
-      }
-    } else {
-      console.warn('⚠️ 로그인 정보 없음 - userNo를 1로 설정');
+    if (!tossPayments) {
+      alert('결제 시스템을 로딩 중입니다. 잠시 후 다시 시도해주세요.');
+      return;
     }
 
     setIsProcessing(true);
@@ -174,32 +236,25 @@ const PaymentComponent = () => {
     try {
       const orderId = `order_${Date.now()}`;
       const phoneNumberOnly = formData.phone.replace(/[^0-9]/g, '');
-
-      // 배송비 제외한 실제 상품 금액 계산
       const productAmount = selectedReward.amount * selectedReward.quantity;
       const deliveryFee = 3000;
       const totalAmount = productAmount + deliveryFee;
 
       console.log('결제 요청 데이터:', {
-        totalAmount: totalAmount,
-        productAmount: productAmount, // 상품 금액만
-        deliveryFee: deliveryFee,
-        orderId: orderId,
-        orderName: selectedReward.title,
-        customerName: formData.name,
-        quantity: selectedReward.quantity,
-        optionNo: selectedReward.optionNo,
-        userNo: userNo
+        totalAmount,
+        productAmount,
+        deliveryFee,
+        orderId,
+        userNo,
       });
 
       await tossPayments.requestPayment('카드', {
-        amount: totalAmount, // 토스에는 총 금액 전달
+        amount: totalAmount,
         orderId: orderId,
         orderName: selectedReward.title,
         customerName: formData.name,
         customerEmail: formData.email,
         customerMobilePhone: phoneNumberOnly,
-        // successUrl에 상품 금액(productAmount)만 전달
         successUrl: `${window.location.origin}/payment/success?postcode=${formData.postcode}&address=${encodeURIComponent(formData.address + ' ' + formData.detailAddress)}&quantity=${selectedReward.quantity}&optionNo=${selectedReward.optionNo}&userNo=${userNo}&productAmount=${productAmount}`,
         failUrl: `${window.location.origin}/payment/fail`,
       });

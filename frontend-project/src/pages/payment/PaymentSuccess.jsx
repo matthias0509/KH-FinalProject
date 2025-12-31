@@ -11,6 +11,25 @@ const PaymentSuccess = () => {
   const [orderInfo, setOrderInfo] = useState(null);
   const [error, setError] = useState(null);
 
+  // ✅ 한글을 지원하는 base64 디코딩 함수 추가
+  const base64UrlDecode = (str) => {
+      try {
+          let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+          
+          const jsonPayload = decodeURIComponent(
+              atob(base64)
+                  .split('')
+                  .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                  .join('')
+          );
+          
+          return JSON.parse(jsonPayload);
+      } catch (e) {
+          console.error('Base64 디코딩 실패:', e);
+          return null;
+      }
+  };
+
   useEffect(() => {
     const confirmPayment = async () => {
       console.log('=== PaymentSuccess 로그인 정보 확인 ===');
