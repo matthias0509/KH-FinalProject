@@ -9,34 +9,38 @@ export const login = async (userId, userPwd) => {
     try {
         const response = await api.post("/login", { userId, userPwd });
         
-        // 🚨 [핵심 수정] 백엔드가 { token: "...", user: {...} } 객체를 줍니다.
-        // 기존처럼 문자열 길이를 체크하거나 sessionStorage에 바로 넣지 말고,
-        // 데이터를 있는 그대로 LoginPage로 넘겨줘야 합니다.
-        
+        // 백엔드가 { token: "...", user: {...} } 객체를 준다고 가정
         if (response.data && response.data.token) {
             return response.data; // { token, user } 객체 전체 반환
         }
 
-        return null;
+        return null; // 응답은 왔지만 토큰이 없는 경우
     } catch (error) {
-
+        // 에러 로그 출력
         console.error("LoginService Error:", error);
-        throw error;
+        
+        // 🚨 수정됨: 둘 중 하나만 선택하세요. 
+        // 방법 1: 에러를 LoginPage로 던져서 거기서 메시지를 띄우게 함 (권장)
+        throw error; 
 
-        console.error("로그인 통신 실패!", error);
-        return null;
-
+        // 방법 2: 그냥 여기서 끝내고 null을 반환하고 싶다면 위 throw를 지우고 아래 주석 해제
+        // return null;
     }
 };
 
-// 로그아웃 시 로컬스토리지 정리 (App.js와 맞춤)
+// 로그아웃 시 로컬스토리지 정리
 export const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    // sessionStorage.removeItem("loginUser"); // 필요하다면 유지
 };
 
+// 현재 사용자 정보 가져오기 (토큰 여부만 체크하는 경우)
 export const getCurrentUser = () => {
-    // App.js가 localStorage를 쓰므로 여기도 맞추는 게 좋습니다.
     return localStorage.getItem("token");
+};
+
+// (선택사항) 만약 사용자 객체 정보가 필요하다면 아래 함수 추가
+export const getLoggedUserInfo = () => {
+    const userStr = localStorage.getItem("user");
+    return userStr ? JSON.parse(userStr) : null;
 };

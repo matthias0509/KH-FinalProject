@@ -1,10 +1,16 @@
 import axios from 'axios';
+// 🚨 [수정 1] 아까 만든 auth.js에서 토큰 가져오는 함수를 임포트합니다.
+// (경로가 맞는지 확인해주세요. api 폴더와 utils 폴더가 형제 레벨이라고 가정)
+import { getStoredToken } from '../utils/auth'; 
 
 const API_ROOT = 'http://localhost:8001/foodding';
 const projectUrl = `${API_ROOT}/project`;
 
 const authHeaders = () => {
-  const token = sessionStorage.getItem('loginUser');
+  // 🚨 [수정 2] sessionStorage.getItem('loginUser') -> getStoredToken() 으로 변경
+  // 이제 LocalStorage에 있는 'token'을 정확히 가져옵니다.
+  const token = getStoredToken(); 
+  
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 

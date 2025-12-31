@@ -5,23 +5,23 @@
 
     <select id="checkFollowStatus" resultType="int">
         SELECT COUNT(*) 
-        FROM FOLLOW 
-        WHERE FOLLOWING = #{userNo} AND SELLER_NO = #{sellerNo}
+        FROM "FOLLOW" 
+        WHERE "FOLLOWING" = #{userNo} AND SELLER_NO = #{sellerNo}
     </select>
 
     <insert id="insertFollow">
-        INSERT INTO FOLLOW (FOLLOWING, SELLER_NO)
+        INSERT INTO "FOLLOW" ("FOLLOWING", SELLER_NO)
         VALUES (#{userNo}, #{sellerNo})
     </insert>
 
     <delete id="deleteFollow">
-        DELETE FROM FOLLOW 
-        WHERE FOLLOWING = #{userNo} AND SELLER_NO = #{sellerNo}
+        DELETE FROM "FOLLOW" 
+        WHERE "FOLLOWING" = #{userNo} AND SELLER_NO = #{sellerNo}
     </delete>
 
     <select id="getFollowerCount" resultType="int">
         SELECT COUNT(*) 
-        FROM FOLLOW 
+        FROM "FOLLOW" 
         WHERE SELLER_NO = #{sellerNo}
     </select>
     
