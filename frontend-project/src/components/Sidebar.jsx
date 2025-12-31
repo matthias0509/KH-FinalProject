@@ -17,7 +17,11 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
 
     // null 안전 처리
     const displayName = userInfo?.nickname || userInfo?.userName || userInfo?.name || '사용자';
-    const userRole = userInfo?.role || 'supporter';
+    
+    // 🚨 [수정된 부분] 권한 체크: DB값(MAKER)과 프론트값(maker) 대소문자 무시하고 비교
+    // userInfo.role이 있으면 소문자로 변환, 없으면 'supporter'
+    const userRole = userInfo?.role ? userInfo.role.toLowerCase() : 'supporter';
+    
     const isMakerMode = location.pathname.startsWith('/maker');
 
     const imageTimestamp = useMemo(() => Date.now(), [userInfo?.modifyProfile]);
@@ -29,11 +33,14 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
     };
 
     const handleMakerClick = () => {
+        // userRole은 이미 소문자로 변환되었으므로 'maker'와 비교
         if (userRole !== 'maker') {
-            if (window.confirm("메이커 권한이 없습니다.\n관리자에게 권한을 신청하시겠습니까?")) {
-                alert("관리자에게 메이커 권한을 요청했습니다! (승인 대기 중)");
+            // 메이커가 아니면 -> 신청 페이지(/change)로 이동할지 물어봄
+            if (window.confirm("메이커 권한이 없습니다.\n메이커 전환 신청 페이지로 이동하시겠습니까?")) {
+                navigate('/change');
             }
         } else {
+            // 이미 메이커면 -> 메이커 관리 페이지로 이동
             navigate('/maker');
         }
     };
@@ -49,6 +56,7 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
                     서포터
                 </Link>
                 
+                {/* userRole은 소문자 'maker'로 통일됨 */}
                 {userRole === 'maker' ? (
                     <Link 
                         to="/maker" 

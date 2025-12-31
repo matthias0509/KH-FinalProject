@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kh.foodding.admin.model.dao.DashboardDao;
-import com.kh.foodding.admin.vo.Dashboard;
+import com.kh.foodding.admin.model.vo.Dashboard;
 
 @Service
 public class DashboardService {

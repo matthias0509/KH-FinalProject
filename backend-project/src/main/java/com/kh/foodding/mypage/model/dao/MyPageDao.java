@@ -6,6 +6,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.kh.foodding.mypage.model.vo.FollowedSeller;
 import com.kh.foodding.mypage.model.vo.FundingHistory;
 import com.kh.foodding.mypage.model.vo.LikedProject; // ✅ VO 임포트 필수!
 import com.kh.foodding.mypage.model.vo.MyPage;
@@ -49,4 +50,7 @@ public interface MyPageDao {
     
  // ✅ 11. 내 후원 내역 리스트 조회
     List<FundingHistory> selectFundingHistory(int userNo);
+    
+ // ✅ 12. 팔로우 목록 조회
+    List<FollowedSeller> selectFollowList(int userNo);
 }

@@ -90,7 +90,7 @@
         ORDER BY L.PRODUCT_NO DESC
     </select>
     
-    <select id="selectFundingHistory" resultType="com.kh.foodding.mypage.model.vo.FundingHistory">
+   <select id="selectFundingHistory" resultType="com.kh.foodding.mypage.model.vo.FundingHistory">
         SELECT 
             O.ORDER_NO AS orderNo,
             TO_CHAR(O.ORDER_DATE, 'YYYY.MM.DD') AS fundingDate,
@@ -101,12 +101,31 @@
             P.MODIFY_THUMBNAIL AS projectThumb,
             P.PRODUCT_NO AS productNo
         FROM ORDERS O
-        JOIN TB_OPTION OPT ON O.OPTION_NO = OPT.OPTION_NO
+        -- 1. 주문(O)과 상세주문(OD) 연결 (중간 다리 역할)
+        JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO
+        -- 2. 상세주문(OD)과 옵션(OPT) 연결
+        JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO
+        -- 3. 옵션(OPT)과 상품(P) 연결
         JOIN PRODUCT P ON OPT.PRODUCT_NO = P.PRODUCT_NO
+        -- 4. 상품(P)과 판매자(S), 유저(U) 연결
         JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
         JOIN TB_USER U ON S.USER_NO = U.USER_NO
         WHERE O.USER_NO = #{userNo}
         ORDER BY O.ORDER_DATE DESC
+    </select>
+    
+   <select id="selectFollowList" resultType="com.kh.foodding.mypage.model.vo.FollowedSeller">
+        SELECT 
+            S.SELLER_NO AS sellerNo,
+            U.NICKNAME AS sellerName,
+            NVL(S.INTRODUCTION, '소개글이 없습니다.') AS sellerBio,
+            U.MODIFY_PROFILE AS sellerImage
+        FROM FOLLOW F
+        JOIN SELLER_PROFILE S ON F.SELLER_NO = S.SELLER_NO
+        JOIN TB_USER U ON S.USER_NO = U.USER_NO
+        WHERE F.FOLLOWING = #{userNo}
+        
+        ORDER BY F.SELLER_NO DESC
     </select>
     
 </mapper>

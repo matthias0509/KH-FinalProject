@@ -2,7 +2,8 @@ package com.kh.foodding.admin.model.dao;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
-import com.kh.foodding.admin.vo.Dashboard;
+
+import com.kh.foodding.admin.model.vo.Dashboard;
 
 @Mapper
 public interface DashboardDao {
