@@ -140,14 +140,6 @@
   text-align: center;
 }
 
-.search-empty-state--expanded {
-  min-height: 55vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
 .search-empty-state h2 {
   font-size: 24px;
   margin-bottom: 12px;

@@ -96,7 +96,7 @@ export default function SearchPage() {
         )}
 
         {hasQuery && !loading && !error && resultCount === 0 && (
-          <div className="search-empty-state search-empty-state--expanded">
+          <div className="search-empty-state">
             <h2>검색 결과가 없습니다.</h2>
             <p>다른 키워드를 입력하거나 실시간 인기 검색어를 선택해보세요.</p>
           </div>
