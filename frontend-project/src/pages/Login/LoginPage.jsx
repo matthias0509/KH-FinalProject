@@ -65,8 +65,7 @@ export default function LoginPage() {
                 // 💡 State 업데이트: 순수 토큰 문자열을 setCurrentUser에 전달
                 setCurrentUser(jwtToken);
             } else {
-                setMessage("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
-                toast.info("로그인에 실패했습니다.");
+                setMessage("아이디 또는 비밀번호를 확인해주세요.");
             }
             
         } catch (error) {

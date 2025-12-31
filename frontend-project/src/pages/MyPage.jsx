@@ -2,84 +2,99 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// 컴포넌트 import (경로는 프로젝트 구조에 맞게 확인해주세요)
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
 import Sidebar from '../components/Sidebar';
 
-// CSS import
 import '../styles/MyPageLayout.css';
 import '../styles/MyPage.css';
 
 const MyPage = () => {
     const navigate = useNavigate();
     
-    // 1. 상태 관리
-    const [userInfo, setUserInfo] = useState(null); // 사용자 정보
-    const [loading, setLoading] = useState(true);   // 로딩 상태
+    // --- [상태 관리] ---
+    const [userInfo, setUserInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+    
+    // 추가된 상태: 좋아요한 프로젝트 목록, 후원 내역
+    const [likedProjects, setLikedProjects] = useState([]);
+    const [fundingHistory, setFundingHistory] = useState([]);
 
-    // 2. 데이터 가져오기 (마운트 시 실행)
+    // --- [데이터 가져오기] ---
     useEffect(() => {
-        const fetchUserInfo = async () => {
+        const fetchData = async () => {
             try {
-                // 저장된 토큰 가져오기 (로그인 시 저장한 키 이름: 'token' 또는 'accessToken')
                 const token = localStorage.getItem('token'); 
-
-                // 토큰이 없으면 로그인 페이지로 리다이렉트
                 if (!token) {
                     alert("로그인이 필요한 서비스입니다.");
                     navigate('/login');
                     return;
                 }
 
-                // 서버 요청 (헤더에 토큰 포함)
-                const response = await axios.get("http://localhost:8001/foodding/api/mypage/info", {
-                    headers: {
-                        'Authorization': `Bearer ${token}` // ✅ 핵심: JWT 토큰 전송
-                    }
+                // 1. 내 정보 가져오기 (통계 포함)
+                const userRes = await axios.get("http://localhost:8001/foodding/api/mypage/info", {
+                    headers: { 'Authorization': `Bearer ${token}` }
                 });
+                setUserInfo(userRes.data);
 
-                // 받아온 데이터 저장
-                setUserInfo(response.data);
+                // 2. 좋아요한 프로젝트 가져오기 (API 호출)
+                try {
+                    const likeRes = await axios.get("http://localhost:8001/foodding/api/mypage/like", {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    // 서버 데이터 구조에 맞춰 매핑 (필요시)
+                    const mappedLikes = likeRes.data.map(item => ({
+                        id: item.productNo, // DB 컬럼명에 맞게 수정 필요
+                        title: item.productTitle,
+                        maker: item.sellerName || '메이커',
+                        percent: item.fundingPercent || 0,
+                        img: item.thumbnailUrl ? `http://localhost:8001/foodding${item.thumbnailUrl}` : 'https://via.placeholder.com/150'
+                    }));
+                    setLikedProjects(mappedLikes);
+                } catch (err) {
+                    console.error("좋아요 목록 로딩 실패:", err);
+                    setLikedProjects([]); // 실패 시 빈 배열
+                }
+
+                // 3. 최근 후원 내역 가져오기 (API 호출 - 예시)
+                try {
+                    const historyRes = await axios.get("http://localhost:8001/foodding/api/mypage/funding/history?limit=3", { // 최근 3개만
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    const mappedHistory = historyRes.data.map(item => ({
+                        id: item.fundingNo,
+                        title: item.projectTitle,
+                        status: item.fundingStatus, // '결제완료', '펀딩성공' 등
+                        amount: item.totalAmount,
+                        date: item.fundingDate, // 날짜 포맷팅 필요할 수 있음
+                        img: item.projectThumb ? `http://localhost:8001/foodding${item.projectThumb}` : 'https://via.placeholder.com/100'
+                    }));
+                    setFundingHistory(mappedHistory);
+
+                } catch (err) {
+                    console.error("후원 내역 로딩 실패:", err);
+                    // 실패 시 빈 배열 (화면 깨짐 방지)
+                    setFundingHistory([]); 
+                }
                 
             } catch (error) {
-                console.error("내 정보 불러오기 실패:", error);
-                
-                // 401 에러(인증 실패) 시 처리
+                console.error("데이터 초기화 실패:", error);
                 if (error.response && error.response.status === 401) {
-                    alert("로그인 정보가 만료되었습니다. 다시 로그인해주세요.");
-                    localStorage.removeItem('token'); // 만료된 토큰 삭제
+                    alert("로그인 정보가 만료되었습니다.");
+                    localStorage.removeItem('token');
                     navigate('/login');
                 }
             } finally {
-                setLoading(false); // 로딩 종료
+                setLoading(false);
             }
         };
 
-        fetchUserInfo();
+        fetchData();
     }, [navigate]);
 
-    // 3. 가상 데이터 (추후 서버 API가 준비되면 이 부분도 axios로 가져오게 수정)
-    const fundingHistory = [
-        {
-            id: 101,
-            title: '입안에서 사르르 녹는 수제 커스터드 푸딩',
-            status: '결제완료',
-            amount: 25000,
-            date: '2025.10.24',
-            img: 'https://via.placeholder.com/100'
-        },
-    ];
 
-    const likedProjects = [
-        { id: 1, title: '초코 듬뿍 브라우니', percent: 120, img: 'https://via.placeholder.com/150' },
-        { id: 2, title: '제주 말차 라떼 키트', percent: 85, img: 'https://via.placeholder.com/150' },
-        { id: 3, title: '비건 쌀 쿠키', percent: 240, img: 'https://via.placeholder.com/150' },
-    ];
-
-    // 4. 렌더링 로직
-    
-    // 로딩 중일 때 표시할 화면
+    // --- [렌더링] ---
     if (loading) {
         return (
             <div className="page-wrapper">
@@ -92,7 +107,6 @@ const MyPage = () => {
         );
     }
 
-    // 데이터 로드 실패 혹은 데이터가 없을 때
     if (!userInfo) return null;
 
     return (
@@ -100,34 +114,32 @@ const MyPage = () => {
             <Header />
             
             <div className="mypage-container">
-                {/* ✅ 서버에서 가져온 userInfo를 사이드바에 전달 */}
                 <Sidebar userInfo={userInfo} />
             
                 <main className="main-content">
-                    {/* 사용자 이름 표시 */}
                     <h2 className="greeting">
-                        {userInfo.userName || userInfo.name || userInfo.nickname}님 반가워요! 👋
+                        {userInfo.userName || userInfo.nickname}님 반가워요! 👋
                     </h2>
 
-                    {/* 활동 현황 배너 */}
+                    {/* 활동 현황 배너 (API 데이터 연동) */}
                     <div className="activity-banner">
                         <div className="activity-item">
                             <span className="icon">🎁</span>
                             <span className="label">후원 참여</span>
-                            {/* userInfo 내부에 stats 객체가 없어도 에러 안 나게 처리 (?.) */}
-                            <span className="value">{userInfo.stats?.fundingCount || 0}</span>
+                            {/* userInfo에 stats가 없으면 0 처리 */}
+                            <span className="value">{fundingHistory.length || 0}</span> 
                         </div>
                         <div className="divider-vertical"></div>
                         <div className="activity-item">
                             <span className="icon">❤️</span>
                             <span className="label">좋아요</span>
-                            <span className="value">{userInfo.stats?.likedCount || 0}</span>
+                            <span className="value">{likedProjects.length || 0}</span>
                         </div>
                         <div className="divider-vertical"></div>
                         <div className="activity-item">
                             <span className="icon">👀</span>
                             <span className="label">팔로잉</span>
-                            <span className="value">{userInfo.stats?.followingCount || 0}</span>
+                            <span className="value">{userInfo.followCount || 0}</span> {/* API에서 followCount를 준다고 가정 */}
                         </div>
                     </div>
 
@@ -170,20 +182,27 @@ const MyPage = () => {
                             <h3>좋아요한 프로젝트 ❤️</h3>
                             <Link to="/mypage/like" className="more-link">전체보기 &gt;</Link>
                         </div>
-                        <div className="card-list">
-                            {likedProjects.map((item) => (
-                                <div key={item.id} className="product-card">
-                                    <div className="img-wrapper">
-                                        <img src={item.img} alt={item.title} />
-                                        <button className="heart-btn active">♥</button>
+                        
+                        {likedProjects.length > 0 ? (
+                            <div className="card-list">
+                                {likedProjects.map((item) => (
+                                    <div key={item.id} className="product-card" onClick={() => navigate(`/project/${item.id}`)}>
+                                        <div className="img-wrapper">
+                                            <img src={item.img} alt={item.title} />
+                                            <button className="heart-btn active">♥</button>
+                                        </div>
+                                        <div className="card-info">
+                                            <p className="percent">{item.percent}% 달성</p>
+                                            <p className="title">{item.title}</p>
+                                        </div>
                                     </div>
-                                    <div className="card-info">
-                                        <p className="percent">{item.percent}% 달성</p>
-                                        <p className="title">{item.title}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="empty-box">
+                                <p>좋아요한 프로젝트가 없습니다.</p>
+                            </div>
+                        )}
                     </section>
                 </main>
             </div>

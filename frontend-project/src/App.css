@@ -426,6 +426,30 @@
   color: var(--text);
 }
 
+.projects-section__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.projects-section__title {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.projects-section__title .text-accent {
+  margin-left: 8px;
+  font-size: 28px;
+}
+
 .text-accent {
   color: var(--accent);
 }
@@ -857,18 +881,29 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-height: 44px;
+  min-height: 30px;
 }
 
 .project-card--compact .project-card__title {
   font-size: 14px;
-  min-height: 38px;
+  min-height: 26px;
 }
 
 .project-card__progress {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.project-card__goal {
+  font-size: 13px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.project-card--compact .project-card__goal {
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .project-card__progress-label {
@@ -2501,4 +2536,3 @@
   font-size: 14px;
   background-color: #fff;
 }
-

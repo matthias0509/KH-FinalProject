@@ -2,6 +2,9 @@ package com.kh.foodding.mypage.model.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.foodding.mypage.model.dao.MyPageDao;
+import com.kh.foodding.mypage.model.vo.FundingHistory;
+import com.kh.foodding.mypage.model.vo.LikedProject;
 import com.kh.foodding.mypage.model.vo.MyPage;
 
 @Service
@@ -112,5 +117,55 @@ public class MyPageService {
     @Transactional
     public boolean withdrawMember(String userId) {
         return mypageDao.deleteMember(userId) == 1;
+    }
+    
+    /**
+     * [추가] 마이페이지 메인 정보 (회원정보 + 통계 같이 줌)
+     */
+    public Map<String, Object> getMyPageInfo(String userId) {
+        // 1. 회원 기본 정보
+        MyPage member = mypageDao.selectMemberById(userId);
+        
+        // 2. 통계 정보 (좋아요 수, 팔로잉 수)
+        Map<String, Object> stats = mypageDao.selectMyPageStats(member.getUserNo());
+        
+        // 3. 결과 합치기
+        Map<String, Object> result = new HashMap<>();
+        
+        // 기존 Member 객체 필드들을 map에 풀어서 넣기 (프론트에서 쓰기 편하게)
+        result.put("userNo", member.getUserNo());
+        result.put("userId", member.getUserId());
+        result.put("userName", member.getUserName());
+        result.put("nickname", member.getNickname());
+        result.put("modifyProfile", member.getModifyProfile());
+        result.put("role", member.getUserRole());
+        
+        // 통계가 없으면 0으로 채워서 넣기
+        if (stats == null) {
+            stats = new HashMap<>();
+            stats.put("likedCount", 0);
+            stats.put("followingCount", 0);
+            stats.put("fundingCount", 0);
+        }
+        result.put("stats", stats);
+        
+        return result;
+    }
+
+
+    public List<LikedProject> getLikedProjects(String userId) {
+        // userId로 userNo를 알아내야 함
+        MyPage member = mypageDao.selectMemberById(userId);
+        return mypageDao.selectLikedProjects(member.getUserNo());
+    }
+    
+    /**
+     * ✅ [추가] 내 후원 내역 가져오기
+     */
+    public List<FundingHistory> getFundingHistory(String userId) {
+        MyPage member = mypageDao.selectMemberById(userId);
+        if (member == null) return List.of();
+        
+        return mypageDao.selectFundingHistory(member.getUserNo());
     }
 }

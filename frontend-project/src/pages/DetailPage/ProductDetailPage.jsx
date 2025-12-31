@@ -330,6 +330,11 @@ export default function ProductDetailPage() {
       return;
     }
 
+    if (Number(sellerUserNo) === Number(buyerNo)) {
+      toast.info('내 프로젝트에는 1:1 문의를 보낼 수 없습니다.');
+      return;
+    }
+
     const width = 400;
     const height = 650;
     const left = window.screen.width - width - 100;
@@ -486,12 +491,12 @@ export default function ProductDetailPage() {
                   <span>달성률</span>
                 </div>
                 <div>
-                  <strong>{currencyFormatter.format(project.funding.raised)}원</strong>
-                  <span>모인 금액</span>
+                  <strong>{currencyFormatter.format(project.funding.goal)}원</strong>
+                  <span>목표 금액</span>
                 </div>
                 <div>
-                  <strong>{project.funding.backers.toLocaleString()}명</strong>
-                  <span>후원자</span>
+                  <strong>{currencyFormatter.format(project.funding.raised)}원</strong>
+                  <span>달성 금액</span>
                 </div>
                 <div>
                   <strong>{project.funding.daysLeft}일</strong>

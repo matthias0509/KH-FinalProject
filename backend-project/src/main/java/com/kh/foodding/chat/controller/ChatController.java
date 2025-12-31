@@ -25,12 +25,16 @@ public class ChatController {
         Long senderNo = Long.valueOf(params.get("senderNo").toString());
         String msgContent = params.get("msgContent").toString();
         
-        int result = chatService.sendMessage(buyerNo, sellerNo, senderNo, msgContent);
-        
         Map<String, Object> response = new HashMap<>();
-        response.put("success", result > 0);
-        
-        return ResponseEntity.ok(response);
+        try {
+            int result = chatService.sendMessage(buyerNo, sellerNo, senderNo, msgContent);
+            response.put("success", result > 0);
+            return ResponseEntity.ok(response);
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            response.put("success", false);
+            response.put("message", ex.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
     
     // 메시지 조회

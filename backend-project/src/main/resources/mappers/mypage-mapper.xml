@@ -11,7 +11,8 @@
             NICKNAME as nickname,
             EMAIL as email,
             PHONE as phone,
-            MODIFY_PROFILE as modifyProfile, POSTCODE as postcode,
+            MODIFY_PROFILE as modifyProfile, 
+            POSTCODE as postcode,
             MAIN_ADDRESS as mainAddress,
             DETAIL_ADDRESS as detailAddress,
             USER_ROLE as userRole
@@ -24,7 +25,13 @@
         FROM TB_USER
         WHERE USER_ID = #{userId}
     </select>
-		
+    
+    <update id="updatePassword">
+        UPDATE TB_USER
+        SET USER_PWD = #{newPassword}
+        WHERE USER_ID = #{userId}
+    </update>
+        
     <update id="updateMemberInfo" parameterType="com.kh.foodding.mypage.model.vo.MyPage">
         UPDATE TB_USER
         <set>
@@ -59,5 +66,47 @@
         DELETE FROM TB_USER 
         WHERE USER_ID = #{userId}
     </delete>
+    
+    <select id="selectMyPageStats" resultType="map">
+        SELECT 
+            (SELECT COUNT(*) FROM TB_LIKE WHERE USER_NO = #{userNo}) AS "likedCount",
+            (SELECT COUNT(*) FROM FOLLOW WHERE FOLLOWING = #{userNo}) AS "followingCount",
+            (SELECT COUNT(*) FROM ORDERS WHERE USER_NO = #{userNo}) AS "fundingCount"
+        FROM DUAL
+    </select>
+    
+    <select id="selectLikedProjects" resultType="com.kh.foodding.mypage.model.vo.LikedProject">
+        SELECT 
+            P.PRODUCT_NO AS productNo,
+            P.PRODUCT_TITLE AS productTitle,
+            P.MODIFY_THUMBNAIL AS thumbnail,
+            U.NICKNAME AS sellerName,
+            TRUNC((P.CURRENT_AMOUNT / NULLIF(P.TARGET_AMOUNT, 0)) * 100) AS fundingPercent
+        FROM TB_LIKE L
+        JOIN PRODUCT P ON L.PRODUCT_NO = P.PRODUCT_NO
+        JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
+        JOIN TB_USER U ON S.USER_NO = U.USER_NO
+        WHERE L.USER_NO = #{userNo}
+        ORDER BY L.PRODUCT_NO DESC
+    </select>
+    
+    <select id="selectFundingHistory" resultType="com.kh.foodding.mypage.model.vo.FundingHistory">
+        SELECT 
+            O.ORDER_NO AS orderNo,
+            TO_CHAR(O.ORDER_DATE, 'YYYY.MM.DD') AS fundingDate,
+            P.PRODUCT_TITLE AS projectTitle,
+            U.NICKNAME AS makerName,
+            O.ORDER_AMOUNT AS totalAmount,
+            O.ORDER_STATUS AS fundingStatus,
+            P.MODIFY_THUMBNAIL AS projectThumb,
+            P.PRODUCT_NO AS productNo
+        FROM ORDERS O
+        JOIN TB_OPTION OPT ON O.OPTION_NO = OPT.OPTION_NO
+        JOIN PRODUCT P ON OPT.PRODUCT_NO = P.PRODUCT_NO
+        JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
+        JOIN TB_USER U ON S.USER_NO = U.USER_NO
+        WHERE O.USER_NO = #{userNo}
+        ORDER BY O.ORDER_DATE DESC
+    </select>
     
 </mapper>

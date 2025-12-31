@@ -1,6 +1,7 @@
 package com.kh.foodding.mypage.controller;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.foodding.mypage.model.service.MyPageService;
+import com.kh.foodding.mypage.model.vo.FundingHistory;
+import com.kh.foodding.mypage.model.vo.LikedProject;
 import com.kh.foodding.mypage.model.vo.MyPage;
 
 @RestController
@@ -26,39 +29,47 @@ public class MyPageController {
     @Autowired
     private MyPageService mypageService;
 
-    // 1. 회원 정보 조회 (주소 포함)
+    /**
+     * 1. 마이페이지 메인 정보 (회원정보 + 통계)
+     * 기존 getInfo를 업그레이드하여 '통계(좋아요 수 등)'까지 포함해서 반환합니다.
+     */
     @GetMapping("/info")
     public ResponseEntity<?> getInfo(Principal principal) {
         
-        System.out.println("=====================================");
-        System.out.println("1. 컨트롤러 진입 성공");
-        
-        // 🔥 Principal이 null이면 인증되지 않은 요청
+        // 1. 인증 체크
         if (principal == null) {
-            System.out.println("2. ❌ Principal is NULL - 인증되지 않은 요청");
-            System.out.println("=====================================");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(Map.of("message", "로그인이 필요합니다."));
         }
         
         String userId = principal.getName();
-        System.out.println("2. ✅ 인증된 사용자 ID: " + userId);
-        System.out.println("=====================================");
         
-        MyPage info = mypageService.selectMemberInfo(userId);
+        // 2. 서비스 호출 (회원정보 + 통계 Map 반환)
+        Map<String, Object> info = mypageService.getMyPageInfo(userId);
         
-        System.out.println("============================================");
-        if (info != null) {
-            System.out.println(">>> DB에서 가져온 프로필 값: " + info.getModifyProfile());
-        } else {
-            System.out.println(">>> info 객체가 NULL 입니다.");
-        }
-        System.out.println("============================================");
-
+        // 3. 응답 반환
         return (info != null)
             ? ResponseEntity.ok(info)
             : ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("message", "사용자를 찾을 수 없습니다."));
+    }
+
+    /**
+     * ✅ [추가] 좋아요한 프로젝트 목록 조회
+     */
+    @GetMapping("/like")
+    public ResponseEntity<?> getLikedProjects(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "로그인이 필요합니다."));
+        }
+
+        String userId = principal.getName();
+        
+        // 서비스 호출 -> 좋아요 목록(List<LikedProject>) 반환
+        List<LikedProject> list = mypageService.getLikedProjects(userId);
+        
+        return ResponseEntity.ok(list);
     }
 
     // 2. 기본 정보 업데이트 (닉네임 등)
@@ -111,7 +122,7 @@ public class MyPageController {
         return ResponseEntity.ok(Map.of("success", isValid));
     }
 
-    // --- 프로필 이미지 관련 로직 (기존 유지) ---
+    // --- 프로필 이미지 관련 로직 ---
     @PostMapping("/base/updateProfileImage")
     public ResponseEntity<?> updateProfileImage(@RequestPart("profileFile") MultipartFile file, Principal principal) {
         if (principal == null) {
@@ -137,5 +148,18 @@ public class MyPageController {
         return (mypageService.deleteProfileImage(userId)) 
             ? ResponseEntity.ok(Map.of("message", "삭제 완료")) 
             : ResponseEntity.internalServerError().body(Map.of("message", "삭제 실패"));
+    }
+    
+ // 3. 내 후원 내역 조회
+    @GetMapping("/funding/history")
+    public ResponseEntity<?> getFundingHistory(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 필요"));
+        }
+        
+        String userId = principal.getName();
+        List<FundingHistory> list = mypageService.getFundingHistory(userId);
+        
+        return ResponseEntity.ok(list);
     }
 }

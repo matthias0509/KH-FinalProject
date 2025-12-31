@@ -23,6 +23,7 @@ public class ChatServiceImpl implements ChatService {
     
     @Override
     public int sendMessage(Long buyerNo, Long sellerNo, Long senderNo, String msgContent) {
+        ensureDifferentParticipants(buyerNo, sellerNo);
         // 1. 채팅방 조회 또는 생성
         Map<String, Object> params = new HashMap<>();
         params.put("buyer", buyerNo);
@@ -50,6 +51,15 @@ public class ChatServiceImpl implements ChatService {
         message.setReadYn("N");
         
         return chatDao.insertMessage(sqlSession, message);
+    }
+
+    private void ensureDifferentParticipants(Long buyerNo, Long sellerNo) {
+        if (buyerNo == null || sellerNo == null) {
+            throw new IllegalArgumentException("참여자 정보가 올바르지 않습니다.");
+        }
+        if (buyerNo.longValue() == sellerNo.longValue()) {
+            throw new IllegalStateException("본인에게는 1:1 문의를 보낼 수 없습니다.");
+        }
     }
     
     @Override
