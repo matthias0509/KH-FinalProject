@@ -76,7 +76,7 @@ export default function NoticeListPage() {
             <br />
             <div className="main-content">
                 <header className="section-header" style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                    <h1 className="section-title">공지사항</h1>
+                    <h2 className='login-title' style={{marginLeft: '10px', marginBottom:'4px', alignItems:'center'}}>공지사항</h2>
                     
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                         {/* 💡 관리자일 때만 등록 버튼 표시 */}

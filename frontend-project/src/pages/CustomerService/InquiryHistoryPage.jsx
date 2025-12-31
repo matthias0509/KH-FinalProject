@@ -99,21 +99,33 @@ export default function InquiryHistoryPage() {
 }
 
 const InquiryDetail = ({ item }) => (
-    <div className="inquiry-detail-content" style={{ padding: '20px', backgroundColor: '#f9f9f9' }}>
-        <div className="user-question" style={{ marginBottom: '20px' }}>
-            <h3 style={{ color: '#333' }}>📝 문의 내용</h3>
-            <p style={{ whiteSpace: 'pre-wrap', marginTop: '10px' }}>{item.qnaContent}</p>
+    <div className="inquiry-detail-content">
+        <div className="detail-section question">
+            <div className="section-title">
+                <span className="icon">📝</span>
+                <h3>문의 내용</h3>
+            </div>
+            <div className="content-box">
+                {item.qnaContent}
+            </div>
         </div>
-        <div className="reply-answer" style={{ borderTop: '1px solid #ddd', paddingTop: '20px' }}>
-            <h3 style={{ color: '#f97316' }}>💬 답변</h3>
-            {item.answerContent ? (
-                <>
-                    <p className="detail-meta-date" style={{ fontSize: '12px', color: '#888' }}>답변일: {item.answerDate}</p>
-                    <p style={{ whiteSpace: 'pre-wrap', marginTop: '10px' }}>{item.answerContent}</p>
-                </>
-            ) : (
-                <p style={{ color: '#999', marginTop: '10px' }}>담당자가 확인 중입니다. 잠시만 기다려 주세요.</p>
-            )}
+
+        {/* 답변 섹션 */}
+        <div className="detail-section answer">
+            <div className="section-title">
+                <span className="icon">💬</span>
+                <h3>관리자 답변</h3>
+                {item.answerContent && (
+                    <span className="detail-meta-date">답변일: {item.answerDate}</span>
+                )}
+            </div>
+            <div className="content-box">
+                {item.answerContent ? (
+                    item.answerContent
+                ) : (
+                    <p className="wait-msg">담당자가 확인 중입니다. 잠시만 기다려 주세요.</p>
+                )}
+            </div>
         </div>
     </div>
 );

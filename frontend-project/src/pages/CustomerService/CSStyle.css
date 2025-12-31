@@ -162,7 +162,7 @@
 }
 
 .list-button:hover {
-    background-color: #0056b3;
+    background-color: #ef4444;
 }
 
 .cancel-button {
@@ -221,70 +221,95 @@
 }
 
 /* ---------------------------------- */
-/* 7. 문의 내역 (InquiryHistoryPage) */
+/* 7. 문의 내역 (InquiryHistoryPage) 상세 최적화 */
+/* ---------------------------------- */
+
+.inquiry-detail-content {
+    text-align: left;
+}
+
+.detail-section {
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.section-title h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+    color: #333;
+}
+
+.section-title .icon {
+    font-size: 18px;
+}
+
+.detail-meta-date {
+    font-size: 12px;
+    color: #999;
+    margin-left: auto; /* 날짜를 우측 끝으로 밀어냄 */
+}
+
+/* 💡 실제 텍스트 영역: 줄바꿈 및 정렬 핵심 */
+.content-box {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #555;
+    white-space: pre-wrap; /* 💡 DB의 엔터(\n)를 화면에 반영 */
+    word-break: break-all; /* 긴 영문/숫자 줄바꿈 방지 */
+}
+
+.answer .section-title h3 {
+    color: #f97316; /* 답변 제목은 주황색 포인트 */
+}
+
+.wait-msg {
+    color: #bbb;
+    font-style: italic;
+    margin: 0;
+}
+
+.detail-meta-date
+
+/* ---------------------------------- */
+/* 테두리 짤림 및 테이블 선 보정 */
 /* ---------------------------------- */
 
 .inquiry-table {
     width: 100%;
-    border-collapse: collapse; /* 💡 셀 사이의 틈을 완전히 제거 */
-    margin-top: 15px;
-    table-layout: fixed; /* 💡 컬럼 너비를 고정하여 선 어긋남 방지 */
+    border-collapse: collapse; /* 💡 셀 사이 간격 제거 */
+    table-layout: fixed;
 }
 
-/* 헤더 스타일 */
-.inquiry-table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
-    color: #333;
+.inquiry-row td {
     padding: 15px 10px;
-    border-bottom: 1px solid #dbdbdb; /* 헤더 하단 선 */
-    text-align: center;
-}
-
-/* 일반 셀 스타일 */
-.inquiry-table td {
-    padding: 15px 10px;
-    text-align: center;
-    vertical-align: middle;
-    /* 💡 모든 td에 동일한 하단 선을 부여하여 끊김 방지 */
-    border-bottom: 1px solid #eee; 
-}
-
-/* 제목 셀 수정 (중요!) */
-.inquiry-title-cell {
-    text-align: left !important;
-    padding-left: 20px !important;
-}
-
-/* 💡 만약 제목 안에 아이콘을 넣고 싶다면 별도의 div에 flex 적용 */
-.inquiry-title-cell > div {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* 행 스타일 */
-.inquiry-row {
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-
-.inquiry-row:hover {
-    background-color: #fffaf0; 
-}
-
-/* 상세 내용 행 (펼쳐졌을 때) */
-.inquiry-detail-row td {
-    background-color: #fafafa;
-    border-bottom: 1px solid #eee !important;
-    padding: 0; /* 내부 InquiryDetail에서 여백 조절 */
-}
-
-/* 마지막 행 마감 */
-.inquiry-table tbody tr:last-child td {
     border-bottom: 1px solid #eee;
+    background-color: #fff;
 }
 
+/* 상세 내용이 펼쳐졌을 때의 행 스타일 */
+.inquiry-detail-row td {
+    padding: 0; /* 💡 외부 여백 삭제 */
+    background-color: #f9f9f9; /* 아주 연한 회색으로 배경을 채워 횡한 느낌 방지 */
+    border-bottom: 1px solid #eee !important;
+}
+
+/* 💡 주황색 테두리가 잘린다면 상단 요소를 감싸는 박스에 아래 적용 */
+.notice-list-container {
+    border-top: 2px solid #f97316; /* 테이블 최상단 포인트 라인 */
+    overflow: hidden;
+}
 /* 상태 표시 스타일 (오렌지 색상 유지) */
 .status-pending {
     color: var(--accent-strong, #ef4444); 
