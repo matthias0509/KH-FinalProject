@@ -78,8 +78,8 @@ export default function ProjectsSection({
 
   return (
     <section className={className.trim()}>
-      <div className="section-header">
-        <h2 className="section-title">
+      <div className="projects-section__header">
+        <h2 className="projects-section__title">
           {title}
           {typeof count === 'number' && (
             <span className="text-accent">{count}</span>

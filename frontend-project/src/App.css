@@ -426,6 +426,30 @@
   color: var(--text);
 }
 
+.projects-section__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.projects-section__title {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+}
+
+.projects-section__title .text-accent {
+  margin-left: 8px;
+  font-size: 28px;
+}
+
 .text-accent {
   color: var(--accent);
 }
@@ -2501,4 +2525,3 @@
   font-size: 14px;
   background-color: #fff;
 }
-
