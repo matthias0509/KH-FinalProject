@@ -19,6 +19,8 @@ export default function ProjectCard({
   const safeDaysLeft = Number.isFinite(project.daysLeft) ? project.daysLeft : 0;
   const daysLabel =
     variant === 'featured' ? `${safeDaysLeft}일 남음` : `${safeDaysLeft}일`;
+  const amountLabel = `${currentAmount.toLocaleString()}원`;
+  const goalLabel = `목표 ${goalAmount.toLocaleString()}원`;
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(Number(project.likeCount) || 0);
   const projectId = project?.id ?? project?.productNo ?? project?.projectNo;
@@ -116,6 +118,7 @@ export default function ProjectCard({
         <h3 className="project-card__title">{title}</h3>
         {!hideProgress && (
           <div className="project-card__progress">
+            <div className="project-card__goal">{goalLabel}</div>
             <div className="project-card__progress-label">{rate}% 달성</div>
             <div className={`progress-bar${variant === 'compact' ? ' progress-bar--compact' : ''}`}>
               <div
@@ -127,7 +130,7 @@ export default function ProjectCard({
         )}
         {!hideMeta && (
           <div className="project-card__meta">
-            <span>{currentAmount.toLocaleString()}원</span>
+            <span>{amountLabel}</span>
             <span>{daysLabel}</span>
           </div>
         )}

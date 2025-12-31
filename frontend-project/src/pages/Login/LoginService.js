@@ -19,8 +19,13 @@ export const login = async (userId, userPwd) => {
 
         return null;
     } catch (error) {
+
         console.error("LoginService Error:", error);
         throw error;
+
+        console.error("로그인 통신 실패!", error);
+        return null;
+
     }
 };
 

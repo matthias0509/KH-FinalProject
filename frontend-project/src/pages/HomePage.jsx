@@ -23,7 +23,7 @@ export default function HomePage() {
       setIsLoading(true);
       setError('');
       try {
-        const response = await fetchProjectList(20);
+        const response = await fetchProjectList(1000);
         if (!isMounted) {
           return;
         }

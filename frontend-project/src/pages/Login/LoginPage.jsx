@@ -38,7 +38,7 @@ export default function LoginPage() {
         setUser(prev => ({...prev, [name]: value}));
     };
 
-    // 💡 핵심 수정: 로그인 처리 함수
+    // 💡 핵심 수정: 로그인 처리 함수 정리
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
@@ -46,44 +46,42 @@ export default function LoginPage() {
 
         try {
             // AuthService.login 호출
-            const response = await AuthService.login(user.userId, user.userPwd); 
+            const response = await AuthService.login(user.userId, user.userPwd);
             
-            // 🚨 [수정 1] response가 null인지 먼저 확인 (로그인 실패 시 null이 올 수 있음)
+            // 1. 응답이 아예 없는 경우 방어
             if (!response) {
-                setMessage("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
-                toast.error("로그인 실패");
-                setIsLoading(false); // 로딩 끄기
-                return; // 함수 종료
+                throw new Error("서버로부터 응답이 없습니다.");
             }
 
-            // 1. 응답값 확인
-            // response가 객체({token:..., user:...})일 수도 있고, 그냥 토큰 문자열일 수도 있음
-            // 안전하게 처리하기 위해 ?. 옵셔널 체이닝 사용
+            // 2. 토큰 추출 로직 (객체인 경우와 문자열인 경우 모두 대응)
+            // response.token이 있으면 그걸 쓰고, 없으면 response 자체가 문자열인지 확인
             const token = response.token || (typeof response === 'string' ? response : null);
-            const userData = response.user; 
+            const userData = response.user; // 사용자 정보가 같이 오는 경우
 
+            // 3. 토큰 존재 여부에 따른 처리
             if (token) {
-                // 2. 토큰 저장
+                // (1) 토큰 저장
                 localStorage.setItem("token", token);
 
-                // 3. 사용자 정보 저장
+                // (2) 사용자 정보가 있다면 저장 (선택사항)
                 if (userData) {
                     localStorage.setItem("user", JSON.stringify(userData));
                 }
 
                 toast.info("로그인에 성공했습니다!");
+                
+                // (3) 상태 업데이트 및 페이지 이동
                 setCurrentUser(token);
-
-                // 4. 페이지 새로고침
                 window.location.href = "/"; 
                 
             } else {
-                // response는 왔지만 토큰이 없는 이상한 경우
-                setMessage("로그인 응답에 토큰이 없습니다.");
+                // 응답은 왔으나 토큰이 없는 경우
+                setMessage("아이디 또는 비밀번호를 확인해주세요.");
             }
             
         } catch (error) {
             const errorMsg = error.response?.data || "서버와 통신 중 오류가 발생했습니다.";
+            // 에러 메시지가 객체일 수도 있으므로 문자열 처리
             setMessage(typeof errorMsg === 'string' ? errorMsg : "로그인 중 오류 발생");
             console.error("로그인 실패:", error);
         } finally {

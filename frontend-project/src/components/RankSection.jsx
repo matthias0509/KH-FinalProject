@@ -31,7 +31,6 @@ export default function RankSection({ projects = [] }) {
                   <h3 className="rank-item__title">{title}</h3>
                   <div className="rank-item__meta">
                     <span className="rank-item__category">{project.category ?? '기타'}</span>
-                    <span>{backers}명 참여</span>
                   </div>
                   <div className="rank-item__progress">{rate}% 달성</div>
                 </div>

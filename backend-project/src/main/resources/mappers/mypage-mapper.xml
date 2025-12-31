@@ -5,7 +5,7 @@
 
    <select id="selectMemberById" resultType="com.kh.foodding.mypage.model.vo.MyPage">
         SELECT 
-            USER_NO as userNo,
+        	USER_NO as userNo,
             USER_ID as userId,
             USER_NAME as userName,      
             NICKNAME as nickname,
