@@ -94,7 +94,7 @@ public class AuthController {
 
 		} else {
 
-			return null;
+			return "";
 		}
 
 	}

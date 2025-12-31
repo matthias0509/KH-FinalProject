@@ -143,8 +143,7 @@ function CreateMember() {
                 }
             });
 
-            toast.success('회원가입이 완료되었습니다.');
-            navigate('/login');
+            navigate('/login' , {state: {message: '회원가입이 완료되었습니다. 로그인해주세요!'}});
         } catch (error) {
             console.error('회원가입 실패:', error);
             toast.error('회원가입 중 오류가 발생했습니다.');
