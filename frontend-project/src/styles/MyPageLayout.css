@@ -1,41 +1,30 @@
 /* =========================================
-   [1. 공통 레이아웃 & 사이드바 - 완전 고정 버전]
+   [1. 공통 레이아웃 & 사이드바]
    파일명: src/styles/MyPageLayout.css
    ========================================= */
 
 .page-wrapper {
     background-color: #f9fafb;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
 }
 
 .mypage-container {
     display: flex;
     max-width: 1200px;
-    width: 100%;
     margin: 0 auto;
     padding: 40px 20px;
     gap: 40px;
     font-family: 'Pretendard', sans-serif;
     color: #333;
-    box-sizing: border-box;
 }
 
-/* ========================================= */
-/* 사이드바 - 완전 고정 (절대 움직이지 않음) */
-/* ========================================= */
+/* --- 사이드바 레이아웃 --- */
 .sidebar { 
-    width: 250px !important;        /* 강제 고정 */
-    min-width: 250px !important;    /* 강제 고정 */
-    max-width: 250px !important;    /* 강제 고정 */
-    flex-shrink: 0 !important;      /* 절대 축소 안 됨 */
-    flex-grow: 0 !important;        /* 절대 확대 안 됨 */
+    width: 250px; 
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    box-sizing: border-box;
-    /* position, top 등 제거 - 자연스러운 흐름대로 배치 */
+    gap: 20px; /* 요소 간 간격 */
 }
 
 /* --- 모드 스위치 (서포터/메이커) --- */
@@ -44,7 +33,8 @@
     background-color: #fff; 
     border-radius: 20px;
     padding: 4px; 
-    border: 1px solid #e9ecef;
+    /* margin-bottom: 30px; -> sidebar gap으로 대체 */
+    border: 1px solid #e9ecef; /* 테두리 추가로 선명하게 */
 }
 
 .mode-btn {
@@ -69,7 +59,7 @@
     background-color: #fff; 
     color: #b91c1c; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border: 1px solid #eee;
+    border: 1px solid #eee; /* 활성 버튼 테두리 */
 }
 
 .mode-btn.link-btn:hover { 
@@ -94,14 +84,14 @@
 }
 
 
-/* --- 프로필 영역 디자인 --- */
+/* --- [수정됨] 프로필 영역 디자인 --- */
 .profile-section { 
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 30px 20px;
     background-color: #fff;
-    border-radius: 12px;
+    border-radius: 12px; /* 카드 형태 */
     border: 1px solid #e9ecef;
 }
 
@@ -129,7 +119,7 @@
 }
 
 .profile-img-wrapper:hover .sidebar-profile-img {
-    transform: scale(1.05);
+    transform: scale(1.05); /* 마우스 올리면 살짝 확대 */
 }
 
 /* 3. 닉네임 텍스트 */
@@ -140,7 +130,7 @@
     margin: 0 0 10px 0;
     letter-spacing: -0.5px;
     text-align: center;
-    cursor: default;
+    cursor: default; /* 클릭 안 됨 표시 */
 }
 
 /* 4. 내 정보 설정 버튼 */
@@ -213,30 +203,26 @@
     align-items: center;
     justify-content: space-between; 
     width: 100%; 
-    padding: 10px 12px;
-    border-radius: 8px;
+    padding: 10px 12px; /* 클릭 영역 확보 */
+    border-radius: 8px; /* 메뉴 배경 둥글게 */
     transition: all 0.2s;
 }
 
 .menu-list ul li a:hover { 
     color: #333; 
-    background-color: #f1f3f5;
+    background-color: #f1f3f5; /* 호버 시 연한 회색 배경 */
 }
 
 .active-menu a { 
     color: #b91c1c !important; 
     font-weight: bold; 
-    background-color: #fff5f5;
+    background-color: #fff5f5; /* 활성 메뉴 배경색 */
 }
 
-/* ========================================= */
-/* 메인 콘텐츠 영역 - 나머지 공간 차지 */
-/* ========================================= */
+/* --- 메인 콘텐츠 영역 공통 --- */
 .main-content { 
-    flex: 1;
-    min-width: 0;
-    width: 100%;
-    box-sizing: border-box;
+    flex: 1; 
+    min-width: 0; /* flexbox 오버플로우 방지 */
 }
 
 .greeting { 
@@ -251,23 +237,4 @@
     color: #333;
     border-bottom: 2px solid #333;
     padding-bottom: 15px;
-}
-
-/* --- 반응형 (모바일) --- */
-@media (max-width: 768px) {
-    .mypage-container {
-        flex-direction: column;
-        padding: 20px 16px;
-        gap: 20px;
-    }
-    
-    .sidebar {
-        width: 100% !important;
-        min-width: unset !important;
-        max-width: unset !important;
-    }
-    
-    .main-content {
-        width: 100%;
-    }
 }

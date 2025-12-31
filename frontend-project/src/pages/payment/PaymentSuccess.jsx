@@ -43,20 +43,18 @@ const PaymentSuccess = () => {
       // URL 파라미터 가져오기
       const paymentKey = searchParams.get('paymentKey');
       const orderId = searchParams.get('orderId');
-      const amount = searchParams.get('amount'); // 토스에서 받은 총 금액
+      const amount = searchParams.get('amount');
       const postcode = searchParams.get('postcode');
       const address = searchParams.get('address');
       const quantity = searchParams.get('quantity');
       const optionNo = searchParams.get('optionNo');
-      const userNoFromUrl = searchParams.get('userNo');
-      const productAmount = searchParams.get('productAmount'); // ★ 상품 금액 (배송비 제외)
+      const userNoFromUrl = searchParams.get('userNo'); // URL에서 받은 userNo
 
       console.log('=== 결제 승인 시작 ===');
       console.log('URL 파라미터:', { 
         paymentKey, 
         orderId, 
-        amount, // 총 금액 (상품 + 배송비)
-        productAmount, // 상품 금액만
+        amount, 
         postcode, 
         address, 
         quantity, 
@@ -79,8 +77,7 @@ const PaymentSuccess = () => {
         const requestBody = { 
           paymentKey, 
           orderId, 
-          amount: Number(amount), // 토스 검증용 총 금액
-          productAmount: Number(productAmount) || (Number(amount) - 3000), // ★ 상품 금액 (배송비 제외)
+          amount: Number(amount),
           postcode: postcode || '00000',
           address: address || '주소 미입력',
           quantity: Number(quantity) || 1,

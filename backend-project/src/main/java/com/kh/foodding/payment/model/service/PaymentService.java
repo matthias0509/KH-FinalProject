@@ -25,7 +25,7 @@ public class PaymentService {
     private String secretKey;
     
     private final PaymentDao paymentDao;
-    private final SqlSessionTemplate sqlSession;
+    private final SqlSessionTemplate sqlSession;  // SqlSessionTemplate 추가
     
     @Autowired
     public PaymentService(PaymentDao paymentDao, SqlSessionTemplate sqlSession) {
@@ -48,12 +48,9 @@ public class PaymentService {
         // 2. DB에 주문 정보 저장
         saveOrderToDatabase(request);
         
-        // 3. 프로젝트 현재 금액 업데이트 (★ 추가)
-        updateProjectCurrentAmount(request);
-        
         System.out.println("=== 결제 처리 완료 ===");
         
-        // 4. 응답 생성
+        // 3. 응답 생성
         return new PaymentConfirmResponse(true, "결제 승인 완료", tossResponse);
     }
     
@@ -101,15 +98,10 @@ public class PaymentService {
      */
     private void saveOrderToDatabase(PaymentConfirmRequest request) {
         try {
-            // ★ 배송비 제외한 상품 금액만 사용
-            Integer orderAmount = request.getProductAmount() != null 
-                ? request.getProductAmount() 
-                : request.getAmount() - 3000;  // productAmount가 없으면 총액에서 배송비 제거
-            
             // Orders 객체 생성
             Orders order = new Orders();
             order.setOrderNo(request.getOrderId());
-            order.setOrderAmount(orderAmount);  // ★ 상품 금액만 저장
+            order.setOrderAmount(request.getAmount());
             order.setOrderStatus("PAY");
             order.setDeliveryStatus("READY");
             order.setPostcode(request.getPostcode() != null ? request.getPostcode() : "00000");
@@ -125,7 +117,7 @@ public class PaymentService {
             System.out.println("DB 저장 - Orders: " + order);
             System.out.println("DB 저장 - OrderDetail: " + orderDetail);
             
-            // DAO 호출
+            // DAO 호출 (SqlSessionTemplate 전달)
             int orderResult = paymentDao.insertOrder(sqlSession, order);
             int detailResult = paymentDao.insertOrderDetail(sqlSession, orderDetail);
             
@@ -139,40 +131,6 @@ public class PaymentService {
             System.err.println("DB 저장 실패: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("주문 정보 저장 실패", e);
-        }
-    }
-    
-    /**
-     * 프로젝트 현재 후원 금액 업데이트
-     */
-    private void updateProjectCurrentAmount(PaymentConfirmRequest request) {
-        try {
-            // Option 테이블에서 productNo 조회 필요
-            Integer productNo = paymentDao.getProductNoByOptionNo(sqlSession, request.getOptionNo());
-            
-            if (productNo == null) {
-                System.err.println("상품 번호를 찾을 수 없습니다. optionNo: " + request.getOptionNo());
-                return;
-            }
-            
-            // ★ 배송비 제외한 상품 금액만 사용
-            Integer productAmount = request.getProductAmount() != null 
-                ? request.getProductAmount() 
-                : request.getAmount() - 3000;
-            
-            // 결제 금액만큼 현재 금액 증가
-            int updateResult = paymentDao.updateProjectCurrentAmount(sqlSession, productNo, productAmount);
-            
-            if (updateResult > 0) {
-                System.out.println("프로젝트 현재 금액 업데이트 완료: productNo=" + productNo + ", amount=" + productAmount);
-            } else {
-                System.err.println("프로젝트 현재 금액 업데이트 실패");
-            }
-            
-        } catch (Exception e) {
-            System.err.println("프로젝트 현재 금액 업데이트 실패: " + e.getMessage());
-            e.printStackTrace();
-            // 이 부분은 실패해도 전체 트랜잭션을 롤백하지 않도록 예외를 던지지 않음
         }
     }
 }

@@ -175,15 +175,8 @@ const PaymentComponent = () => {
       const orderId = `order_${Date.now()}`;
       const phoneNumberOnly = formData.phone.replace(/[^0-9]/g, '');
 
-      // 배송비 제외한 실제 상품 금액 계산
-      const productAmount = selectedReward.amount * selectedReward.quantity;
-      const deliveryFee = 3000;
-      const totalAmount = productAmount + deliveryFee;
-
       console.log('결제 요청 데이터:', {
-        totalAmount: totalAmount,
-        productAmount: productAmount, // 상품 금액만
-        deliveryFee: deliveryFee,
+        amount: totalAmount,
         orderId: orderId,
         orderName: selectedReward.title,
         customerName: formData.name,
@@ -193,14 +186,13 @@ const PaymentComponent = () => {
       });
 
       await tossPayments.requestPayment('카드', {
-        amount: totalAmount, // 토스에는 총 금액 전달
+        amount: totalAmount,
         orderId: orderId,
         orderName: selectedReward.title,
         customerName: formData.name,
         customerEmail: formData.email,
         customerMobilePhone: phoneNumberOnly,
-        // successUrl에 상품 금액(productAmount)만 전달
-        successUrl: `${window.location.origin}/payment/success?postcode=${formData.postcode}&address=${encodeURIComponent(formData.address + ' ' + formData.detailAddress)}&quantity=${selectedReward.quantity}&optionNo=${selectedReward.optionNo}&userNo=${userNo}&productAmount=${productAmount}`,
+        successUrl: `${window.location.origin}/payment/success?postcode=${formData.postcode}&address=${encodeURIComponent(formData.address + ' ' + formData.detailAddress)}&quantity=${selectedReward.quantity}&optionNo=${selectedReward.optionNo}&userNo=${userNo}`,
         failUrl: `${window.location.origin}/payment/fail`,
       });
     } catch (error) {
