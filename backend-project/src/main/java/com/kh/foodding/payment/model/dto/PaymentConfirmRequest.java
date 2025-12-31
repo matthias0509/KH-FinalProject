@@ -12,7 +12,8 @@ import lombok.ToString;
 public class PaymentConfirmRequest {
     private String paymentKey;
     private String orderId;
-    private Integer amount;
+    private Integer amount;  // 토스 검증용 총 금액 (상품 + 배송비)
+    private Integer productAmount;  // 실제 상품 금액만 (배송비 제외)
     private String customerName;
     private String customerEmail;
     private String customerPhone;

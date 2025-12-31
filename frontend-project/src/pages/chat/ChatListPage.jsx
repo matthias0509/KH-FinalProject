@@ -60,42 +60,60 @@ const ChatListPage = () => {
     console.log('🔵 ChatListPage 마운트');
     
     const getUserInfo = async () => {
-      const token = localStorage.getItem('token');
-      console.log('🔑 토큰:', token ? '있음' : '없음');
-      
-      if (!token) {
-        console.log('❌ 토큰 없음');
-        setError('로그인이 필요합니다');
-        setLoading(false);
-        return null;
-      }
-      
-      try {
-        // JWT에서 userNo 추출
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('📦 JWT Payload:', payload);
-        
-        let userNo = payload.userNo || payload.sub || payload.id || payload.user_no || payload.USER_NO;
-        console.log('👤 추출된 userNo:', userNo);
-        
-        // JWT에서 못 찾으면 API 호출
-        if (!userNo) {
-          console.log('📡 API로 사용자 정보 가져오기 시도');
-          const response = await axios.get(`${API_BASE_URL}/api/mypage/info`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          console.log('✅ API 응답:', response.data);
-          userNo = response.data.userNo || response.data.USER_NO;
+  const token = localStorage.getItem('token');
+  console.log('🔑 토큰:', token ? '있음' : '없음');
+  
+  if (!token) {
+    console.log('❌ 토큰 없음');
+    setError('로그인이 필요합니다');
+    setLoading(false);
+    return null;
+  }
+  
+  try {
+    // JWT 파싱 시도 (안전하게)
+    let userNo = null;
+    
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        // 표준 JWT 형식인 경우에만 파싱 시도
+        const payload = JSON.parse(atob(parts[1]));
+          console.log('📦 JWT Payload:', payload);
+          userNo = payload.userNo || payload.sub || payload.id || payload.user_no || payload.USER_NO;
+          console.log('👤 추출된 userNo:', userNo);
         }
-        
-        return userNo;
-      } catch (e) {
-        console.error('❌ 사용자 정보 가져오기 실패:', e);
-        setError('인증 정보가 올바르지 않습니다');
-        setLoading(false);
-        return null;
+      } catch (jwtError) {
+        console.warn('⚠️ JWT 파싱 실패, API로 사용자 정보 조회:', jwtError.message);
       }
-    };
+      
+      // JWT에서 못 찾았거나 파싱 실패 시 API 호출
+      if (!userNo) {
+        console.log('📡 API로 사용자 정보 가져오기 시도');
+        const response = await axios.get(`${API_BASE_URL}/api/mypage/info`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        console.log('✅ API 응답:', response.data);
+        userNo = response.data.userNo || response.data.USER_NO;
+      }
+      
+      return userNo;
+    } catch (e) {
+      console.error('❌ 사용자 정보 가져오기 실패:', e);
+      
+      // 401 에러면 로그인 페이지로
+      if (e.response && e.response.status === 401) {
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        localStorage.removeItem('token');
+        navigate('/login');
+      } else {
+        setError('인증 정보가 올바르지 않습니다');
+      }
+      
+      setLoading(false);
+      return null;
+    }
+  };
 
     const loadChatrooms = async (userNo) => {
       console.log('📡 채팅방 목록 API 호출:', { userNo });
@@ -278,7 +296,7 @@ const ChatListPage = () => {
                   <Search size={18} className="chat-list-page__search-icon" />
                   <input
                     type="text"
-                    placeholder="대화 검색..."
+                    placeholder="검색"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="chat-list-page__search-input"
