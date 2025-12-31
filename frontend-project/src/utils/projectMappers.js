@@ -14,6 +14,15 @@ const toNumber = (value, fallback = 0) => {
   return Number.isNaN(parsed) ? fallback : parsed;
 };
 
+const toTimestamp = (value) => {
+  if (!value) {
+    return null;
+  }
+  const date = new Date(value);
+  const time = date.getTime();
+  return Number.isNaN(time) ? null : time;
+};
+
 const calculateDaysLeft = (fundEndDate) => {
   if (!fundEndDate) {
     return 0;
@@ -47,6 +56,10 @@ export const mapProjectSummary = (project) => {
       ? Math.max(0, project.daysLeft)
       : calculateDaysLeft(project.fundEndDate);
 
+  const createdAtSource =
+    project.createDate || project.createdAt || project.create_at || project.created_at;
+  const createdAt = toTimestamp(createdAtSource);
+
   return {
     id: projectNo,
     title: project.productTitle ?? project.title ?? '프로젝트',
@@ -59,6 +72,8 @@ export const mapProjectSummary = (project) => {
     goal,
     backers: project.backers ?? project.supporterCount ?? project.funding?.backers ?? 0,
     daysLeft,
+    createdAt,
+    fundEndDate: project.fundEndDate || null,
     detailPath: getProjectDetailPath({ ...project, productNo: projectNo }),
   };
 };

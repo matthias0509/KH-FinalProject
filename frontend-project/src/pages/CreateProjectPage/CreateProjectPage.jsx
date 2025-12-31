@@ -13,6 +13,7 @@ import { fetchSellerProfileStatus } from '../../api/sellerApplicationApi';
 
 import { imsiProjectAxios, insertProjectAxios, fetchDraftDetailAxios, uploadThumbnailAxios } from './ProjectApi';
 import DatePickerField from '../../components/DatePickerField';
+import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
 const CustomImage = Image.extend({
   addAttributes() {
@@ -79,19 +80,11 @@ const addDays = (date, days) => {
 
 const parseDateInput = (value) => (value ? new Date(`${value}T00:00:00`) : null);
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001/foodding';
-
 const resolveAssetUrl = (path) => {
   if (!path || path === 'DEFAULT_THUMBNAIL.png') {
     return '';
   }
-  if (path.startsWith('http')) {
-    return path;
-  }
-  if (path.startsWith('/')) {
-    return `${API_BASE_URL}${path}`;
-  }
-  return `${API_BASE_URL}/${path}`;
+  return resolveProjectImageUrl(path, '');
 };
 
 

@@ -330,6 +330,11 @@ export default function ProductDetailPage() {
       return;
     }
 
+    if (Number(sellerUserNo) === Number(buyerNo)) {
+      toast.info('내 프로젝트에는 1:1 문의를 보낼 수 없습니다.');
+      return;
+    }
+
     const width = 400;
     const height = 650;
     const left = window.screen.width - width - 100;
