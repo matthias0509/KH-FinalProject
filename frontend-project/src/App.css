@@ -450,6 +450,31 @@
   font-size: 28px;
 }
 
+.projects-sort {
+  display: inline-flex;
+  gap: 8px;
+  background-color: #f8fafc;
+  padding: 4px;
+  border-radius: 999px;
+}
+
+.projects-sort__button {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.projects-sort__button.is-active {
+  background-image: linear-gradient(to right, var(--accent), var(--accent-strong));
+  color: #fff;
+}
+
 .text-accent {
   color: var(--accent);
 }

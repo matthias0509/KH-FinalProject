@@ -9,9 +9,25 @@ export default function ProjectsSection({
   limit,
   className = '',
   showSort = true,
+  persistSortKey,
 }) {
   const gridClass = `project-grid${variant === 'compact' ? ' project-grid--compact' : ''}`;
-  const [sortOption, setSortOption] = useState('popular');
+  const tabOptions = [
+    { value: 'popular', label: '전체' },
+    { value: 'topFunded', label: '모집금액순' },
+    { value: 'closing', label: '마감임박순' },
+    { value: 'latest', label: '최신순' },
+  ];
+  const allowedSorts = tabOptions.map((tab) => tab.value);
+  const storageKey = showSort ? persistSortKey || (title ? `projects-section:${title}` : null) : null;
+  const readStoredSort = () => {
+    if (!storageKey || typeof window === 'undefined') {
+      return 'popular';
+    }
+    const stored = window.sessionStorage.getItem(storageKey);
+    return allowedSorts.includes(stored) ? stored : 'popular';
+  };
+  const [sortOption, setSortOption] = useState(readStoredSort);
   const pageSize = typeof limit === 'number' && limit > 0 ? limit : projects.length || 1;
 
   const sortedProjects = useMemo(() => {
@@ -51,7 +67,11 @@ export default function ProjectsSection({
       });
     }
 
-    // 인기순 (기본) - 달성률 기준 내림차순
+    if (sortOption === 'topFunded') {
+      return items.sort((a, b) => (Number(b.current) || 0) - (Number(a.current) || 0));
+    }
+
+    // 인기순 (기본) - 달성률 기준 내림차순 / 전체 역할
     return items.sort((a, b) => getProgressScore(b) - getProgressScore(a));
   }, [projects, sortOption]);
 
@@ -61,6 +81,13 @@ export default function ProjectsSection({
   useEffect(() => {
     setPage(0);
   }, [projects, pageSize, sortOption]);
+
+  useEffect(() => {
+    if (!storageKey || typeof window === 'undefined') {
+      return;
+    }
+    window.sessionStorage.setItem(storageKey, sortOption);
+  }, [sortOption, storageKey]);
 
   const visibleProjects = useMemo(() => {
     if (!sortedProjects.length) return [];
@@ -86,16 +113,19 @@ export default function ProjectsSection({
           )}
         </h2>
         {showSort && (
-          <select
-            className="select-control"
-            value={sortOption}
-            onChange={(event) => setSortOption(event.target.value)}
-            aria-label="프로젝트 정렬 순서"
-          >
-            <option value="popular">인기순</option>
-            <option value="latest">최신순</option>
-            <option value="closing">마감임박순</option>
-          </select>
+          <div className="projects-sort" role="tablist" aria-label="프로젝트 정렬">
+            {tabOptions.map((tab) => (
+              <button
+                key={tab.value}
+                type="button"
+                className={`projects-sort__button${tab.value === sortOption ? ' is-active' : ''}`}
+                onClick={() => setSortOption(tab.value)}
+                aria-pressed={tab.value === sortOption}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         )}
       </div>
       <div className={gridClass}>
