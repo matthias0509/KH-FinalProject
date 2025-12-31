@@ -31,4 +31,14 @@ public class ChatDao {
     public List<Message> selectMessageList(SqlSessionTemplate sqlSession, Long chatroomNo) {
         return sqlSession.selectList("chatMapper.selectMessageList", chatroomNo);
     }
+    
+    // 사용자의 채팅방 목록 조회
+    public List<Map<String, Object>> selectChatroomListByUser(SqlSessionTemplate sqlSession, Long userNo) {
+        return sqlSession.selectList("chatMapper.selectChatroomListByUser", userNo);
+    }
+    
+    // 메시지 읽음 처리
+    public int updateMessagesToRead(SqlSessionTemplate sqlSession, Map<String, Object> params) {
+        return sqlSession.update("chatMapper.updateMessagesToRead", params);
+    }
 }

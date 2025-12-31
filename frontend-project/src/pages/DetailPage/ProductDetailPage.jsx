@@ -292,6 +292,7 @@ export default function ProductDetailPage() {
   };
 
 
+
   const handleOpenChat = () => {
     const loginInfo = getLoginUserInfo();
 
@@ -345,14 +346,13 @@ export default function ProductDetailPage() {
     console.log('chatWindow:', chatWindow);
 
     if (chatWindow) {
-      let messageCount = 0;
-      const maxAttempts = 20; // 2초 동안 시도 (100ms * 20)
-      
-      // CHAT_READY 메시지 리스너 추가
+      // 🔥 CHAT_READY 메시지를 기다렸다가 데이터 전송
       const handleChatReady = (event) => {
+        if (event.origin !== window.location.origin) return;
+        
         if (event.data.type === 'CHAT_READY') {
-          console.log('채팅창 준비 완료!');
-          // 준비 완료 메시지를 받으면 즉시 데이터 전송
+          console.log('✅ 채팅창 준비 완료!');
+          
           const dataToSend = {
             type: 'CREATOR_DATA',
             creator: {
@@ -360,51 +360,25 @@ export default function ProductDetailPage() {
               avatar: project.creator.avatar
             },
             buyerNo: buyerNo,
-            sellerNo: sellerUserNo
+            sellerNo: sellerUserNo,
+            currentUserNo: buyerNo // 🔥 currentUserNo 추가!
           };
-          console.log('데이터 전송:', dataToSend);
+          
+          console.log('📤 데이터 전송:', dataToSend);
           chatWindow.postMessage(dataToSend, window.location.origin);
+          
+          // 리스너 제거
           window.removeEventListener('message', handleChatReady);
         }
       };
       
       window.addEventListener('message', handleChatReady);
       
-      // 백업: interval로도 계속 시도 (CHAT_READY를 못 받을 경우 대비)
-      const checkWindow = setInterval(() => {
-        try {
-          if (chatWindow.closed) {
-            clearInterval(checkWindow);
-            window.removeEventListener('message', handleChatReady);
-            return;
-          }
-          
-          messageCount++;
-
-          chatWindow.postMessage(
-            {
-              type: 'CREATOR_DATA',
-              creator: {
-                name: project.creator.name,
-                avatar: project.creator.avatar
-              },
-              buyerNo: buyerNo,
-              sellerNo: sellerUserNo
-            },
-            window.location.origin
-          );
-          
-          // 최대 시도 횟수에 도달하면 interval 정리
-          if (messageCount >= maxAttempts) {
-            clearInterval(checkWindow);
-            window.removeEventListener('message', handleChatReady);
-          }
-        } catch (e) {
-          console.error('데이터 전달 오류:', e);
-          clearInterval(checkWindow);
-          window.removeEventListener('message', handleChatReady);
-        }
-      }, 100);
+      // 🔥 타임아웃 설정: 5초 후에도 CHAT_READY를 못 받으면 리스너 제거
+      setTimeout(() => {
+        window.removeEventListener('message', handleChatReady);
+        console.log('⚠️ CHAT_READY 타임아웃');
+      }, 5000);
     }
   };
 

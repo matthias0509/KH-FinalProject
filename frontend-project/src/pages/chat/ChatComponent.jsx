@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send, Paperclip, Smile, Loader } from 'lucide-react';
+import { X, Send, Loader } from 'lucide-react';
 import './ChatComponent.css';
 import axios from 'axios';
 
@@ -9,11 +9,13 @@ const ChatComponent = () => {
   const [creator, setCreator] = useState(null);
   const [buyerNo, setBuyerNo] = useState(null);
   const [sellerNo, setSellerNo] = useState(null);
+  const [currentUserNo, setCurrentUserNo] = useState(null);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [hasLoadedMessages, setHasLoadedMessages] = useState(false);
+  const [hasSentWelcome, setHasSentWelcome] = useState(false);
   const messagesEndRef = useRef(null);
   const pollingIntervalRef = useRef(null);
 
@@ -23,10 +25,15 @@ const ChatComponent = () => {
       if (event.origin !== window.location.origin) return;
       
       if (event.data.type === 'CREATOR_DATA') {
-        console.log('Received CREATOR_DATA:', event.data);
+        console.log('✅ Received CREATOR_DATA:', event.data);
+        console.log('  - buyerNo:', event.data.buyerNo);
+        console.log('  - sellerNo:', event.data.sellerNo);
+        console.log('  - currentUserNo:', event.data.currentUserNo);
+        
         setCreator(event.data.creator);
         setBuyerNo(event.data.buyerNo);
-        setSellerNo(event.data.sellerNo); // 수정: sellerNo를 직접 받음
+        setSellerNo(event.data.sellerNo);
+        setCurrentUserNo(event.data.currentUserNo); // 현재 사용자 번호 저장
       }
     };
     
@@ -42,8 +49,8 @@ const ChatComponent = () => {
 
   // creator와 buyerNo가 설정되면 메시지 불러오기 및 폴링 시작
   useEffect(() => {
-    if (creator && buyerNo && sellerNo && !hasLoadedMessages) {
-      console.log('Loading messages with:', { buyerNo, sellerNo });
+    if (creator && buyerNo && sellerNo && currentUserNo && !hasLoadedMessages) {
+      console.log('Loading messages with:', { buyerNo, sellerNo, currentUserNo });
       loadMessages();
       setHasLoadedMessages(true);
     }
@@ -53,7 +60,7 @@ const ChatComponent = () => {
         clearInterval(pollingIntervalRef.current);
       }
     };
-  }, [creator, buyerNo, sellerNo, hasLoadedMessages]);
+  }, [creator, buyerNo, sellerNo, currentUserNo, hasLoadedMessages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -63,7 +70,7 @@ const ChatComponent = () => {
     scrollToBottom();
   }, [messages]);
 
-  // 폴링으로 새 메시지 확인 (5초마다)
+  // 폴링으로 새 메시지 확인 (3초마다)
   const startPolling = () => {
     // 기존 폴링이 있다면 제거
     if (pollingIntervalRef.current) {
@@ -72,7 +79,7 @@ const ChatComponent = () => {
     
     pollingIntervalRef.current = setInterval(() => {
       loadMessages(true);
-    }, 5000);
+    }, 3000);
   };
 
   // 메시지 불러오기
@@ -95,35 +102,55 @@ const ChatComponent = () => {
       
       console.log('Messages response:', response.data);
       
-      if (response.data && response.data.length > 0) {
+      if (response.data && Array.isArray(response.data)) {
         const formattedMessages = response.data.map(msg => ({
           id: msg.msgNo,
-          sender: msg.sender === buyerNo ? 'user' : 'creator',
+          sender: msg.sender === currentUserNo ? 'user' : 'creator', // currentUserNo와 비교
           text: msg.msgContent,
           timestamp: msg.sendDate
         }));
+        
+        console.log('📨 Formatted messages:', formattedMessages);
         setMessages(formattedMessages);
         
         // 메시지가 있으면 폴링 시작
-        if (!silent && !pollingIntervalRef.current) {
+        if (!pollingIntervalRef.current) {
           startPolling();
         }
-      } else if (!silent) {
-        // 첫 방문시 환영 메시지 전송 (한 번만)
-        console.log('No messages found, sending welcome message');
-        const welcomeText = `안녕하세요! ${creator.name}입니다. 프로젝트에 관심 가져주셔서 감사합니다. 무엇이든 물어보세요 😊`;
-        await sendMessageToServer(sellerNo, welcomeText);
-        await loadMessages(true);
-        startPolling();
+      } else {
+        // 메시지가 없으면 빈 배열 설정하고 폴링 시작
+        setMessages([]);
+        if (!pollingIntervalRef.current) {
+          startPolling();
+        }
       }
     } catch (error) {
       console.error('메시지 로딩 실패:', error);
       if (error.response) {
         console.error('Error response:', error.response.data);
       }
+      setMessages([]);
     } finally {
       if (!silent) setIsLoading(false);
     }
+  };
+
+  // 메시지 읽음 처리 함수 추가
+  const markMessagesAsRead = async (chatroomNo) => {
+      try {
+          console.log('📖 메시지 읽음 처리:', { chatroomNo, currentUserNo });
+          
+          await axios.post(`${API_BASE_URL}/chat/messages/read`, null, {
+              params: {
+                  chatroomNo: chatroomNo,
+                  userNo: currentUserNo
+              }
+          });
+          
+          console.log('✅ 읽음 처리 완료');
+      } catch (error) {
+          console.error('❌ 읽음 처리 실패:', error);
+      }
   };
 
   // 메시지 서버로 전송
@@ -154,21 +181,11 @@ const ChatComponent = () => {
       setMessage('');
       
       try {
-        // 사용자 메시지 전송
-        await sendMessageToServer(buyerNo, messageText);
+        // 사용자 메시지 전송 (현재 사용자 번호로 전송)
+        await sendMessageToServer(currentUserNo, messageText);
         
         // 메시지 목록 새로고침
         await loadMessages(true);
-        
-        // 시뮬레이션: 2초 후 자동 응답 (개발/테스트용)
-        setTimeout(async () => {
-          try {
-            await sendMessageToServer(sellerNo, '메시지 감사합니다! 곧 답변드리겠습니다.');
-            await loadMessages(true);
-          } catch (error) {
-            console.error('자동 응답 실패:', error);
-          }
-        }, 2000);
       } catch (error) {
         console.error('메시지 전송 중 오류:', error);
         setMessage(messageText); // 실패시 메시지 복원
@@ -203,7 +220,7 @@ const ChatComponent = () => {
     window.close();
   };
 
-  if (!creator || !buyerNo || !sellerNo) {
+  if (!creator || !buyerNo || !sellerNo || !currentUserNo) {
     return (
       <div className="chat-page chat-page--loading">
         <div className="chat-page__loading-content">
@@ -273,9 +290,6 @@ const ChatComponent = () => {
 
       {/* Input */}
       <div className="chat-page__input-container">
-        <button type="button" className="chat-page__input-action">
-          <Paperclip size={20} />
-        </button>
         <input
           type="text"
           className="chat-page__input"
@@ -285,9 +299,6 @@ const ChatComponent = () => {
           onKeyPress={handleKeyPress}
           disabled={isSending}
         />
-        <button type="button" className="chat-page__input-action">
-          <Smile size={20} />
-        </button>
         <button 
           type="button"
           className="chat-page__send-button"

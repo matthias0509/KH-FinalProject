@@ -41,4 +41,30 @@ public class ChatController {
         List<Message> messages = chatService.getMessageList(buyerNo, sellerNo);
         return ResponseEntity.ok(messages);
     }
+    
+    // 채팅방 목록 조회
+    @GetMapping("/rooms")
+    public ResponseEntity<List<Map<String, Object>>> getChatroomList(@RequestParam Long userNo) {
+        System.out.println("채팅방 목록 요청 - userNo: " + userNo); // 로그 추가
+        List<Map<String, Object>> chatrooms = chatService.getChatroomList(userNo);
+        System.out.println("조회된 채팅방 수: " + (chatrooms != null ? chatrooms.size() : 0)); // 로그 추가
+        return ResponseEntity.ok(chatrooms);
+    }
+    
+    // 메시지 읽음 처리
+    @PostMapping("/messages/read")
+    public ResponseEntity<Map<String, Object>> markMessagesAsRead(
+            @RequestParam Long chatroomNo,
+            @RequestParam Long userNo) {
+        
+        System.out.println("메시지 읽음 처리 - chatroomNo: " + chatroomNo + ", userNo: " + userNo);
+        
+        int result = chatService.markMessagesAsRead(chatroomNo, userNo);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", result > 0);
+        response.put("updatedCount", result);
+        
+        return ResponseEntity.ok(response);
+    }
 }
