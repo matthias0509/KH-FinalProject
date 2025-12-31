@@ -491,12 +491,12 @@ export default function ProductDetailPage() {
                   <span>달성률</span>
                 </div>
                 <div>
-                  <strong>{currencyFormatter.format(project.funding.raised)}원</strong>
-                  <span>모인 금액</span>
+                  <strong>{currencyFormatter.format(project.funding.goal)}원</strong>
+                  <span>목표 금액</span>
                 </div>
                 <div>
-                  <strong>{project.funding.backers.toLocaleString()}명</strong>
-                  <span>후원자</span>
+                  <strong>{currencyFormatter.format(project.funding.raised)}원</strong>
+                  <span>달성 금액</span>
                 </div>
                 <div>
                   <strong>{project.funding.daysLeft}일</strong>
