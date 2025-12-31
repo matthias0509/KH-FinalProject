@@ -17,4 +17,17 @@ public class PaymentDao {
     public int insertOrderDetail(SqlSessionTemplate sqlSession, OrderDetail orderDetail) {
         return sqlSession.insert("paymentMapper.insertOrderDetail", orderDetail);
     }
+    
+    // ★ 추가: optionNo로 productNo 조회
+    public Integer getProductNoByOptionNo(SqlSessionTemplate sqlSession, Integer optionNo) {
+        return sqlSession.selectOne("paymentMapper.getProductNoByOptionNo", optionNo);
+    }
+    
+    // ★ 추가: 프로젝트 현재 금액 업데이트
+    public int updateProjectCurrentAmount(SqlSessionTemplate sqlSession, Integer productNo, Integer amount) {
+        java.util.Map<String, Object> params = new java.util.HashMap<>();
+        params.put("productNo", productNo);
+        params.put("amount", amount);
+        return sqlSession.update("paymentMapper.updateProjectCurrentAmount", params);
+    }
 }
