@@ -160,7 +160,7 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
                                 <Link to='/mypage/chat'>1:1 채팅 내역</Link>
                             </li>
                             <li className={isActive('/qna')}>
-                                <Link to='/faq'>나의 문의(Q&A)</Link>
+                                <Link to='/inquiries'>나의 문의(Q&A)</Link>
                             </li>
                             <li>
                                 <Link to='/notice/:noticeNo'>고객센터</Link>
