@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import './App.css';
 
 // 김동규
@@ -54,20 +54,34 @@ import DashBoardPage from './pages/admin/DashBoardPage';
 import ChatListPage from './pages/chat/ChatListPage';
 
 
-
 export default function App() {
+  const location = useLocation(); // 페이지 이동 감지용
 
-  // ★ 상태 관리 (Single Source of Truth)
-  const [userInfo, setUserInfo] = useState({
-    name: '푸딩러버',
-    profileImg: '🍮',
-    role: 'maker',
-    stats: {
-        fundingCount: 12,
-        followingCount: 5,
-        likedCount: 8
+  // 1. userInfo 초기값은 null로 설정 (로딩 전)
+  const [userInfo, setUserInfo] = useState(null);
+
+  // 2. 앱 실행 시(새로고침 시) 로컬 스토리지에서 사용자 정보 복구
+  useEffect(() => {
+    // 로그인 페이지에서 저장한 키값('user')을 확인하세요.
+    const storedUser = localStorage.getItem('user'); 
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUserInfo(parsedUser); // 상태 업데이트
+        console.log("✅ 로그인 정보 복구 완료:", parsedUser);
+      } catch (e) {
+        console.error("사용자 정보 파싱 오류", e);
+        localStorage.removeItem('user'); // 깨진 데이터 삭제
+      }
     }
-  });
+  }, []);
+
+  // 3. 페이지 이동 시 스크롤 최상단으로 이동 (UX 개선)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
 
   return (
     <Routes>
@@ -97,12 +111,10 @@ export default function App() {
 
       
       {/* ======================================================= */}
-      {/* ★ [박주현] 마이페이지 (서포터) 경로 수정 완료 ★ */}
-      {/* 사이드바 링크(/mypage/xxx)와 여기 path를 일치시켰습니다. */}
+      {/* ★ [박주현] 마이페이지 (서포터) */}
       {/* ======================================================= */}
       <Route path="/mypage" element={<MyPage userInfo={userInfo} />} />
       
-      {/* 사이드바가 /mypage/profile 로 보내니까 여기도 맞춰야 함 */}
       <Route path="/mypage/profile" element={<ProfileEditPage />} />
       <Route path="/mypage/history" element={<FundingHistoryPage />} />
       <Route path="/mypage/cancel" element={<FundingCancelPage />} />
@@ -113,7 +125,7 @@ export default function App() {
 
 
       {/* ======================================================= */}
-      {/* ★ [메이커] 경로 설정 */}
+      {/* ★ [메이커] 경로 설정 (userInfo 전달 필수!) */}
       {/* ======================================================= */}
       <Route path="/maker" element={<MakerPage userInfo={userInfo} />} />
       <Route path="/maker/chat-history" element={<ChatHistoryPage userInfo={userInfo}/>} />

@@ -3,7 +3,8 @@ package com.kh.foodding.admin.model.dao;
 import java.util.List;
 import java.util.Map;
 import org.apache.ibatis.annotations.Mapper;
-import com.kh.foodding.admin.vo.User;
+
+import com.kh.foodding.admin.model.vo.User;
 
 @Mapper
 public interface UserDao {

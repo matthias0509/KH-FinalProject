@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.foodding.mypage.model.service.MyPageService;
+import com.kh.foodding.mypage.model.vo.FollowedSeller;
 import com.kh.foodding.mypage.model.vo.FundingHistory;
 import com.kh.foodding.mypage.model.vo.LikedProject;
 import com.kh.foodding.mypage.model.vo.MyPage;
@@ -162,4 +163,20 @@ public class MyPageController {
         
         return ResponseEntity.ok(list);
     }
+    
+    // 4. 팔로우 목록 조회
+    @GetMapping("/follow")
+    public ResponseEntity<?> getFollowList(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "로그인이 필요합니다."));
+        }
+
+        String userId = principal.getName();
+        List<FollowedSeller> list = mypageService.getFollowList(userId);
+        
+        return ResponseEntity.ok(list);
+    }
+    
+
 }

@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.kh.foodding.admin.model.service.UserService;
-import com.kh.foodding.admin.vo.User;
+import com.kh.foodding.admin.model.vo.User;
 
 
 @RestController

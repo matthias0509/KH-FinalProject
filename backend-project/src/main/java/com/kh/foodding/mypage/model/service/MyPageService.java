@@ -14,9 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.foodding.mypage.model.dao.MyPageDao;
-import com.kh.foodding.mypage.model.vo.FundingHistory;
-import com.kh.foodding.mypage.model.vo.LikedProject;
+// 🚨 [추가된 부분] VO 임포트가 빠지면 에러가 납니다!
 import com.kh.foodding.mypage.model.vo.MyPage;
+import com.kh.foodding.mypage.model.vo.LikedProject;   
+import com.kh.foodding.mypage.model.vo.FundingHistory; 
+import com.kh.foodding.mypage.model.vo.FollowedSeller; 
 
 @Service
 public class MyPageService {
@@ -79,7 +81,6 @@ public class MyPageService {
         if (!folder.exists()) folder.mkdirs();
 
         String originalName = file.getOriginalFilename();
-        // 확장자 추출 안전장치 (파일에 확장자가 없을 경우 대비)
         String ext = "";
         if (originalName != null && originalName.contains(".")) {
             ext = originalName.substring(originalName.lastIndexOf("."));
@@ -93,7 +94,6 @@ public class MyPageService {
             return null;
         }
 
-        // DB에는 파일명만 저장 (Sidebar.js에서 경로를 붙여줌)
         String dbPath = storedName;
         int result = mypageDao.updateProfileImage(userId, dbPath);
 
@@ -123,16 +123,12 @@ public class MyPageService {
      * [추가] 마이페이지 메인 정보 (회원정보 + 통계 같이 줌)
      */
     public Map<String, Object> getMyPageInfo(String userId) {
-        // 1. 회원 기본 정보
         MyPage member = mypageDao.selectMemberById(userId);
         
-        // 2. 통계 정보 (좋아요 수, 팔로잉 수)
         Map<String, Object> stats = mypageDao.selectMyPageStats(member.getUserNo());
         
-        // 3. 결과 합치기
         Map<String, Object> result = new HashMap<>();
         
-        // 기존 Member 객체 필드들을 map에 풀어서 넣기 (프론트에서 쓰기 편하게)
         result.put("userNo", member.getUserNo());
         result.put("userId", member.getUserId());
         result.put("userName", member.getUserName());
@@ -140,7 +136,6 @@ public class MyPageService {
         result.put("modifyProfile", member.getModifyProfile());
         result.put("role", member.getUserRole());
         
-        // 통계가 없으면 0으로 채워서 넣기
         if (stats == null) {
             stats = new HashMap<>();
             stats.put("likedCount", 0);
@@ -152,9 +147,10 @@ public class MyPageService {
         return result;
     }
 
-
+    /**
+     * [추가] 좋아요한 프로젝트 목록 조회
+     */
     public List<LikedProject> getLikedProjects(String userId) {
-        // userId로 userNo를 알아내야 함
         MyPage member = mypageDao.selectMemberById(userId);
         return mypageDao.selectLikedProjects(member.getUserNo());
     }
@@ -167,5 +163,15 @@ public class MyPageService {
         if (member == null) return List.of();
         
         return mypageDao.selectFundingHistory(member.getUserNo());
+    }
+    
+    /**
+     * ✅ [추가] 팔로우 목록 가져오기
+     */
+    public List<FollowedSeller> getFollowList(String userId) {
+        MyPage member = mypageDao.selectMemberById(userId);
+        if (member == null) return List.of();
+        
+        return mypageDao.selectFollowList(member.getUserNo());
     }
 }

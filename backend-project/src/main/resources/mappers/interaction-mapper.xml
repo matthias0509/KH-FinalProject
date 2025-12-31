@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.foodding.interaction.model.dao.InteractionDao">
+
+    <select id="checkFollowStatus" resultType="int">
+        SELECT COUNT(*) 
+        FROM FOLLOW 
+        WHERE FOLLOWING = #{userNo} AND SELLER_NO = #{sellerNo}
+    </select>
+
+    <insert id="insertFollow">
+        INSERT INTO FOLLOW (FOLLOWING, SELLER_NO)
+        VALUES (#{userNo}, #{sellerNo})
+    </insert>
+
+    <delete id="deleteFollow">
+        DELETE FROM FOLLOW 
+        WHERE FOLLOWING = #{userNo} AND SELLER_NO = #{sellerNo}
+    </delete>
+
+    <select id="getFollowerCount" resultType="int">
+        SELECT COUNT(*) 
+        FROM FOLLOW 
+        WHERE SELLER_NO = #{sellerNo}
+    </select>
+    
+    <select id="checkLikeStatus" resultType="int">
+        SELECT COUNT(*) FROM TB_LIKE WHERE USER_NO = #{userNo} AND PRODUCT_NO = #{productNo}
+    </select>
+
+    <insert id="insertLike">
+        INSERT INTO TB_LIKE (USER_NO, PRODUCT_NO) VALUES (#{userNo}, #{productNo})
+    </insert>
+
+    <delete id="deleteLike">
+        DELETE FROM TB_LIKE WHERE USER_NO = #{userNo} AND PRODUCT_NO = #{productNo}
+    </delete>
+
+    <select id="getLikeCount" resultType="int">
+        SELECT COUNT(*) FROM TB_LIKE WHERE PRODUCT_NO = #{productNo}
+    </select>
+
+</mapper>

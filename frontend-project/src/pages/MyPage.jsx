@@ -136,10 +136,11 @@ const MyPage = () => {
                             <span className="value">{likedProjects.length || 0}</span>
                         </div>
                         <div className="divider-vertical"></div>
-                        <div className="activity-item">
+                       <div className="activity-item">
                             <span className="icon">👀</span>
                             <span className="label">팔로잉</span>
-                            <span className="value">{userInfo.followCount || 0}</span> {/* API에서 followCount를 준다고 가정 */}
+                            {/* ✅ 수정됨: stats 객체 안에 있는 followingCount를 꺼내야 합니다! */}
+                            <span className="value">{userInfo.stats?.followingCount || 0}</span> 
                         </div>
                     </div>
 
