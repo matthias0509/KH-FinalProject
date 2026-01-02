@@ -13,15 +13,30 @@ export default function NoticeListPage() {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // 💡 1. 관리자 권한 확인 (토큰 Payload 해독)
+    // 💡 관리자 권한 확인 (토큰 Payload 해독)
     const token = sessionStorage.getItem("loginUser");
     let isAdmin = false;
+    
     if (token) {
         try {
-            const payload = JSON.parse(window.atob(token.split('.')[1]));
-            isAdmin = payload.role === 'ADMIN';
+            const parts = token.split('.');
+            
+            if (parts.length === 3) {
+                // ✅ atob 대신 base64 디코딩 함수 사용 (한글 지원)
+                const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(
+                    atob(base64)
+                        .split('')
+                        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                        .join('')
+                );
+                
+                const payload = JSON.parse(jsonPayload);
+                console.log("디코딩된 payload:", payload); // 디버깅용
+                isAdmin = payload.role === 'ADMIN' || payload.userRole === 'ADMIN';
+            }
         } catch (e) {
-            console.error("토큰 확인 실패", e);
+            console.error("토큰 확인 실패:", e);
         }
     }
 
@@ -30,15 +45,15 @@ export default function NoticeListPage() {
 
     // 검색 실행 함수
     const handleSearch = () => {
-        setCurrentPage(1); // 검색 시 1페이지로 이동
-        fetchNotices(1); // 변경된 검색어와 1페이지 정보를 서버에 요청
+        setCurrentPage(1);
+        fetchNotices(1);
     };
+
     // 데이터 요청
     const fetchNotices = async (page) => {
         setLoading(true);
         try {
             const response = await axios.get("http://localhost:8001/foodding/notice/list", {
-                // 서버에 현재 페이지와 검색어를 전달하여 필터링된 결과를 가져옴
                 params: { page: page, keyword: search }
             });
             setNotices(response.data.list || []);
@@ -57,10 +72,8 @@ export default function NoticeListPage() {
 
     // 클릭 핸들러
     const handleNoticeClick = async (id) => {
-            navigate(`/notice/${id}`);
+        navigate(`/notice/${id}`);
     };
-
-    
 
     const resetSearch = () => {
         setSearch("");
@@ -115,7 +128,7 @@ export default function NoticeListPage() {
                             const id = n.noticeNo || n.NOTICE_NO;
                             return (
                                 <div key={id} className="notice-card project-card"
-                                     onClick={() => handleNoticeClick(id)} // 💡 클릭 시 조회수 증가 함수 실행
+                                     onClick={() => handleNoticeClick(id)}
                                      style={{ cursor: 'pointer', marginBottom: '12px' }}>
                                     <div className="notice-card__body project-card__body" style={{ padding: '12px 20px' }}>
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

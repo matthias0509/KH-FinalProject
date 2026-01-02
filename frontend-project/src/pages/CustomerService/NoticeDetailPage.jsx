@@ -16,18 +16,34 @@ export default function NoticeDetailPage() {
     useEffect(() => {
         if (location.state?.message === '수정 완료') {
             toast.success('공지사항이 성공적으로 수정되었습니다!');
-            window.history.replaceState({}, document.title); // 메시지 중복 표시 방지
+            window.history.replaceState({}, document.title);
         }
     }, [location]);
 
-    // 💡 1. 관리자 권한 확인
+    // 💡 1. 관리자 권한 확인 (한글 지원 버전)
     const token = sessionStorage.getItem("loginUser");
     let isAdmin = false;
+    
     if (token) {
         try {
-            const payload = JSON.parse(window.atob(token.split('.')[1]));
-            isAdmin = payload.role === 'ADMIN';
-        } catch (e) { console.error(e); }
+            const parts = token.split('.');
+            if (parts.length === 3) {
+                // ✅ 한글을 지원하는 디코딩 방식
+                const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(
+                    atob(base64)
+                        .split('')
+                        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                        .join('')
+                );
+                
+                const payload = JSON.parse(jsonPayload);
+                console.log("디코딩된 payload:", payload); // 디버깅용
+                isAdmin = payload.role === 'ADMIN' || payload.userRole === 'ADMIN';
+            }
+        } catch (e) {
+            console.error("토큰 확인 실패:", e);
+        }
     }
 
     useEffect(() => {
@@ -44,7 +60,7 @@ export default function NoticeDetailPage() {
         fetchDetail();
     }, [noticeNo, navigate]);
 
-    // 💡 2. 삭제 함수 추가
+    // 💡 2. 삭제 함수
     const handleDelete = async () => {
         if (!window.confirm("정말로 이 공지사항을 삭제하시겠습니까?")) return;
 
@@ -52,19 +68,19 @@ export default function NoticeDetailPage() {
             const response = await axios({
                 url: 'http://localhost:8001/foodding/notice/delete',
                 method: 'POST',
-                data: { noticeNo: noticeNo }, // 💡 객체 형태로 전달
+                data: { noticeNo: noticeNo },
                 headers: { Authorization: `Bearer ${token}` }
             });
 
             if (response.data === "success") {
-                alert("공지사항이 삭제되었습니다.");
-                navigate('/notice');
+                toast.success("공지사항이 삭제되었습니다.");
+                setTimeout(() => navigate('/notice'), 1000);
             } else {
-                alert("삭제 실패");
+                toast.error("삭제 실패");
             }
         } catch (error) {
             console.error("삭제 에러:", error);
-            alert("서버 통신 중 오류가 발생했습니다.");
+            toast.error("서버 통신 중 오류가 발생했습니다.");
         }
     };
 
