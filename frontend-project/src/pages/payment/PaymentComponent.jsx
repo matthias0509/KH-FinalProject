@@ -255,8 +255,7 @@ const PaymentComponent = () => {
         customerName: formData.name,
         customerEmail: formData.email,
         customerMobilePhone: phoneNumberOnly,
-        successUrl: `${window.location.origin}/payment/success?postcode=${formData.postcode}&address=${encodeURIComponent(formData.address + ' ' + formData.detailAddress)}
-                    &quantity=${selectedReward.quantity}&optionNo=${selectedReward.optionNo}&userNo=${userNo}&productAmount=${productAmount}`,
+        successUrl: `${window.location.origin}/payment/success?postcode=${formData.postcode}&address=${encodeURIComponent(formData.address + ' ' + formData.detailAddress)}&quantity=${selectedReward.quantity}&optionNo=${selectedReward.optionNo}&userNo=${userNo}&productAmount=${productAmount}`,
         failUrl: `${window.location.origin}/payment/fail`,
       });
     } catch (error) {
