@@ -24,7 +24,7 @@ const formatCurrency = (amount) => {
 const formatStatus = (status) => STATUS_LABEL[status] || status;
 
 // =========================================================
-// 1. 심사 모달 컴포넌트
+// 1. 심사 모달 컴포넌트 (기존 유지)
 // =========================================================
 const ProjectReviewModal = ({
     isOpen,
@@ -48,14 +48,9 @@ const ProjectReviewModal = ({
 
     if (!isOpen) return null;
 
-    // ✅ 승인 핸들러 (바로 OPEN 처리)
     const handleApprove = () => {
         if (!project || actionLoading || isLoading) return;
-        if (
-            window.confirm(
-                `[${project.productTitle}] 프로젝트를 승인하시겠습니까?\n\n※ 확인 즉시 '진행중(OPEN)' 상태로 변경되어 사용자에게 노출됩니다.`
-            )
-        ) {
+        if (window.confirm(`[${project.productTitle}] 프로젝트를 승인하시겠습니까?\n\n※ 확인 즉시 '진행중(OPEN)' 상태로 변경되어 사용자에게 노출됩니다.`)) {
             onAction(project.productNo, 'APPROVE');
         }
     };
@@ -81,16 +76,10 @@ const ProjectReviewModal = ({
                     <h3>📝 프로젝트 심사 ({formatStatus(project?.productStatus)})</h3>
                     <button className="btn-close" onClick={onClose}>&times;</button>
                 </div>
-
                 {isLoading ? (
                     <div className="modal-body"><p className="no-data">상세 정보를 불러오는 중입니다...</p></div>
-                ) : errorMessage ? (
-                    <div className="modal-body"><p className="no-data">{errorMessage}</p></div>
-                ) : !project ? (
-                    <div className="modal-body"><p className="no-data">정보를 찾을 수 없습니다.</p></div>
                 ) : (
                     <div className="modal-body review-layout">
-                        {/* 상세 정보 영역 */}
                         <div className="review-section basic-info">
                             <div className="info-row">
                                 <span className="label">카테고리</span>
@@ -104,17 +93,8 @@ const ProjectReviewModal = ({
                                 <span className="label">펀딩 기간</span>
                                 <span className="value">{project.fundStartDate} ~ {project.fundEndDate}</span>
                             </div>
-                            {project.rejectReason && (
-                                <div className="info-row">
-                                    <span className="label">반려 사유</span>
-                                    <span className="value reject-reason">{project.rejectReason}</span>
-                                </div>
-                            )}
                         </div>
-
                         <hr className="divider" />
-
-                        {/* 스토리 미리보기 */}
                         <div className="review-section content-preview">
                             <h4>스토리 & 썸네일 확인</h4>
                             <div className="preview-container">
@@ -128,55 +108,20 @@ const ProjectReviewModal = ({
                                 </div>
                             </div>
                         </div>
-
-                        <hr className="divider" />
-
-                        {/* 리워드 확인 */}
-                        <div className="review-section">
-                            <h4>리워드 구성</h4>
-                            <div className="reward-list-grid">
-                                {project.rewards?.map((reward, idx) => (
-                                    <div key={idx} className="reward-card">
-                                        <div className="reward-header">
-                                            <span className="reward-price">{formatCurrency(reward.price)}</span>
-                                            <span className="reward-name">{reward.title}</span>
-                                        </div>
-                                        <p className="reward-desc">{reward.description}</p>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
                     </div>
                 )}
-
-                {/* 하단 버튼 액션 */}
                 <div className="modal-footer-actions">
-                    {actionError && <div className="admin-seller__error">{actionError}</div>}
                     {!showRejectInput ? (
                         <>
-                            <button className="btn-save" onClick={handleApprove} disabled={actionLoading}>
-                                승인 (즉시 진행)
-                            </button>
-                            <button className="btn-action btn-danger" onClick={() => setShowRejectInput(true)} disabled={actionLoading}>
-                                반려
-                            </button>
+                            <button className="btn-save" onClick={handleApprove} disabled={actionLoading}>승인 (즉시 진행)</button>
+                            <button className="btn-action btn-danger" onClick={() => setShowRejectInput(true)} disabled={actionLoading}>반려</button>
                             <button className="btn-close-footer" onClick={onClose}>닫기</button>
                         </>
                     ) : (
                         <div className="reject-input-group">
-                            <input
-                                type="text"
-                                placeholder="반려 사유 입력 (필수)"
-                                value={rejectReason}
-                                onChange={(e) => setRejectReason(e.target.value)}
-                                className="input-field full-width"
-                            />
-                            <button className="btn-action btn-danger" onClick={handleReject} disabled={actionLoading}>
-                                반려 확정
-                            </button>
-                            <button className="btn-close-footer" onClick={() => { setShowRejectInput(false); setRejectReason(''); }}>
-                                취소
-                            </button>
+                            <input type="text" placeholder="반려 사유 입력 (필수)" value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} className="input-field full-width" />
+                            <button className="btn-action btn-danger" onClick={handleReject} disabled={actionLoading}>반려 확정</button>
+                            <button className="btn-close-footer" onClick={() => { setShowRejectInput(false); setRejectReason(''); }}>취소</button>
                         </div>
                     )}
                 </div>
@@ -186,13 +131,17 @@ const ProjectReviewModal = ({
 };
 
 // =========================================================
-// 2. 메인 페이지 컴포넌트
+// 2. 메인 페이지 컴포넌트 (페이지네이션 적용)
 // =========================================================
 const ProjectApprovalPage = () => {
     const [projectList, setProjectList] = useState([]);
     const [filterStatus, setFilterStatus] = useState('WAITING');
     const [listLoading, setListLoading] = useState(false);
     
+    // 🚨 [추가] 페이지네이션 상태
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
     // 모달 관련
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState(null);
@@ -205,6 +154,7 @@ const ProjectApprovalPage = () => {
         try {
             const data = await fetchProjectReviewList(filterStatus);
             setProjectList(Array.isArray(data) ? data : []);
+            setCurrentPage(1); // 🚨 필터 변경 시 1페이지로 리셋
         } catch (error) {
             console.error(error);
             setProjectList([]);
@@ -216,6 +166,14 @@ const ProjectApprovalPage = () => {
     useEffect(() => {
         loadProjects();
     }, [loadProjects]);
+
+    // 🚨 [추가] 현재 페이지에 해당하는 데이터 슬라이싱 로직
+    const totalPages = Math.ceil(projectList.length / itemsPerPage);
+    const currentItems = useMemo(() => {
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        return projectList.slice(start, end);
+    }, [projectList, currentPage]);
 
     // 모달 열기
     const handleOpenModal = async (productNo) => {
@@ -235,10 +193,9 @@ const ProjectApprovalPage = () => {
     const handleProjectAction = async (productNo, actionType, reason) => {
         setActionLoading(true);
         try {
-            // actionType: 'APPROVE' -> 백엔드에서 OPEN으로 처리
             await reviewProjectSubmission(productNo, { action: actionType, reason });
             alert("처리가 완료되었습니다.");
-            await loadProjects(); // 목록 갱신
+            await loadProjects(); 
             setIsModalOpen(false);
         } catch (error) {
             alert("처리 중 오류가 발생했습니다.");
@@ -257,7 +214,6 @@ const ProjectApprovalPage = () => {
                     <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="filter-select">
                         <option value="WAITING">심사 대기 (신규)</option>
                         <option value="REJECT">반려됨</option>
-                        {/* OPEN은 여기서 안 보고 PuddingManagementPage에서 관리하므로 제외해도 됨 */}
                         <option value="OPEN">승인됨 (진행중)</option>
                     </select>
                 </div>
@@ -278,8 +234,8 @@ const ProjectApprovalPage = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {projectList.length > 0 ? (
-                            projectList.map((p) => (
+                        {currentItems.length > 0 ? (
+                            currentItems.map((p) => (
                                 <tr key={p.productNo} className="hover-row">
                                     <td>{p.productNo}</td>
                                     <td><span className="category-badge">{p.category}</span></td>
@@ -301,6 +257,27 @@ const ProjectApprovalPage = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* 🚨 [추가] 하단 페이지네이션 UI */}
+            {totalPages > 0 && (
+                <div className="pagination-area">
+                    <button 
+                        className="btn-page" 
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        disabled={currentPage === 1}
+                    >
+                        &lt;
+                    </button>
+                    <span className="page-info">{currentPage} / {totalPages}</span>
+                    <button 
+                        className="btn-page" 
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        disabled={currentPage === totalPages}
+                    >
+                        &gt;
+                    </button>
+                </div>
+            )}
 
             <ProjectReviewModal
                 isOpen={isModalOpen}

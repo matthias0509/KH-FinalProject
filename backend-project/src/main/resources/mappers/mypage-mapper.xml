@@ -109,6 +109,7 @@
         JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
         JOIN TB_USER U ON S.USER_NO = U.USER_NO
         WHERE O.USER_NO = #{userNo}
+          AND O.ORDER_STATUS = 'PAY'
         ORDER BY O.ORDER_DATE DESC
     </select>
     
@@ -145,9 +146,6 @@
             opt.OPTION_NAME AS "rewardName",
             opt.OPTION_PRICE AS "rewardPrice",
             od.QUANTITY AS "quantity",
-            
-            -- TB_OPTION 테이블에 DELIVERY_FEE 컬럼이 없다면 3000으로 고정하거나 컬럼 추가 필요
-            -- 현재 스키마에는 없으므로 임시로 3000원 고정 (추후 수정)
             3000 AS "shippingFee"
             
         FROM ORDERS o
@@ -166,7 +164,7 @@
         SET ORDER_STATUS = 'CANCEL'
         WHERE ORDER_NO = #{orderNo}
           AND USER_NO = #{userNo}
-          AND ORDER_STATUS = 'PAY' -- 결제 완료 상태일 때만 취소 가능
+          AND ORDER_STATUS = 'PAY'
     </update>
 
     <update id="updateProductAmountDecrease">
@@ -180,9 +178,10 @@
             JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO
             JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO
             WHERE O.ORDER_NO = #{orderNo}
-            AND ROWNUM = 1 -- 혹시 모를 중복 방지
+            AND ROWNUM = 1
         )
     </update>
+
     <select id="selectCanceledFundingHistory" resultType="com.kh.foodding.mypage.model.vo.FundingHistory">
         SELECT 
             O.ORDER_NO AS orderNo,
@@ -201,7 +200,7 @@
         JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
         JOIN TB_USER U ON S.USER_NO = U.USER_NO
         WHERE O.USER_NO = #{userNo}
-          AND O.ORDER_STATUS = 'CANCEL'  -- 🚨 취소된 건만 조회
+          AND O.ORDER_STATUS = 'CANCEL'
         ORDER BY O.ORDER_DATE DESC
     </select>
 </mapper>
