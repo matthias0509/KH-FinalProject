@@ -11,5 +11,6 @@ public class FundingHistory {
     private int totalAmount;        // 결제 금액 (TB_ORDER)
     private String fundingStatus;   // 상태 (결제완료/펀딩성공 등)
     private String projectThumb;    // 썸네일 이미지 (TB_PRODUCT)
+    private String originThumbnail; // ORIGIN_THUMBNAIL
     private int productNo;          // 상품 번호 (상세페이지 이동용)
 }

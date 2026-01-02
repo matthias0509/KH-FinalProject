@@ -5,6 +5,7 @@ import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
 import Sidebar from '../../components/Sidebar';
 import '../../styles/MyPageLayout.css';
+import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
 const FundingDetailPage = () => {
     const { fundingNo } = useParams();
@@ -70,7 +71,10 @@ const FundingDetailPage = () => {
                         
                         <div className="project-detail-row">
                             <img 
-                                src={detail.projectThumb ? (detail.projectThumb.startsWith('http') ? detail.projectThumb : `http://localhost:8001/foodding${detail.projectThumb}`) : "https://via.placeholder.com/140"} 
+                                src={resolveProjectImageUrl(
+                                  detail.projectThumb || detail.originThumbnail,
+                                  'https://via.placeholder.com/140',
+                                )}
                                 alt="썸네일" 
                                 className="project-thumb-lg" 
                             />

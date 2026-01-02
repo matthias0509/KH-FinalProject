@@ -80,6 +80,7 @@
             P.PRODUCT_NO AS productNo,
             P.PRODUCT_TITLE AS productTitle,
             P.MODIFY_THUMBNAIL AS thumbnail,
+            P.ORIGIN_THUMBNAIL AS originThumbnail,
             U.NICKNAME AS sellerName,
             TRUNC((P.CURRENT_AMOUNT / NULLIF(P.TARGET_AMOUNT, 0)) * 100) AS fundingPercent
         FROM TB_LIKE L
@@ -99,6 +100,7 @@
             O.ORDER_AMOUNT AS totalAmount,
             O.ORDER_STATUS AS fundingStatus,
             P.MODIFY_THUMBNAIL AS projectThumb,
+            P.ORIGIN_THUMBNAIL AS originThumbnail,
             P.PRODUCT_NO AS productNo
         FROM ORDERS O
         JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO
@@ -135,7 +137,8 @@
             
             p.PRODUCT_NO AS "productNo",
             p.PRODUCT_TITLE AS "projectTitle",
-            p.ORIGIN_THUMBNAIL AS "projectThumb",
+            p.MODIFY_THUMBNAIL AS "projectThumb",
+            p.ORIGIN_THUMBNAIL AS "originThumbnail",
             u.NICKNAME AS "makerName", 
             
             opt.OPTION_NO AS "optionNo",
@@ -189,6 +192,7 @@
             O.ORDER_AMOUNT AS totalAmount,
             O.ORDER_STATUS AS fundingStatus,
             P.MODIFY_THUMBNAIL AS projectThumb,
+            P.ORIGIN_THUMBNAIL AS originThumbnail,
             P.PRODUCT_NO AS productNo
         FROM ORDERS O
         JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO

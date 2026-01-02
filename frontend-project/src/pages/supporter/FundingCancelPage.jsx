@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import MyPageLayout from '../../components/MyPageLayout'; 
+import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
 // 스타일 파일
 import '../../styles/MyPageLayout.css';
 import '../../styles/Funding.css'; 
-
-const SERVER_URL = "http://localhost:8001/foodding";
 
 const FundingCancelPage = () => {
     const navigate = useNavigate();
@@ -30,7 +29,7 @@ const FundingCancelPage = () => {
 
             try {
                 // 🚨 실제 백엔드 API 호출
-                const response = await axios.get(`${SERVER_URL}/api/mypage/funding/cancel`, {
+                const response = await axios.get(`http://localhost:8001/foodding/api/mypage/funding/cancel`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -46,9 +45,10 @@ const FundingCancelPage = () => {
                     status: '취소완료',
                     reason: '사용자 요청 취소', // 취소 사유 컬럼이 없다면 고정값 사용
                     // 썸네일 경로 처리
-                    img: item.projectThumb 
-                        ? (item.projectThumb.startsWith('http') ? item.projectThumb : `${SERVER_URL}${item.projectThumb}`)
-                        : 'https://via.placeholder.com/150',
+                    img: resolveProjectImageUrl(
+                        item.projectThumb || item.originThumbnail,
+                        'https://via.placeholder.com/150',
+                    ),
                     productNo: item.productNo
                 }));
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { resolveProjectImageUrl } from '../../utils/projectMedia';
 import MyPageLayout from '../../components/MyPageLayout';
 import '../../styles/MyPageLayout.css';
 import '../../styles/Funding.css';
@@ -37,9 +38,10 @@ const FundingHistoryPage = () => {
                 maker: item.makerName,
                 price: item.totalAmount,
                 status: item.fundingStatus, // 'PAY', 'CANCEL' 등
-                img: item.projectThumb 
-                    ? (item.projectThumb.startsWith('http') ? item.projectThumb : `http://localhost:8001/foodding${item.projectThumb}`)
-                    : 'https://via.placeholder.com/150',
+                img: resolveProjectImageUrl(
+                    item.projectThumb || item.originThumbnail,
+                    'https://via.placeholder.com/150',
+                ),
                 productNo: item.productNo
             }));
 
