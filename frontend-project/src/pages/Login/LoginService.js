@@ -42,23 +42,21 @@ export const isTokenExpired = (token) => {
 export const login = async (userId, userPwd) => {
     try {
         const response = await api.post("/login", { userId, userPwd });
-        const jwtToken = response.data;
+        const data = response.data;
 
-        if (jwtToken && jwtToken.length > 50) { 
-            // 토큰을 'loginUser'라는 키로 sessionStorage에 저장
-            sessionStorage.setItem("loginUser", jwtToken); 
-            return jwtToken; 
+        const token =
+            (typeof data === 'string' && data.length > 20 ? data : null) ||
+            (data && typeof data === 'object' ? data.token : null);
+        const user = data && typeof data === 'object' ? data.user : null;
+
+        if (token) {
+            sessionStorage.setItem("loginUser", token);
+            return { token, user };
         }
 
-        return null; // 응답은 왔지만 토큰이 없는 경우
+        return null;
     } catch (error) {
         throw error;
-
-        console.error("로그인 통신 실패!", error);
-        return null;
-
-        // 방법 2: 그냥 여기서 끝내고 null을 반환하고 싶다면 위 throw를 지우고 아래 주석 해제
-        // return null;
     }
 };
 
