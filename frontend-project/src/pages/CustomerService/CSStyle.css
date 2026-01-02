@@ -2,9 +2,9 @@
     max-width: 800px;
     margin: 50px auto;
     padding: 20px;
-    border: 1px solid var(--border, #e0e0e0); /* App.css 변수 활용 */
+    border: 1px solid var(--border, #e0e0e0);
     border-radius: 8px;
-    background-color: var(--surface, #ffffff); /* App.css 변수 활용 */
+    background-color: var(--surface, #ffffff);
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
@@ -13,7 +13,7 @@
     font-weight: bold;
     margin-bottom: 20px;
     padding-bottom: 10px;
-    border-bottom: 2px solid var(--text, #333); /* App.css 변수 활용 */
+    border-bottom: 2px solid var(--text, #333);
     text-align: center;
 }
 
@@ -30,7 +30,7 @@
     align-items: center;
     margin-bottom: 25px;
     padding: 10px;
-    background-color: var(--background-light, #f9f9f9); /* 배경색 지정 */
+    background-color: var(--background-light, #f9f9f9);
     border-radius: 4px;
 }
 
@@ -59,7 +59,7 @@
 
 .faq-answer {
     padding: 15px 10px 20px 10px;
-    background-color: #f0f4f7; /* 답변 배경색 (다소 진하게 구분) */
+    background-color: #f0f4f7;
     font-size: 15px;
     color: var(--text-muted, #555);
     line-height: 1.6;
@@ -84,7 +84,7 @@
 /* ---------------------------------- */
 .inquiry-button-group {
     display: flex;
-    gap: 10px; /* 버튼 간격 */
+    gap: 10px;
 }
 
 .inquiry-button {
@@ -92,13 +92,13 @@
     align-items: center;
     padding: 10px 15px;
     border: none;
-    border-radius: 8px; /* SubmitButton과 유사한 둥근 모양 */
+    border-radius: 8px;
     color: white;
     font-weight: 600;
     cursor: pointer;
     font-size: 15px;
     background-image: linear-gradient(to right, var(--accent, #f97316), var(--accent-strong, #ef4444));
-    box-shadow: 0 4px 6px rgba(249, 115, 22, 0.3); /* 주황색 그림자 추가 */
+    box-shadow: 0 4px 6px rgba(249, 115, 22, 0.3);
     transition: all 0.2s ease;
 }
 
@@ -107,7 +107,7 @@
 }
 
 .inquiry-button svg {
-    margin-right: 8px; /* 아이콘과 텍스트 간격 */
+    margin-right: 8px;
 }
 
 .notice-detail-container {
@@ -137,7 +137,7 @@
 }
 
 .detail-content {
-    min-height: 200px; /* 내용이 짧아도 최소 높이 유지 */
+    min-height: 200px;
     padding: 30px 0;
     line-height: 1.8;
     color: var(--text-dark, #333);
@@ -167,7 +167,7 @@
 
 .cancel-button {
     padding: 10px 30px;
-    background-color: var(--text-muted, #6c757d); /* 회색 계열 버튼 */
+    background-color: var(--text-muted, #6c757d);
     color: white;
     border: none;
     border-radius: 5px;
@@ -185,10 +185,9 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding: 0 20px; /* 폼 내부 여백 */
+    padding: 0 20px;
 }
 
-/* 드롭다운/텍스트 영역 공통 라벨 스타일 */
 .select-label, .textarea-label {
     font-weight: 600;
     color: var(--text, #111827);
@@ -197,7 +196,6 @@
     display: block;
 }
 
-/* 드롭다운 (select) 스타일 */
 .select-field {
     border: 1px solid var(--border, #e5e7eb);
     border-radius: 8px;
@@ -205,11 +203,10 @@
     font-size: 14px;
     width: 100%;
     box-sizing: border-box;
-    appearance: none; /* OS 기본 스타일 제거 */
+    appearance: none;
     background-color: white;
 }
 
-/* 텍스트 영역 (textarea) 스타일 */
 .textarea-input {
     border: 1px solid var(--border, #e5e7eb);
     border-radius: 8px;
@@ -217,7 +214,7 @@
     font-size: 14px;
     width: 100%;
     box-sizing: border-box;
-    resize: vertical; /* 세로 크기 조절만 허용 */
+    resize: vertical;
 }
 
 /* ---------------------------------- */
@@ -258,20 +255,19 @@
 .detail-meta-date {
     font-size: 12px;
     color: #999;
-    margin-left: auto; /* 날짜를 우측 끝으로 밀어냄 */
+    margin-left: auto;
 }
 
-/* 💡 실제 텍스트 영역: 줄바꿈 및 정렬 핵심 */
 .content-box {
     font-size: 15px;
     line-height: 1.7;
     color: #555;
-    white-space: pre-wrap; /* 💡 DB의 엔터(\n)를 화면에 반영 */
-    word-break: break-all; /* 긴 영문/숫자 줄바꿈 방지 */
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 .answer .section-title h3 {
-    color: #f97316; /* 답변 제목은 주황색 포인트 */
+    color: #f97316;
 }
 
 .wait-msg {
@@ -280,43 +276,74 @@
     margin: 0;
 }
 
-.detail-meta-date
-
 /* ---------------------------------- */
 /* 테두리 짤림 및 테이블 선 보정 */
 /* ---------------------------------- */
 
 .inquiry-table {
     width: 100%;
-    border-collapse: collapse; /* 💡 셀 사이 간격 제거 */
+    border-collapse: collapse;
     table-layout: fixed;
+}
+
+.inquiry-table thead {
+    border-bottom: 2px solid #f97316;
+}
+
+.inquiry-table thead th {
+    padding: 15px 10px;
+    text-align: center;
+    font-weight: 600;
+    border-bottom: 2px solid #f97316;
+    border-left: none;
+    border-right: none;
 }
 
 .inquiry-row td {
     padding: 15px 10px;
     border-bottom: 1px solid #eee;
+    border-left: none;
+    border-right: none;
+    border-top: none;
     background-color: #fff;
 }
 
-/* 상세 내용이 펼쳐졌을 때의 행 스타일 */
-.inquiry-detail-row td {
-    padding: 0; /* 💡 외부 여백 삭제 */
-    background-color: #f9f9f9; /* 아주 연한 회색으로 배경을 채워 횡한 느낌 방지 */
-    border-bottom: 1px solid #eee !important;
+.inquiry-row:hover td {
+    background-color: #f9f9f9;
 }
 
-/* 💡 주황색 테두리가 잘린다면 상단 요소를 감싸는 박스에 아래 적용 */
+.inquiry-row td:focus {
+    outline: none;
+}
+
+.inquiry-table td,
+.inquiry-table th {
+    border-left: none !important;
+    border-right: none !important;
+}
+
+.inquiry-detail-row td {
+    padding: 0;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: none !important;
+}
+
 .notice-list-container {
-    border-top: 2px solid #f97316; /* 테이블 최상단 포인트 라인 */
+    border-top: 2px solid #f97316;
     overflow: hidden;
 }
-/* 상태 표시 스타일 (오렌지 색상 유지) */
+
+/* 상태 표시 스타일 */
 .status-pending {
-    color: var(--accent-strong, #ef4444); 
+    color: #f97316;
     font-weight: 600;
 }
+
 .status-complete {
-    color: var(--text-dark, #333); 
+    color: #333;
     font-weight: 600;
 }
 
@@ -325,38 +352,34 @@
 /* ---------------------------------- */
 
 .notice-write-form {
-    /* 1:1 문의 폼 스타일과 거의 동일 */
     display: flex;
     flex-direction: column;
     gap: 16px;
     padding: 0 20px;
 }
 
-/* 1. 테이블 행 디자인 수정 */
 .notice-table tbody tr.inquiry-row {
     cursor: pointer;
     transition: background-color 0.2s;
 }
 
-/* 2. 각 셀 하단에 보더를 주어 선이 이어지게 만듦 */
 .notice-table tbody tr.inquiry-row td {
     padding: 20px 10px;
-    border-bottom: 1px solid #eee; /* 💡 점선이 끊긴다면 이 부분을 추가 */
+    border-bottom: 1px solid #eee;
     vertical-align: middle;
 }
 
-/* 3. 상세 내용 행은 보더를 없애서 자연스럽게 연결 */
 .inquiry-detail-row td {
     border-bottom: 1px solid #eee !important;
-    background-color: #fafafa; /* 상세 영역 배경색 차별화 */
+    background-color: #fafafa;
 }
 
-/* 4. 마지막 줄 보더 정리 */
-.notice-table tbody tr:last-child td {
-    border-bottom: 2px solid #333; /* 테이블 하단 마감선 */
+.notice-table tbody tr:last-child td,
+.inquiry-table tbody tr:last-child td {
+    border-bottom: 2px solid #333 !important;
 }
 
-
-
-
-
+/* 마지막 행이 상세 행일 경우도 처리 */
+.inquiry-table tbody tr:last-of-type td {
+    border-bottom: 2px solid #333 !important;
+}
