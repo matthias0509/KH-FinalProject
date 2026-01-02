@@ -61,10 +61,10 @@ export const fetchImsiAxios = async (userNo) => {
     }
   };
 
-  export const uploadThumbnailAxios = async (file) => {
-    const url = `${commonUrl}thumbnail`;
-    const formData = new FormData();
-    formData.append('file', file);
+export const uploadThumbnailAxios = async (file) => {
+  const url = `${commonUrl}thumbnail`;
+  const formData = new FormData();
+  formData.append('file', file);
 
     try {
       const response = await axios({
@@ -75,10 +75,29 @@ export const fetchImsiAxios = async (userNo) => {
       });
       return response.data;
     } catch (error) {
-      console.error('썸네일 업로드 실패!', error);
-      throw error;
-    }
-  };
+    console.error('썸네일 업로드 실패!', error);
+    throw error;
+  }
+};
+
+export const uploadStoryImageAxios = async (file) => {
+  const url = `${commonUrl}story/image`;
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const response = await axios({
+      url,
+      method: 'post',
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('스토리 이미지 업로드 실패!', error);
+    throw error;
+  }
+};
 
   export const fetchDraftDetailAxios = async ({ userNo, tempNo }) => {
     const url = `${commonUrl}drafts/${tempNo}`;

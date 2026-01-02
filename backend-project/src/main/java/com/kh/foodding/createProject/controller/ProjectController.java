@@ -93,6 +93,21 @@ public class ProjectController {
         response.put("url", publicUrl);
         return response;
     }
+
+    // 스토리 이미지 저장 API
+    @PostMapping("story/image")
+    public Map<String, String> uploadStoryImage(@RequestPart("file") MultipartFile file) {
+
+        String relativePath = projectAssetStorageService.storeStoryImage(file);
+        String publicUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path(relativePath)
+                .toUriString();
+
+        Map<String, String> response = new HashMap<>();
+        response.put("path", relativePath);
+        response.put("url", publicUrl);
+        return response;
+    }
     
 
     // 임시저장 프로젝트 삭제
