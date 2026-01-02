@@ -79,10 +79,6 @@ const FundingCancelPage = () => {
         <MyPageLayout>
             <h2 className="page-title">후원 취소/환불 내역</h2>
 
-            <div className="funding-filter-container">
-                <button className="funding-filter-tab active">전체</button>
-            </div>
-
             <div className="funding-list-container">
                 {loading ? (
                     <div className="empty-state-box"><p>내역을 불러오는 중입니다...</p></div>

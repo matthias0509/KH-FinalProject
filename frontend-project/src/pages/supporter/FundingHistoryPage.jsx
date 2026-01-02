@@ -108,10 +108,6 @@ const FundingHistoryPage = () => {
         <MyPageLayout>
             <h2 className="page-title">후원 내역 조회</h2>
             
-            <div className="funding-filter-container">
-                <button className="funding-filter-tab active">전체</button>
-            </div>
-
             <div className="funding-list-container">
                 {loading ? (
                     <div className="empty-state-box"><p>로딩 중입니다...</p></div>
