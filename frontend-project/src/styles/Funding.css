@@ -46,10 +46,11 @@
     background: white;
     border: 1px solid #e5e7eb;
     border-radius: 12px;
-    padding: 20px;
-    gap: 20px;
+    padding: 16px;
+    gap: 16px;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    align-items: center;
+    align-items: stretch;
+    min-height: 120px;
 }
 
 .history-card:hover {
@@ -60,8 +61,8 @@
 
 /* 카드 이미지 */
 .history-thumb {
-    width: 120px;
-    height: 90px;
+    width: 96px;
+    height: 96px;
     border-radius: 8px;
     object-fit: cover;
     background-color: #f0f0f0;
@@ -73,15 +74,15 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    height: 90px;
+    gap: 8px;
+    min-height: 96px;
 }
 
 .history-meta {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 4px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .history-date {
@@ -126,8 +127,8 @@
     flex-direction: column;
     align-items: flex-end;
     justify-content: space-between;
-    height: 90px;
-    min-width: 100px;
+    min-width: 120px;
+    gap: 8px;
 }
 
 .history-price {
