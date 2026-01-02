@@ -25,15 +25,8 @@ export default function LoginPage() {
             toast.success(location.state.message);
             window.history.replaceState({}, document.title);
         }
+    }, [location]);
 
-        const params = new URLSearchParams(location.search);
-        if (params.get('expired') === 'true') {
-            toast.error("세션이 만료되어 로그아웃되었습니다. 다시 로그인해주세요.");
-            // URL 깨끗하게 정리 (파라미터 제거)
-            navigate('/login', { replace: true });
-        }
-    }, [location, navigate]);
-    // 💡 1. 컴포넌트가 마운트되거나 상태가 변경될 때 로그인 상태 확인
     useEffect(() => {
         if (currentUser) {
             navigate('/', { replace: true }); 

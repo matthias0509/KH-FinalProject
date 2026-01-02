@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kh.foodding.admin.model.dao.FaqDao">
+
+    <resultMap id="faqMap" type="com.kh.foodding.admin.model.vo.Faq">
+        <id property="faqNo" column="FAQ_NO"/>
+        <result property="question" column="FAQ_QUESTION"/>
+        <result property="answer" column="FAQ_ANSWER"/>
+        <result property="createDate" column="CREATE_DATE"/>
+    </resultMap>
+
+    <select id="selectFaqList" resultMap="faqMap">
+        SELECT FAQ_NO, FAQ_QUESTION, FAQ_ANSWER, TO_CHAR(CREATE_DATE, 'YYYY-MM-DD') AS CREATE_DATE
+        FROM TB_FAQ
+        ORDER BY FAQ_NO DESC
+    </select>
+
+    <insert id="insertFaq">
+        INSERT INTO TB_FAQ (FAQ_NO, FAQ_QUESTION, FAQ_ANSWER)
+        VALUES (SEQ_FAQ_NO.NEXTVAL, #{question}, #{answer})
+    </insert>
+
+    <update id="updateFaq">
+        UPDATE TB_FAQ
+        SET FAQ_QUESTION = #{question},
+            FAQ_ANSWER = #{answer}
+        WHERE FAQ_NO = #{faqNo}
+    </update>
+
+    <delete id="deleteFaq">
+        DELETE FROM TB_FAQ WHERE FAQ_NO = #{faqNo}
+    </delete>
+
+</mapper>
