@@ -46,7 +46,7 @@ function EmailVerificationForm({ email, onChange ,onVerified }) {
         }
     };
 
-    // 2. 인증번호 확인 (Spring Boot 컨트롤러로 검증 요청)
+    // 인증번호 확인
     const handleVerifyCode = async () => {
         if (authCode.length < 6) {
             toast.warning("인증번호 6자리를 입력해주세요.");
@@ -59,10 +59,9 @@ function EmailVerificationForm({ email, onChange ,onVerified }) {
                 code: authCode 
             });
 
-            // 백엔드에서 true 또는 "success"를 반환한다고 가정
             if (response.data === true || response.data === "success") {
                 setIsVerified(true);
-                onVerified(true); // 💡 부모(CreateMember)의 상태를 true로 변경
+                onVerified(true); //CreateMember의 상태를 true로 변경
                 toast.success("이메일 인증에 성공했습니다.");
             } else {
                 toast.error("인증번호가 일치하지 않거나 만료되었습니다.");

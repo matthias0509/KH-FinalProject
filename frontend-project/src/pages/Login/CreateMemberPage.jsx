@@ -73,7 +73,7 @@ function CreateMember() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // 1. 필수 입력값 및 중복 확인 체크리스트
+        // 필수 입력값 및 중복 확인 체크리스트
         if (!form.userId) {
             toast.warning("아이디를 입력해주세요.");
             return;
@@ -111,21 +111,20 @@ function CreateMember() {
             return;
         }
 
-        // 2. 모든 검사 통과 시 실제 데이터 전송 시작
+        // 검사 통과 시 실제 데이터 전송 시작
         setIsLoading(true);
 
-        // 💡 핵심: 새로운 FormData 생성
+        // 새로운 FormData 생성
         const formData = new FormData();
 
-        // 2. 텍스트 필드 전부 추가 (birthDate 포함)
+        // 텍스트 필드 전부 추가
         Object.keys(form).forEach(key => {
-            if (key !== 'confirmPassword') { // 확인용 필드 제외
+            if (key !== 'confirmPassword') {
                 formData.append(key, form[key]);
             }
         });
 
-        // 3. 파일 객체 추가 (가장 중요!)
-        // 여기서 'upfile'이라는 이름은 Java의 @RequestPart("upfile") 또는 매개변수 이름과 일치해야 합니다.
+        // 파일 객체 추가
         if (profileFile) {
             formData.append('upfile', profileFile); 
             console.log("파일 첨부됨:", profileFile.name);
@@ -136,7 +135,6 @@ function CreateMember() {
         try {
             const API_URL = "http://localhost:8001/foodding";
             
-            // 4. 전송 시 헤더 설정 (Axios는 FormData 전송 시 자동으로 설정해주지만 명시하면 더 안전함)
             await axios.post(`${API_URL}/member/insert`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -310,7 +308,7 @@ const handleNickBlur = async () => {
                         required
                     />
                     
-                    {/* 5. 닉네임 (NICKNAME) 💡 추가된 부분 */}
+                    {/* 5. 닉네임 (NICKNAME) */}
                     <div>
                         <InputField
                             label="닉네임"

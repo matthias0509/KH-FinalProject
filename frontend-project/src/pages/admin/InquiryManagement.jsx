@@ -8,17 +8,24 @@ export default function InquiryManagement() {
     const [selectedIq, setSelectedIq] = useState(null);
     const [answer, setAnswer] = useState('');
     const [loading, setLoading] = useState(false);
-
-    // 💡 필터 및 페이지네이션 상태
-    const [showOnlyPending, setShowOnlyPending] = useState(false); // 미답변 필터
+    const [showOnlyPending, setShowOnlyPending] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8; // 한 페이지에 8개
+    const itemsPerPage = 10;
 
     const token = sessionStorage.getItem("loginUser");
 
     useEffect(() => {
         fetchInquiries();
     }, []);
+
+    // 💡 모달이 열릴 때 배경 스크롤 방지
+    useEffect(() => {
+        if (selectedIq) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+    }, [selectedIq]);
 
     const fetchInquiries = async () => {
         setLoading(true);
@@ -34,12 +41,10 @@ export default function InquiryManagement() {
         }
     };
 
-    // 💡 필터링 로직
     const filteredInquiries = showOnlyPending 
         ? inquiries.filter(iq => !iq.answerContent) 
         : inquiries;
 
-    // 💡 페이지네이션 계산
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = filteredInquiries.slice(indexOfFirstItem, indexOfLastItem);
@@ -74,7 +79,6 @@ export default function InquiryManagement() {
                     <h2>💬 1:1 문의 답변 관리</h2>
                     <p>사용자 문의를 확인하고 답변을 등록하세요.</p>
                 </div>
-                {/* 💡 미답변 필터 버튼 */}
                 <button 
                     className={`filter-btn ${showOnlyPending ? 'active' : ''}`}
                     onClick={() => { setShowOnlyPending(!showOnlyPending); setCurrentPage(1); }}
@@ -83,87 +87,86 @@ export default function InquiryManagement() {
                 </button>
             </div>
 
-            <div className="inquiry-admin-layout">
-                <div className="inquiry-list-wrapper">
-                    <table className="inquiry-table">
-                        <thead>
-                            <tr>
-                                <th style={{ width: '60px' }}>번호</th>
-                                <th>문의 제목</th>
-                                <th style={{ width: '100px' }}>상태</th>
-                                <th style={{ width: '120px' }}>작성일</th>
+            <div className="inquiry-admin-full-layout">
+                <table className="inquiry-table">
+                    <thead>
+                        <tr>
+                            <th style={{ width: '60px' }}>번호</th>
+                            <th style={{ width: '120px' }}>작성자</th>
+                            <th>문의 제목</th>
+                            <th style={{ width: '100px' }}>상태</th>
+                            <th style={{ width: '150px' }}>작성일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentItems.map(iq => (
+                            <tr key={iq.qnaNo} onClick={() => handleSelect(iq)} className="admin-row-hover">
+                                <td className="text-center">{iq.qnaNo}</td>
+                                <td className="text-center">{iq.userName}</td> {/* 💡 이름 필드 */}
+                                <td className="text-left title-text">{iq.qnaTitle}</td>
+                                <td className="text-center">
+                                    <span className={`status-badge ${iq.answerContent ? 'done' : 'pending'}`}>
+                                        {iq.answerContent ? '완료' : '미답변'}
+                                    </span>
+                                </td>
+                                <td className="text-center">{iq.qnaDate}</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {currentItems.map(iq => (
-                                <tr key={iq.qnaNo} onClick={() => handleSelect(iq)} className={selectedIq?.qnaNo === iq.qnaNo ? 'selected-row' : ''}>
-                                    <td className="text-center">{iq.qnaNo}</td>
-                                    <td className="text-left title-text">{iq.qnaTitle}</td>
-                                    <td className="text-center">
-                                        <span className={`status-badge ${iq.answerContent ? 'done' : 'pending'}`}>
-                                            {iq.answerContent ? '완료' : '미답변'}
-                                        </span>
-                                    </td>
-                                    <td className="text-center">{iq.qnaDate}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                    
-                    {/* 💡 페이지네이션 UI */}
-                    <div className="admin-pagination">
-                        <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>이전</button>
-                        {[...Array(totalPages)].map((_, i) => (
-                            <button key={i} className={currentPage === i + 1 ? 'active' : ''} onClick={() => setCurrentPage(i + 1)}>
-                                {i + 1}
-                            </button>
                         ))}
-                        <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>다음</button>
-                    </div>
-                </div>
-
-                <div className="inquiry-detail-wrapper">
-                    {selectedIq ? (
-                        <div className="detail-panel">
-                            {/* 상세 패널 헤더 */}
-                            <div className="detail-panel-header">
-                                <h3>문의 상세 정보</h3>
-                            </div>
-
-                            <div className="qna-section">
-                                <div className="meta-info">
-                                    <span><strong>번호:</strong> {selectedIq.qnaNo}</span>
-                                    <span><strong>작성일:</strong> {selectedIq.qnaDate}</span>
-                                </div>
-                                <div className="qna-box">{selectedIq.qnaContent}</div>
-                            </div>
-
-                            <div className="qna-section">
-                                <h4>답변 작성/수정</h4>
-                                <textarea 
-                                    className="answer-textarea" 
-                                    value={answer} 
-                                    onChange={(e) => setAnswer(e.target.value)} 
-                                    placeholder="친절한 답변을 입력해 주세요."
-                                />
-                                <div className="qna-buttons">
-                                    {/* 💡 답변 내용(answerContent)이 있으면 '수정하기', 없으면 '저장하기' */}
-                                    <button className="btn-save" onClick={handleSubmit}>
-                                        {selectedIq.answerContent ? "수정하기" : "저장하기"}
-                                    </button>
-                                    <button className="btn-close-new" onClick={() => setSelectedIq(null)}>
-                                        닫기
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="empty-panel">
-                            <p>목록에서 문의를 선택하면 상세 내용이 표시됩니다.</p>
-                        </div>
-                    )}
+                    </tbody>
+                </table>
+                
+                <div className="admin-pagination">
+                    <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)}>이전</button>
+                    {[...Array(totalPages)].map((_, i) => (
+                        <button key={i} className={currentPage === i + 1 ? 'active' : ''} onClick={() => setCurrentPage(i + 1)}>
+                            {i + 1}
+                        </button>
+                    ))}
+                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)}>다음</button>
                 </div>
             </div>
+
+            {/* 💡 답변 모달창 구현 */}
+            {selectedIq && (
+                <div className="inquiry-modal-overlay" onClick={() => setSelectedIq(null)}>
+                    <div className="inquiry-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>문의 상세 및 답변 등록</h3>
+                            <button className="close-x" onClick={() => setSelectedIq(null)}>&times;</button>
+                        </div>
+                        
+                        <div className="modal-body">
+                            <div className="qna-info-grid">
+                                <div><strong>작성자:</strong> {selectedIq.userName}</div>
+                                <div><strong>작성일:</strong> {selectedIq.qnaDate}</div>
+                                <div className="full-width"><strong>제목:</strong> {selectedIq.qnaTitle}</div>
+                            </div>
+                            
+                            <div className="qna-section">
+                                <label>문의 내용</label>
+                                <div className="qna-box-content">{selectedIq.qnaContent}</div>
+                            </div>
+
+                            <div className="qna-section">
+                                <label>관리자 답변</label>
+                                <textarea 
+                                    className="answer-textarea-modal" 
+                                    value={answer} 
+                                    onChange={(e) => setAnswer(e.target.value)} 
+                                    placeholder="답변 내용을 입력해 주세요."
+                                />
+                            </div>
+                        </div>
+
+                        <div className="modal-footer">
+                            <button className="btn-save-modal" onClick={handleSubmit}>
+                                {selectedIq.answerContent ? "답변 수정" : "답변 등록"}
+                            </button>
+                            <button className="btn-cancel-modal" onClick={() => setSelectedIq(null)}>닫기</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

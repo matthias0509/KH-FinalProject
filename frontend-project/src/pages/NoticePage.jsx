@@ -28,11 +28,17 @@ export default function NoticeListPage() {
     const limit = 7; 
     const pageBlock = 5; 
 
-    // 💡 2. 목록 불러오기 함수 (기존 로직 유지)
+    // 검색 실행 함수
+    const handleSearch = () => {
+        setCurrentPage(1); // 검색 시 1페이지로 이동
+        fetchNotices(1); // 변경된 검색어와 1페이지 정보를 서버에 요청
+    };
+    // 데이터 요청
     const fetchNotices = async (page) => {
         setLoading(true);
         try {
             const response = await axios.get("http://localhost:8001/foodding/notice/list", {
+                // 서버에 현재 페이지와 검색어를 전달하여 필터링된 결과를 가져옴
                 params: { page: page, keyword: search }
             });
             setNotices(response.data.list || []);
@@ -49,15 +55,12 @@ export default function NoticeListPage() {
         fetchNotices(currentPage);
     }, [currentPage]);
 
-    // 💡 3. 상세 페이지 이동 전 조회수 증가 처리 (onClick 함수)
+    // 클릭 핸들러
     const handleNoticeClick = async (id) => {
             navigate(`/notice/${id}`);
     };
 
-    const handleSearch = () => {
-        setCurrentPage(1);
-        fetchNotices(1);
-    };
+    
 
     const resetSearch = () => {
         setSearch("");

@@ -34,4 +34,5 @@ public class Notice {
     
     @Schema(description="공지사항 삭제 여부 (Y/N)", example="N")
     private String noticeYn;
+    
 }

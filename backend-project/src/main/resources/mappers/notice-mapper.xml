@@ -18,6 +18,8 @@
 	    <result column="QNA_DATE" property="qnaDate"/>
 	    <result column="ANSWER_CONTENT" property="answerContent"/>
 	    <result column="ANSWER_DATE" property="answerDate"/>
+	    <result column="USER_ID" property="userId" />
+    	<result column="USER_NAME" property="userName" />
 	</resultMap>
 
     <select id="selectNoticeList" parameterType="map" resultMap="noticeResultSet">
@@ -130,7 +132,8 @@
 	        QNA_DATE,
 	        ANSWER_CONTENT,
 	        ANSWER_DATE,
-	        M.USER_ID
+	        M.USER_ID,
+	        M.USER_NAME
 	    FROM QNA Q
 	    JOIN TB_USER M ON (Q.USER_NO = M.USER_NO)
 	    ORDER BY CASE WHEN ANSWER_CONTENT IS NULL THEN 0 ELSE 1 END, QNA_DATE DESC
