@@ -7,13 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.foodding.mypage.model.service.MyPageService;
@@ -24,61 +18,48 @@ import com.kh.foodding.mypage.model.vo.MyPage;
 
 @RestController
 @RequestMapping("/api/mypage")
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class MyPageController {
 
     @Autowired
     private MyPageService mypageService;
 
     /**
-     * 1. 마이페이지 메인 정보 (회원정보 + 통계)
-     * 기존 getInfo를 업그레이드하여 '통계(좋아요 수 등)'까지 포함해서 반환합니다.
+     * 1. 마이페이지 메인 정보
      */
     @GetMapping("/info")
     public ResponseEntity<?> getInfo(Principal principal) {
-        
-        // 1. 인증 체크
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "로그인이 필요합니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
         }
         
         String userId = principal.getName();
-        
-        // 2. 서비스 호출 (회원정보 + 통계 Map 반환)
         Map<String, Object> info = mypageService.getMyPageInfo(userId);
         
-        // 3. 응답 반환
         return (info != null)
             ? ResponseEntity.ok(info)
-            : ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("message", "사용자를 찾을 수 없습니다."));
+            : ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자를 찾을 수 없습니다."));
     }
 
     /**
-     * ✅ [추가] 좋아요한 프로젝트 목록 조회
+     * 2. 좋아요한 프로젝트 목록 조회
      */
     @GetMapping("/like")
     public ResponseEntity<?> getLikedProjects(Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "로그인이 필요합니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
         }
 
         String userId = principal.getName();
-        
-        // 서비스 호출 -> 좋아요 목록(List<LikedProject>) 반환
         List<LikedProject> list = mypageService.getLikedProjects(userId);
         
         return ResponseEntity.ok(list);
     }
 
-    // 2. 기본 정보 업데이트 (닉네임 등)
+    // 3. 기본 정보 업데이트
     @PostMapping("/base/updateInfo")
     public ResponseEntity<?> updateInfo(@RequestBody MyPage dto, Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "로그인이 필요합니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
         }
         
         String userId = principal.getName();
@@ -89,12 +70,11 @@ public class MyPageController {
             : ResponseEntity.internalServerError().body(Map.of("message", "변경 실패"));
     }
 
-    // 3. 계정 정보 업데이트 (비밀번호, 이메일, 주소 통합)
+    // 4. 계정 정보 업데이트
     @PostMapping("/account/update")
     public ResponseEntity<?> updateAccountInfo(@RequestBody MyPage dto, Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "로그인이 필요합니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
         }
         
         String userId = principal.getName();
@@ -107,12 +87,11 @@ public class MyPageController {
             : ResponseEntity.internalServerError().body(Map.of("message", "계정 정보 수정 실패"));
     }
 
-    // 4. 비밀번호 확인 (계정 정보 탭 진입 전 인증용)
+    // 5. 비밀번호 확인
     @PostMapping("/account/verifyPassword")
     public ResponseEntity<?> verifyPassword(@RequestBody Map<String, String> payload, Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "로그인이 필요합니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
         }
         
         String userId = principal.getName();
@@ -123,12 +102,11 @@ public class MyPageController {
         return ResponseEntity.ok(Map.of("success", isValid));
     }
 
-    // --- 프로필 이미지 관련 로직 ---
+    // --- 프로필 이미지 관련 ---
     @PostMapping("/base/updateProfileImage")
     public ResponseEntity<?> updateProfileImage(@RequestPart("profileFile") MultipartFile file, Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "로그인이 필요합니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
         }
         
         String userId = principal.getName();
@@ -141,8 +119,7 @@ public class MyPageController {
     @PostMapping("/base/deleteProfileImage")
     public ResponseEntity<?> deleteProfileImage(Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "로그인이 필요합니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
         }
         
         String userId = principal.getName();
@@ -151,7 +128,7 @@ public class MyPageController {
             : ResponseEntity.internalServerError().body(Map.of("message", "삭제 실패"));
     }
     
- // 3. 내 후원 내역 조회
+    // 6. 내 후원 내역 조회 (전체)
     @GetMapping("/funding/history")
     public ResponseEntity<?> getFundingHistory(Principal principal) {
         if (principal == null) {
@@ -163,13 +140,26 @@ public class MyPageController {
         
         return ResponseEntity.ok(list);
     }
+
+    // 7. 🚨 [추가됨] 내 후원 취소 내역 조회 (GET)
+    // 이 부분이 없어서 404 에러가 났던 것입니다.
+    @GetMapping("/funding/cancel")
+    public ResponseEntity<?> getCanceledFundingHistory(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인 필요"));
+        }
+        
+        String userId = principal.getName();
+        List<FundingHistory> list = mypageService.getCanceledFundingHistory(userId);
+        
+        return ResponseEntity.ok(list);
+    }
     
-    // 4. 팔로우 목록 조회
+    // 8. 팔로우 목록 조회
     @GetMapping("/follow")
     public ResponseEntity<?> getFollowList(Principal principal) {
         if (principal == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("message", "로그인이 필요합니다."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
         }
 
         String userId = principal.getName();
@@ -178,5 +168,50 @@ public class MyPageController {
         return ResponseEntity.ok(list);
     }
     
+    // 9. 후원 내역 상세 조회
+    @GetMapping("/funding/{fundingNo}")
+    public ResponseEntity<?> getFundingDetail(
+            @PathVariable("fundingNo") String fundingNo, 
+            Principal principal
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
 
+        String userId = principal.getName();
+        
+        MyPage member = mypageService.selectMemberInfo(userId);
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("회원 정보를 찾을 수 없습니다.");
+        }
+        int userNo = member.getUserNo();
+        
+        Map<String, Object> detail = mypageService.selectFundingDetail(fundingNo, userNo);
+
+        if (detail == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 후원 내역을 찾을 수 없습니다.");
+        }
+
+        return ResponseEntity.ok(detail);
+    }
+    
+    // 10. 후원 취소 요청 (POST)
+    @PostMapping("/funding/cancel")
+    public ResponseEntity<?> cancelFunding(@RequestBody Map<String, String> request, Principal principal) {
+        if (principal == null) return ResponseEntity.status(401).build();
+
+        String userId = principal.getName();
+        int userNo = mypageService.selectMemberInfo(userId).getUserNo(); 
+        String orderNo = request.get("orderNo");
+
+        int result = mypageService.cancelFunding(orderNo, userNo); 
+
+        if (result > 0) {
+            return ResponseEntity.ok("후원이 성공적으로 취소되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("취소할 수 없는 상태이거나 주문을 찾을 수 없습니다.");
+        }
+    }
+    
+    
 }

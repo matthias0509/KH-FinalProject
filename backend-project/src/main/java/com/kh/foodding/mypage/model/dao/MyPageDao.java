@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 import com.kh.foodding.mypage.model.vo.FollowedSeller;
 import com.kh.foodding.mypage.model.vo.FundingHistory;
-import com.kh.foodding.mypage.model.vo.LikedProject; // ✅ VO 임포트 필수!
+import com.kh.foodding.mypage.model.vo.LikedProject;
 import com.kh.foodding.mypage.model.vo.MyPage;
 
 @Mapper
@@ -38,19 +38,31 @@ public interface MyPageDao {
     // 8. 회원 탈퇴 (데이터 삭제)
     int deleteMember(String userId); 
     
-    // 닉네임 업데이트 (Service에서 사용하는 경우 유지)
+    // 닉네임 업데이트
     int updateNickname(@Param("userId") String userId, @Param("nickname") String nickname);
     
-    // ✅ 9. 통계 정보 가져오기 (좋아요 수, 팔로잉 수 등)
+    // 9. 통계 정보 가져오기
     Map<String, Object> selectMyPageStats(int userNo);
 
-    // ✅ 10. 좋아요한 프로젝트 리스트 가져오기
-    // (수정됨: LikedProjectDao -> LikedProject)
+    // 10. 좋아요한 프로젝트 리스트 가져오기
     List<LikedProject> selectLikedProjects(int userNo);
     
- // ✅ 11. 내 후원 내역 리스트 조회
+    // 11. 내 후원 내역 리스트 조회 (전체)
     List<FundingHistory> selectFundingHistory(int userNo);
     
- // ✅ 12. 팔로우 목록 조회
+    // 12. 팔로우 목록 조회
     List<FollowedSeller> selectFollowList(int userNo);
+    
+    // 후원 상세 조회
+    Map<String, Object> selectFundingDetail(Map<String, Object> params);
+  
+    // 후원 취소 (상태 변경)
+    int updateOrderStatusToCancel(@Param("orderNo") String orderNo, @Param("userNo") int userNo);
+
+    // 후원 취소 (금액 차감)
+    int updateProductAmountDecrease(String orderNo);
+
+    // 🚨 [추가됨] 13. 취소/환불된 후원 내역 조회
+    List<FundingHistory> selectCanceledFundingHistory(int userNo);
+
 }

@@ -36,8 +36,7 @@ import LikeProjectPage from './pages/supporter/LikeProjectPage'
 import FollowProjectPage from './pages/supporter/FollowProjectPage'
 import ProfileEditPage from './pages/supporter/ProfileEditPage'
 import QnAPage from './pages/supporter/QnAPage'
-import ProjectApprovalPage from './pages/admin/ProjectApprovalPage';
-
+import ProjectApprovalPage from './pages/admin/ProjectApprovalPage'; // 관리자 페이지
 
 // 강호형
 import ChatComponent from './pages/chat/ChatComponent';
@@ -62,14 +61,12 @@ export default function App() {
 
   // 2. 앱 실행 시(새로고침 시) 로컬 스토리지에서 사용자 정보 복구
   useEffect(() => {
-    // 로그인 페이지에서 저장한 키값('user')을 확인하세요.
     const storedUser = localStorage.getItem('user'); 
     
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
         setUserInfo(parsedUser); // 상태 업데이트
-        console.log("✅ 로그인 정보 복구 완료:", parsedUser);
       } catch (e) {
         console.error("사용자 정보 파싱 오류", e);
         localStorage.removeItem('user'); // 깨진 데이터 삭제
@@ -113,15 +110,17 @@ export default function App() {
       {/* ======================================================= */}
       {/* ★ [박주현] 마이페이지 (서포터) */}
       {/* ======================================================= */}
+      {/* userInfo를 props로 넘겨주면, 각 페이지에서 Sidebar 등에 활용할 수 있습니다 */}
       <Route path="/mypage" element={<MyPage userInfo={userInfo} />} />
       
-      <Route path="/mypage/profile" element={<ProfileEditPage />} />
-      <Route path="/mypage/history" element={<FundingHistoryPage />} />
-      <Route path="/mypage/cancel" element={<FundingCancelPage />} />
-      <Route path="/mypage/detail" element={<FundingDetailPage />} />
-      <Route path="/mypage/like" element={<LikeProjectPage />} />
-      <Route path="/mypage/follow" element={<FollowProjectPage />} />
-      <Route path="/mypage/qna" element={<QnAPage />} />
+      <Route path="/mypage/profile" element={<ProfileEditPage userInfo={userInfo} />} />
+      <Route path="/mypage/history" element={<FundingHistoryPage userInfo={userInfo} />} />
+      <Route path="/mypage/cancel" element={<FundingCancelPage userInfo={userInfo} />} />
+      <Route path="/mypage/history/:fundingNo" element={<FundingDetailPage userInfo={userInfo} />} />
+      <Route path="/mypage/like" element={<LikeProjectPage userInfo={userInfo} />} />
+      <Route path="/mypage/follow" element={<FollowProjectPage userInfo={userInfo} />} />
+      <Route path="/mypage/qna" element={<QnAPage userInfo={userInfo} />} />
+      <Route path="/mypage/chat" element={<ChatListPage userInfo={userInfo} isMaker={false}/>} />
 
 
       {/* ======================================================= */}
@@ -131,6 +130,7 @@ export default function App() {
       <Route path="/maker/chat-history" element={<ChatHistoryPage userInfo={userInfo}/>} />
       <Route path="/maker/project" element={<ProjectPage userInfo={userInfo}/>} />
       <Route path="/maker/settlement" element={<SettlementPage userInfo={userInfo}/>} />
+      <Route path="/maker/chat" element={<ChatListPage userInfo={userInfo} isMaker={true}/>} />
 
 
       {/* 관리자 전용 */}
@@ -148,7 +148,7 @@ export default function App() {
 
       {/* 채팅 관련 */}
       <Route path="/chat" element={<ChatComponent />} />
-      <Route path="/mypage/chat" element={<ChatListPage />} />
+    
       
     </Routes>
   );

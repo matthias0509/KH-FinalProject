@@ -5,7 +5,7 @@
 
    <select id="selectMemberById" resultType="com.kh.foodding.mypage.model.vo.MyPage">
         SELECT 
-        	USER_NO as userNo,
+            USER_NO as userNo,
             USER_ID as userId,
             USER_NAME as userName,      
             NICKNAME as nickname,
@@ -70,7 +70,7 @@
     <select id="selectMyPageStats" resultType="map">
         SELECT 
             (SELECT COUNT(*) FROM TB_LIKE WHERE USER_NO = #{userNo}) AS "likedCount",
-            (SELECT COUNT(*) FROM FOLLOW WHERE FOLLOWING = #{userNo}) AS "followingCount",
+            (SELECT COUNT(*) FROM "FOLLOW" WHERE "FOLLOWING" = #{userNo}) AS "followingCount",
             (SELECT COUNT(*) FROM ORDERS WHERE USER_NO = #{userNo}) AS "fundingCount"
         FROM DUAL
     </select>
@@ -101,13 +101,9 @@
             P.MODIFY_THUMBNAIL AS projectThumb,
             P.PRODUCT_NO AS productNo
         FROM ORDERS O
-        -- 1. 주문(O)과 상세주문(OD) 연결 (중간 다리 역할)
         JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO
-        -- 2. 상세주문(OD)과 옵션(OPT) 연결
-        JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO
-        -- 3. 옵션(OPT)과 상품(P) 연결
+        JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO 
         JOIN PRODUCT P ON OPT.PRODUCT_NO = P.PRODUCT_NO
-        -- 4. 상품(P)과 판매자(S), 유저(U) 연결
         JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
         JOIN TB_USER U ON S.USER_NO = U.USER_NO
         WHERE O.USER_NO = #{userNo}
@@ -120,12 +116,88 @@
             U.NICKNAME AS sellerName,
             NVL(S.INTRODUCTION, '소개글이 없습니다.') AS sellerBio,
             U.MODIFY_PROFILE AS sellerImage
-        FROM FOLLOW F
+        FROM "FOLLOW" F
         JOIN SELLER_PROFILE S ON F.SELLER_NO = S.SELLER_NO
         JOIN TB_USER U ON S.USER_NO = U.USER_NO
-        WHERE F.FOLLOWING = #{userNo}
-        
+        WHERE F."FOLLOWING" = #{userNo}
         ORDER BY F.SELLER_NO DESC
     </select>
     
+    <select id="selectFundingDetail" resultType="map">
+        SELECT 
+            o.ORDER_NO AS "orderNo",
+            TO_CHAR(o.ORDER_DATE, 'YYYY-MM-DD HH24:MI:SS') AS "orderDate",
+            o.ORDER_STATUS AS "orderStatus",
+            o.DELIVERY_STATUS AS "deliveryStatus",
+            o.ORDER_AMOUNT AS "totalAmount",
+            o.POSTCODE AS "postcode",
+            o.ADDRESS AS "address",
+            
+            p.PRODUCT_NO AS "productNo",
+            p.PRODUCT_TITLE AS "projectTitle",
+            p.ORIGIN_THUMBNAIL AS "projectThumb",
+            u.NICKNAME AS "makerName", 
+            
+            opt.OPTION_NO AS "optionNo",
+            opt.OPTION_NAME AS "rewardName",
+            opt.OPTION_PRICE AS "rewardPrice",
+            od.QUANTITY AS "quantity",
+            
+            -- TB_OPTION 테이블에 DELIVERY_FEE 컬럼이 없다면 3000으로 고정하거나 컬럼 추가 필요
+            -- 현재 스키마에는 없으므로 임시로 3000원 고정 (추후 수정)
+            3000 AS "shippingFee"
+            
+        FROM ORDERS o
+        JOIN ORDER_DETAIL od ON o.ORDER_NO = od.ORDER_NO
+        JOIN TB_OPTION opt ON od.OPTION_NO = opt.OPTION_NO
+        JOIN PRODUCT p ON opt.PRODUCT_NO = p.PRODUCT_NO
+        JOIN SELLER_PROFILE s ON p.SELLER_NO = s.SELLER_NO
+        JOIN TB_USER u ON s.USER_NO = u.USER_NO
+        
+        WHERE o.ORDER_NO = #{orderNo}
+          AND o.USER_NO = #{userNo} 
+    </select>
+    
+    <update id="updateOrderStatusToCancel">
+        UPDATE ORDERS
+        SET ORDER_STATUS = 'CANCEL'
+        WHERE ORDER_NO = #{orderNo}
+          AND USER_NO = #{userNo}
+          AND ORDER_STATUS = 'PAY' -- 결제 완료 상태일 때만 취소 가능
+    </update>
+
+    <update id="updateProductAmountDecrease">
+        UPDATE PRODUCT P
+        SET P.CURRENT_AMOUNT = P.CURRENT_AMOUNT - (
+            SELECT ORDER_AMOUNT FROM ORDERS WHERE ORDER_NO = #{orderNo}
+        )
+        WHERE P.PRODUCT_NO = (
+            SELECT OPT.PRODUCT_NO
+            FROM ORDERS O
+            JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO
+            JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO
+            WHERE O.ORDER_NO = #{orderNo}
+            AND ROWNUM = 1 -- 혹시 모를 중복 방지
+        )
+    </update>
+    <select id="selectCanceledFundingHistory" resultType="com.kh.foodding.mypage.model.vo.FundingHistory">
+        SELECT 
+            O.ORDER_NO AS orderNo,
+            TO_CHAR(O.ORDER_DATE, 'YYYY.MM.DD') AS fundingDate,
+            P.PRODUCT_TITLE AS projectTitle,
+            U.NICKNAME AS makerName,
+            O.ORDER_AMOUNT AS totalAmount,
+            O.ORDER_STATUS AS fundingStatus,
+            P.MODIFY_THUMBNAIL AS projectThumb,
+            P.PRODUCT_NO AS productNo
+        FROM ORDERS O
+        JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO
+        JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO
+        JOIN PRODUCT P ON OPT.PRODUCT_NO = P.PRODUCT_NO
+        JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
+        JOIN TB_USER U ON S.USER_NO = U.USER_NO
+        WHERE O.USER_NO = #{userNo}
+          AND O.ORDER_STATUS = 'CANCEL'  -- 🚨 취소된 건만 조회
+        ORDER BY O.ORDER_DATE DESC
+    </select>
 </mapper>

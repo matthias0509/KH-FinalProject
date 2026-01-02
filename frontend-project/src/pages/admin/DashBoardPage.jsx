@@ -27,8 +27,9 @@ const DashboardTab = () => {
             setLoading(true); // 로딩 시작
             
             // API 호출 (주소 확인 필요!)
-            const response = await axios.get('http://localhost:8080/admin/dashboard/stats', {
+            const response = await axios.get('http://localhost:8001/foodding/admin/dashboard/stats', {
                 params: { period: filterPeriod }
+                
             });
 
             console.log("서버 응답 데이터:", response.data); // F12 콘솔에서 데이터 확인용

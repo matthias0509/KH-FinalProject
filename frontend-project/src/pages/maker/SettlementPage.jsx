@@ -1,135 +1,163 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
 import Sidebar from '../../components/Sidebar'; 
-import { Outlet } from 'react-router-dom'; // MakerPage가 Layout 역할을 할 때 Outlet 사용
-import '../../styles/MakerPage.css'; // 정산 스타일 포함
+import '../../styles/MakerPage.css';
 
-// 더미 데이터
-const dummySettlements = [
-    { 
-        id: 1, 
-        title: "화제의 굿즈! 초경량 티타늄 텀블러", 
-        amount: 1450000, 
-        status: 'paid', 
-        paidDate: '2025.07.10',
-        projectEndDate: '2025.06.30'
-    },
-    { 
-        id: 2, 
-        title: "인생 리클라이너 소파 펀딩 성공", 
-        amount: 5000000, 
-        status: 'pending', 
-        paidDate: '2025.10.25 (예정)',
-        projectEndDate: '2025.09.30'
-    },
-    { 
-        id: 3, 
-        title: "DIY 스마트 화분 키트", 
-        amount: 850000, 
-        status: 'canceled', 
-        paidDate: '오류',
-        projectEndDate: '2025.05.15'
-    },
-];
+const SERVER_URL = "http://localhost:8001/foodding";
+const COMMISSION_RATE = 0.05; // 수수료 5%
 
-// 정산 항목 카드 컴포넌트
+// --- [컴포넌트] 정산 리스트 아이템 ---
 const SettlementListItem = ({ item }) => {
-    const formatCurrency = (amount) => amount.toLocaleString('ko-KR');
+    // 금액 계산 (원단위 절사)
+    const totalAmount = Number(item.amount);
+    const fee = Math.floor(totalAmount * COMMISSION_RATE); // 수수료
+    const finalAmount = totalAmount - fee; // 최종 지급액
 
-    const getStatusText = (status) => {
+    const formatCurrency = (num) => num.toLocaleString('ko-KR');
+
+    // 상태별 텍스트 및 스타일
+    const getStatusInfo = (status) => {
         switch (status) {
-            case 'paid':
-                return <span className="settlement-status status-paid">지급 완료</span>;
-            case 'pending':
-                return <span className="settlement-status status-pending">지급 대기</span>;
-            case 'canceled':
-                return <span className="settlement-status status-canceled">정산 취소</span>;
-            default:
-                return null;
+            case 'paid': return { text: '지급 완료', className: 'status-paid' };
+            case 'pending': return { text: '지급 대기', className: 'status-pending' };
+            case 'canceled': return { text: '정산 취소', className: 'status-canceled' };
+            default: return { text: '상태 미정', className: '' };
         }
     };
 
+    const { text, className } = getStatusInfo(item.status);
+
     return (
-        <div className="maker-card settlement-list-item">
+        <div className="settlement-list-item">
+            {/* 1. 프로젝트 정보 */}
             <div className="settlement-project-info">
                 <h4>{item.title}</h4>
-                <p className="date-info">프로젝트 종료일: {item.projectEndDate}</p>
+                <p className="date-info">
+                    종료일: {item.projectEndDate} 
+                    {item.status === 'paid' && ` · 지급일: ${item.paidDate}`}
+                    {item.status === 'pending' && ` · 지급 예정일: ${item.paidDate}`}
+                </p>
+                {/* 상세 내역 (작게 표시) */}
+                <p style={{fontSize: '12px', color: '#999', marginTop: '4px'}}>
+                    총 모금액 {formatCurrency(totalAmount)}원 - 수수료 {formatCurrency(fee)}원 (5%)
+                </p>
             </div>
             
-            {getStatusText(item.status)}
+            {/* 2. 상태 뱃지 */}
+            <span className={`settlement-status ${className}`}>
+                {text}
+            </span>
             
+            {/* 3. 최종 지급 금액 (강조) */}
             <div className="settlement-amount">
-                {formatCurrency(item.amount)} 원
+                {formatCurrency(finalAmount)} 원
             </div>
         </div>
     );
 };
 
 
+// --- [메인 페이지] ---
 const SettlementPage = ({ userInfo }) => {
+    const navigate = useNavigate();
+    const [settlements, setSettlements] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const totalPaid = dummySettlements
-        .filter(i => i.status === 'paid')
-        .reduce((sum, item) => sum + item.amount, 0);
+    // 1. 데이터 가져오기
+    useEffect(() => {
+        const fetchSettlements = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("로그인이 필요합니다.");
+                navigate('/login');
+                return;
+            }
 
-    const totalPending = dummySettlements
-        .filter(i => i.status === 'pending')
-        .reduce((sum, item) => sum + item.amount, 0);
+            try {
+                const response = await axios.get(`${SERVER_URL}/api/maker/settlement`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                setSettlements(response.data);
+            } catch (error) {
+                console.error("정산 내역 로딩 실패:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const totalProjects = dummySettlements.length;
+        if (userInfo) {
+            fetchSettlements();
+        }
+    }, [userInfo, navigate]);
 
-    const formatCurrency = (amount) => amount.toLocaleString('ko-KR');
+    // 2. 통계 자동 계산 (수수료 제외한 금액 기준)
+    const calculateTotal = (status) => {
+        return settlements
+            .filter(i => i.status === status)
+            .reduce((sum, item) => {
+                const amount = Number(item.amount);
+                const netAmount = amount - Math.floor(amount * COMMISSION_RATE); // 5% 제외
+                return sum + netAmount;
+            }, 0);
+    };
+
+    const totalPaid = calculateTotal('paid');
+    const totalPending = calculateTotal('pending');
+    const totalProjects = settlements.length;
+
+    const formatCurrency = (amount) => Number(amount).toLocaleString('ko-KR');
 
     return (
         <div className="page-wrapper">
             <Header />
             <div className="mypage-container">
-                {/* 메이커 사이드바 */}
                 <Sidebar userInfo={userInfo} />
 
-                {/* 메인 콘텐츠 */}
                 <main className="main-content">
                     
-                    <h2>정산 관리</h2>
+                    <h2 className="page-title">정산 관리</h2>
 
-                    {/* 1. 정산 요약 카드 */}
+                    {/* 상단 요약 카드 */}
                     <div className="settlement-summary-card">
                         <div className="summary-item">
-                            <p className="label">총 정산 프로젝트 수</p>
+                            <p className="label">총 정산 프로젝트</p>
                             <p className="value">{totalProjects} 건</p>
                         </div>
                         <div className="summary-item">
-                            <p className="label">누적 지급 완료 금액</p>
+                            <p className="label">지급 완료 (수수료 제외)</p>
                             <p className="value">{formatCurrency(totalPaid)} 원</p>
                         </div>
                         <div className="summary-item">
-                            <p className="label">지급 예정 금액</p>
+                            <p className="label">지급 예정 (수수료 제외)</p>
                             <p className="value primary">{formatCurrency(totalPending)} 원</p>
                         </div>
                     </div>
 
-                    {/* 2. 정산 목록 헤더 */}
+                    {/* 리스트 헤더 & 필터 */}
                     <div className="settlement-list-header">
-                        <span>프로젝트 정산 내역</span>
+                        <span>상세 내역 <small style={{fontSize:'12px', color:'#888', fontWeight:'400'}}>(수수료 5% 제외 후 지급)</small></span>
                         <select className="filter-select">
-                            <option>최근 정산일 순</option>
-                            <option>지급 상태 순</option>
+                            <option>전체 보기</option>
+                            <option>지급 완료</option>
+                            <option>지급 대기</option>
                         </select>
                     </div>
 
-                    {/* 3. 정산 목록 리스트 */}
+                    {/* 정산 목록 리스트 */}
                     <div className="settlement-card-list">
-                        {dummySettlements.length > 0 ? (
-                            dummySettlements.map(item => (
+                        {loading ? (
+                            <div className="empty-state"><p>데이터를 불러오는 중입니다...</p></div>
+                        ) : settlements.length > 0 ? (
+                            settlements.map(item => (
                                 <SettlementListItem key={item.id} item={item} />
                             ))
                         ) : (
-                            <div className="maker-card">
-                                <div className="empty-state">
-                                    <p className="empty-title">정산 내역이 없습니다.</p>
-                                    <p className="empty-desc">프로젝트 종료 후 정산이 시작됩니다.</p>
-                                </div>
+                            <div className="empty-state">
+                                <p className="empty-title">정산 내역이 없습니다.</p>
+                                <p className="empty-desc">프로젝트가 종료되면 이곳에서 정산 내역을 확인할 수 있습니다.</p>
                             </div>
                         )}
                     </div>
