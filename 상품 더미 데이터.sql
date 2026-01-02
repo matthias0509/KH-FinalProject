@@ -1254,4 +1254,145 @@ INSERT INTO TB_OPTION (
     82500,
     SEQ_PRODUCT_NO.CURRVAL
 );
+-- === 마감임박 특집 ===
+DECLARE
+    v_product_no PRODUCT.PRODUCT_NO%TYPE;
+BEGIN
+    INSERT INTO PRODUCT (
+        PRODUCT_NO, PRODUCT_TITLE, PRODUCT_DESC, STORY_HTML, STORY_JSON,
+        TARGET_AMOUNT, CURRENT_AMOUNT, FUND_START_DATE, FUND_END_DATE, SHIP_START_DATE,
+        PRODUCT_STATUS, CATEGORY, ORIGIN_THUMBNAIL, CREATE_DATE, PRODUCT_YN, SELLER_NO
+    ) VALUES (
+        SEQ_PRODUCT_NO.NEXTVAL,
+        '겨울 한정 감귤 타르트 박스',
+        '디저트 카테고리에서 선보이는 마감임박 감귤 타르트 프로젝트입니다.',
+        '<p>겨울 한정 감귤 타르트는 제주 산지 감귤과 프랑스 버터로만 구워 상큼한 풍미를 살린 구성입니다.</p>',
+        '{"highlights":["제주 산지 감귤과 무염 버터만 사용합니다.","새벽 생산 후 당일 배송으로 신선도를 유지합니다."],"timeline":[{"title":"오픈","date":"2025-12-01"},{"title":"마감","date":"2026-01-07"},{"title":"배송 시작","date":"2026-01-18"}]}',
+        12000000,
+        9825000,
+        DATE '2025-12-01',
+        DATE '2026-01-07',
+        DATE '2026-01-18',
+        'OPEN',
+        '디저트',
+        'https://images.unsplash.com/photo-1511381939415-e44015466834?w=800&h=600&fit=crop',
+        SYSDATE,
+        'Y',
+        1
+    ) RETURNING PRODUCT_NO INTO v_product_no;
+
+    INSERT INTO TB_OPTION (
+        OPTION_NO, OPTION_NAME, OPTION_CONTENT, OPTION_PRICE, PRODUCT_NO
+    ) VALUES (
+        SEQ_OPTION_NO.NEXTVAL,
+        '얼리버드 세트',
+        '감귤 4종 타르트와 한정 스티커 세트',
+        42000,
+        v_product_no
+    );
+    INSERT INTO TB_OPTION (
+        OPTION_NO, OPTION_NAME, OPTION_CONTENT, OPTION_PRICE, PRODUCT_NO
+    ) VALUES (
+        SEQ_OPTION_NO.NEXTVAL,
+        '스탠다드 세트',
+        '감귤 6종 타르트와 전용 보냉백 구성',
+        62000,
+        v_product_no
+    );
+END;
+/
+
+DECLARE
+    v_product_no PRODUCT.PRODUCT_NO%TYPE;
+BEGIN
+    INSERT INTO PRODUCT (
+        PRODUCT_NO, PRODUCT_TITLE, PRODUCT_DESC, STORY_HTML, STORY_JSON,
+        TARGET_AMOUNT, CURRENT_AMOUNT, FUND_START_DATE, FUND_END_DATE, SHIP_START_DATE,
+        PRODUCT_STATUS, CATEGORY, ORIGIN_THUMBNAIL, CREATE_DATE, PRODUCT_YN, SELLER_NO
+    ) VALUES (
+        SEQ_PRODUCT_NO.NEXTVAL,
+        '눈꽃 한우 곰탕 밀키트',
+        '간편식/밀키트 카테고리에서 선보이는 마감임박 한우 곰탕 프로젝트입니다.',
+        '<p>겨울철 간편하게 끓여 먹을 수 있는 깊은 육수의 한우 곰탕 밀키트로 냉동고 보관이 쉬운 구성입니다.</p>',
+        '{"highlights":["48시간 이상 고온 저온을 번갈아 우려낸 육수입니다.","사골과 한우 양지 원재료를 모두 국내산으로 구성했습니다."],"timeline":[{"title":"오픈","date":"2025-12-05"},{"title":"마감","date":"2026-01-07"},{"title":"배송 시작","date":"2026-01-22"}]}',
+        18500000,
+        17120000,
+        DATE '2025-12-05',
+        DATE '2026-01-07',
+        DATE '2026-01-22',
+        'OPEN',
+        '간편식/밀키트',
+        'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=800&h=600&fit=crop',
+        SYSDATE,
+        'Y',
+        1
+    ) RETURNING PRODUCT_NO INTO v_product_no;
+
+    INSERT INTO TB_OPTION (
+        OPTION_NO, OPTION_NAME, OPTION_CONTENT, OPTION_PRICE, PRODUCT_NO
+    ) VALUES (
+        SEQ_OPTION_NO.NEXTVAL,
+        '얼리버드 패밀리팩',
+        '500ml 파우치 4개와 한우 수육 슬라이스 포함',
+        69000,
+        v_product_no
+    );
+    INSERT INTO TB_OPTION (
+        OPTION_NO, OPTION_NAME, OPTION_CONTENT, OPTION_PRICE, PRODUCT_NO
+    ) VALUES (
+        SEQ_OPTION_NO.NEXTVAL,
+        '스탠다드 패밀리팩',
+        '500ml 파우치 6개와 특제 양념 2종 세트',
+        94000,
+        v_product_no
+    );
+END;
+/
+
+DECLARE
+    v_product_no PRODUCT.PRODUCT_NO%TYPE;
+BEGIN
+    INSERT INTO PRODUCT (
+        PRODUCT_NO, PRODUCT_TITLE, PRODUCT_DESC, STORY_HTML, STORY_JSON,
+        TARGET_AMOUNT, CURRENT_AMOUNT, FUND_START_DATE, FUND_END_DATE, SHIP_START_DATE,
+        PRODUCT_STATUS, CATEGORY, ORIGIN_THUMBNAIL, CREATE_DATE, PRODUCT_YN, SELLER_NO
+    ) VALUES (
+        SEQ_PRODUCT_NO.NEXTVAL,
+        '동짓달 약차 선물 세트',
+        '건강식품 카테고리에서 선보이는 마감임박 약차 선물 프로젝트입니다.',
+        '<p>13가지 한방 재료를 저온에서 달여낸 약차와 꿀 유자청을 함께 구성해 겨울 선물로 준비했습니다.</p>',
+        '{"highlights":["무카페인 허브와 국산 꿀로 깔끔한 여운을 남깁니다.","재사용 가능한 유리 보틀과 보온 파우치를 기본 제공입니다."],"timeline":[{"title":"오픈","date":"2025-12-03"},{"title":"마감","date":"2026-01-07"},{"title":"배송 시작","date":"2026-01-15"}]}',
+        9800000,
+        8650000,
+        DATE '2025-12-03',
+        DATE '2026-01-07',
+        DATE '2026-01-15',
+        'OPEN',
+        '건강식품',
+        'https://images.unsplash.com/photo-1470337458703-46ad1756a187?w=800&h=600&fit=crop',
+        SYSDATE,
+        'Y',
+        1
+    ) RETURNING PRODUCT_NO INTO v_product_no;
+
+    INSERT INTO TB_OPTION (
+        OPTION_NO, OPTION_NAME, OPTION_CONTENT, OPTION_PRICE, PRODUCT_NO
+    ) VALUES (
+        SEQ_OPTION_NO.NEXTVAL,
+        '얼리버드 보틀 세트',
+        '약차 2병과 손잡이 보온 파우치 포함',
+        38000,
+        v_product_no
+    );
+    INSERT INTO TB_OPTION (
+        OPTION_NO, OPTION_NAME, OPTION_CONTENT, OPTION_PRICE, PRODUCT_NO
+    ) VALUES (
+        SEQ_OPTION_NO.NEXTVAL,
+        '스탠다드 선물 세트',
+        '약차 3병, 꿀 유자청, 다도 굿즈 구성',
+        54000,
+        v_product_no
+    );
+END;
+/
 COMMIT;
