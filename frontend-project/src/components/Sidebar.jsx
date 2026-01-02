@@ -161,7 +161,7 @@ const Sidebar = ({ userInfo, loading }) => {
                                 <Link to='/inquiries'>나의 문의(Q&A)</Link>
                             </li>
                             <li>
-                                <Link to='/notice'>고객센터</Link>
+                                <Link to='/logout'>로그아웃</Link>
                             </li>
                         </ul>
                     </>
