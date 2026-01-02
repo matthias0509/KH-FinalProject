@@ -14,9 +14,7 @@
         <result property="phone" column="PHONE"/>
         <result property="postcode" column="POSTCODE"/>
         <result property="mainAddress" column="MAIN_ADDRESS"/>
-        
         <result property="detailAddress" column="DETAIL_ADDRESS"/>
-        
         <result property="enrollDate" column="ENROLL_DATE"/>
         <result property="userYn" column="USER_YN"/>
         <result property="userRole" column="USER_ROLE"/>
@@ -24,18 +22,23 @@
     </resultMap>
 
     <sql id="searchCriteria">
-    WHERE 1=1
-    <if test="status == null or status == ''">
-        AND USER_YN = 'Y' 
-    </if>
-    <if test="status != null and status != 'all' and status != ''">
-        AND USER_YN = #{status}
-    </if>
-    
+        WHERE 1=1
+        <if test="status != null and status != '' and status != 'all'">
+            AND U.USER_YN = #{status}
+        </if>
+        
+        <if test="keyword != null and keyword != ''">
+            AND (
+                U.USER_ID LIKE '%' || #{keyword} || '%'
+                OR U.USER_NAME LIKE '%' || #{keyword} || '%'
+                OR U.NICKNAME LIKE '%' || #{keyword} || '%'
+            )
+        </if>
     </sql>
 
     <select id="selectTotalCount" parameterType="hashmap" resultType="int">
-        SELECT COUNT(*) FROM TB_USER
+        SELECT COUNT(*) 
+        FROM TB_USER U
         <include refid="searchCriteria"/>
     </select>
 
@@ -43,12 +46,21 @@
         SELECT * FROM (
             SELECT ROWNUM AS RNUM, A.* FROM (
                 SELECT 
-                    U.USER_NO, U.USER_ID, U.USER_NAME, U.NICKNAME, 
+                    U.USER_NO, 
+                    U.USER_ID, 
+                    U.USER_NAME, 
+                    U.NICKNAME, 
                     TO_CHAR(U.BIRTH_DATE, 'YYYY.MM.DD') AS BIRTH_DATE,
-                    U.GENDER, U.EMAIL, U.PHONE, U.POSTCODE, 
+                    U.GENDER, 
+                    U.EMAIL, 
+                    U.PHONE, 
+                    U.POSTCODE, 
                     U.MAIN_ADDRESS, 
-                    U.DETAIL_ADDRESS,  TO_CHAR(U.ENROLL_DATE, 'YYYY.MM.DD') AS ENROLL_DATE,
-                    U.USER_YN, U.USER_ROLE,
+                    U.DETAIL_ADDRESS,  
+                    TO_CHAR(U.ENROLL_DATE, 'YYYY.MM.DD') AS ENROLL_DATE,
+                    U.USER_YN, 
+                    U.USER_ROLE,
+                    /* 서브쿼리로 누적 후원액 계산 (결제완료 건만) */
                     (SELECT NVL(SUM(O.ORDER_AMOUNT), 0) 
                      FROM ORDERS O 
                      WHERE O.USER_NO = U.USER_NO 
@@ -68,7 +80,8 @@
             EMAIL = #{email},
             PHONE = #{phone},
             MAIN_ADDRESS = #{mainAddress},
-            DETAIL_ADDRESS = #{detailAddress}, USER_YN = #{userYn},
+            DETAIL_ADDRESS = #{detailAddress}, 
+            USER_YN = #{userYn},
             USER_ROLE = #{userRole}
         WHERE USER_NO = #{userNo}
     </update>

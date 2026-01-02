@@ -2,19 +2,23 @@
 
 import React, { useState } from 'react';
 
-// 💡 사용자가 제공한 import 경로와 컴포넌트 이름 사용
+// 💡 각 페이지 컴포넌트 Import
 import UserManagementPage from './UserManagementPage';
-
-import ProjectApprovalPage from './ProjectApprovalPage'; // 👈 import 추가됨
-
-import DashBoardPage from './DashBoardPage'; // DashboardTab 대신 DashBoardPage 사용
-import ProductVisibilityManager from './ProductVisibilityManager';
+import ProjectApprovalPage from './ProjectApprovalPage';
+import DashBoardPage from './DashBoardPage';
+import PuddingManagementPage from './PuddingManagementPage'; // 👈 푸슐랭 관리 추가
+import InquiryManagement from './InquiryManagement';
 import SellerApplicationAdmin from './SellerApplicationAdmin';
+
+// 💡 아직 페이지가 없는 경우를 위한 임시 컴포넌트 (필요 시 유지)
+// import ProductVisibilityManager from './ProductVisibilityManager'; 
 
 import '../../styles/AdminPage.css'; // 관리자 전용 CSS
 import '../../styles/MyPageLayout.css'; // 공통 레이아웃 (재활용)
-
-import InquiryManagement from './InquiryManagement';
+import FAQManagementPage from './FAQManagementPage';
+import NoticeEditPage from '../CustomerService/NoticeEditPage';
+import NoticeDetailPage from '../CustomerService/NoticeDetailPage';
+import NoticeWritePage from '../CustomerService/NoticeWritePage';
 
 
 // ===================================================
@@ -27,9 +31,9 @@ const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
         { id: 'dashboard', name: '📊 대시보드 (통계)', category: '주요 기능' },
         { id: 'proj_manage', name: '📝 프로젝트 승인/반려', category: '운영 관리' },
         { id: 'seller_apply', name: '🧾 판매자 전환 관리', category: '' },
+        { id: 'pudding_manage', name: '🍮 푸슐랭(프로젝트) 관리', category: '' }, // 👈 이름 약간 수정
         { id: 'refund_manage', name: '💰 후원/환불 관리', category: '' },
         { id: 'user_manage', name: '👤 회원 정보 조회/관리', category: '회원 관리' },
-        { id: 'pudding_manage', name: '🍮 푸슐랭 관리', category: '' },
         { id: 'notice_manage', name: '📢 공지사항 관리', category: '콘텐츠 관리' },
         { id: 'faq_manage', name: '❓ FAQ 관리', category: '문의 관리' },
         { id: 'inquiry_manage', name: '💬 문의 관리 (Q&A/1:1)', category: '' },
@@ -37,7 +41,6 @@ const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
 
     // 메뉴를 카테고리별로 그룹화
     const groupedMenus = adminMenus.reduce((acc, menu) => {
-        // 이 로직은 카테고리 없는 메뉴를 바로 위 카테고리에 묶습니다.
         const category = menu.category || (acc.length > 0 ? acc[acc.length - 1].category : '기타');
         
         let existingGroup = acc.find(item => item.category === category);
@@ -57,7 +60,6 @@ const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
             
             <div className="menu-list">
                 {groupedMenus.map(group => (
-                    // 카테고리가 비어있지 않은 경우에만 그룹 헤더 표시
                     <div key={group.category} className="menu-group">
                         {group.category !== '기타' && <div className="menu-category">{group.category}</div>}
                         <ul>
@@ -84,16 +86,7 @@ const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
 // ===================================================
 const AdminContent = ({ activeMenu }) => {
 
-    // 💡 'user_manage'를 별도 컴포넌트로 렌더링
-    if (activeMenu === 'user_manage') {
-        return (
-            <main className="main-content admin-main-content">
-                <UserManagementPage /> 
-            </main>
-        );
-    }
-    
-    // 💡 'dashboard'를 별도 컴포넌트로 렌더링 (DashBoardPage 사용)
+    // 1. 대시보드
     if (activeMenu === 'dashboard') {
          return (
              <main className="main-content admin-main-content">
@@ -102,7 +95,7 @@ const AdminContent = ({ activeMenu }) => {
          );
     }
 
-    // ✅ [수정됨] 2. 프로젝트 승인/반려 (ProjectApprovalPage 연결)
+    // 2. 프로젝트 승인/반려
     if (activeMenu === 'proj_manage') {
         return (
             <main className="main-content admin-main-content">
@@ -111,22 +104,40 @@ const AdminContent = ({ activeMenu }) => {
         );
     }
 
-    // 💡 문의 관리 컴포넌트 추가
-    if (activeMenu === 'inquiry_manage') {
-        return <main className="main-content admin-main-content"><InquiryManagement /></main>;
+    // 3. 회원 관리
+    if (activeMenu === 'user_manage') {
+        return (
+            <main className="main-content admin-main-content">
+                <UserManagementPage /> 
+            </main>
+        );
     }
 
+    // ✅ [추가됨] 4. 푸슐랭(프로젝트) 관리
+    // switch문에서 빼내어 독립된 화면으로 렌더링 (중복 타이틀 방지)
+    if (activeMenu === 'pudding_manage') {
+        return (
+            <main className="main-content admin-main-content">
+                <PuddingManagementPage />
+            </main>
+        );
+    }
+
+    // 5. 문의 관리
+    if (activeMenu === 'inquiry_manage') {
+        return (
+            <main className="main-content admin-main-content">
+                <InquiryManagement />
+            </main>
+        );
+    }
+
+    // =========================================================
+    // 아직 전용 페이지 컴포넌트가 없는 메뉴들 (Switch로 처리)
+    // =========================================================
     let content;
 
     switch (activeMenu) {
-        // dashboard, user_manage, proj_manage는 위 if문에서 처리했으므로 switch문에서 제외합니다.
-        
-
-        case 'proj_manage':
-            content = (
-                <ProductVisibilityManager />
-            );
-            break;
         case 'seller_apply':
             content = (
                 <SellerApplicationAdmin />
@@ -137,53 +148,42 @@ const AdminContent = ({ activeMenu }) => {
             content = (
                 <>
                     <h2 className="page-title">💰 후원 및 환불 관리</h2>
-                    <p>후원 내역 상세 조회 및 강제 취소/환불 처리를 진행합니다. (유스케이스: 후원 취소/환불 관리, 후원 상세 조회)</p>
+                    <p>후원 내역 상세 조회 및 강제 취소/환불 처리를 진행합니다.</p>
                 </>
             );
             break;
         
-        case 'pudding_manage':
-            content = (
-                <>
-                    <h2 className="page-title">🍮 푸슐랭 관리</h2>
-                    <p>푸슐랭 목록 조회 및 푸슐랭 정보 수정, 푸슐랭 삭제를 처리합니다. (유스케이스: 푸슐랭 목록 조회, 푸슐랭 정보 수정/삭제)</p>
-                </>
-            );
-            break;
         case 'notice_manage':
             content = (
                 <>
                     <h2 className="page-title">📢 공지사항 관리</h2>
-                    <p>공지사항 등록, 수정, 삭제 기능을 제공합니다. (유스케이스: 공지사항 등록/수정/삭제)</p>
+                    <p>공지사항 등록, 수정, 삭제 기능을 제공합니다.</p>
+                    <NoticeWritePage/>
                 </>
             );
             break;
+
         case 'faq_manage':
             content = (
                 <>
-                    <h2 className="page-title">❓ FAQ 관리</h2>
-                    <p>FAQ 등록, 수정, 삭제 기능을 제공합니다. (유스케이스: FAQ 등록/수정/삭제)</p>
+                  
+                    <FAQManagementPage/>
                 </>
             );
             break;
-        case 'inquiry_manage':
-            content = (
-                <>
-                    <h2 className="page-title">💬 문의 관리 (Q&A/1:1 채팅)</h2>
-                    < InquiryManagement />
-                </>
-            );
-            break;
+
         default:
-            content = <h2 className="page-title">관리자 대시보드에 오신 것을 환영합니다.</h2>;
+            content = <h2 className="page-title">준비 중인 페이지입니다.</h2>;
     }
 
     return (
         <main className="main-content admin-main-content">
             {content}
+            {/* 아직 개발되지 않은 페이지일 경우에만 박스 표시 */}
             <div className="admin-content-box">
-                {/* 나머지 메뉴들은 내용이 채워지기 전까지 이 상자가 표시됩니다. */}
-                <p>여기에 {activeMenu} 관련 상세 콘텐츠가 표시됩니다.</p>
+                <p style={{ color: '#999', marginTop: '20px' }}>
+                    '{activeMenu}' 메뉴의 상세 기능은 개발 예정입니다.
+                </p>
             </div>
         </main>
     );
@@ -197,9 +197,7 @@ const AdminPage = () => {
     const [activeMenu, setActiveMenu] = useState('dashboard');
 
     return (
-        // Header와 Footer가 없는 전체 화면 래퍼 사용
         <div className="admin-full-page-wrapper"> 
-            
             <div className="mypage-container admin-container no-header"> 
                 
                 {/* --- 왼쪽 사이드바 --- */}

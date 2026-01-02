@@ -51,6 +51,7 @@ import AdminLoginPage from './pages/admin/AdminLoginPage';
 import UserManagementPage from './pages/admin/UserManagementPage';
 import DashBoardPage from './pages/admin/DashBoardPage';
 import ChatListPage from './pages/chat/ChatListPage';
+import FAQManagementPage from './pages/admin/FAQManagementPage';
 
 
 export default function App() {
@@ -139,6 +140,7 @@ export default function App() {
       <Route path="/usermanagement" element={<UserManagementPage />} />
       <Route path="/dashboard" element={<DashBoardPage />} />
       <Route path="/projectapproval" element={<ProjectApprovalPage />} />
+      <Route path="/faqmanagement" element={<FAQManagementPage />} />
       
 
       {/* 강호형 - 결제 관련 */}
