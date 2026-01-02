@@ -62,8 +62,16 @@ export const resolveProjectImageUrl = (path = '', fallback = PLACEHOLDER_IMAGE) 
     return fallback;
   }
 
-  if (typeof path === 'string' && path.startsWith('http')) {
-    return path;
+  if (typeof path === 'string') {
+    const trimmed = path.trim();
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('//')) {
+      const protocol =
+        typeof window !== 'undefined' && window.location ? window.location.protocol : 'https:';
+      return `${protocol}${trimmed}`;
+    }
   }
 
   const sanitized = sanitizeRelativePath(path);

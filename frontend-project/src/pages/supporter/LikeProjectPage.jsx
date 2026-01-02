@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import MyPageLayout from '../../components/MyPageLayout'; 
+import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
 // 스타일
 import '../../styles/MyPageLayout.css';
@@ -31,17 +32,20 @@ const LikeProjectsPage = () => {
                 });
 
                 // 받아온 데이터 가공 (이미지 경로 처리 등)
-                const mappedProjects = response.data.map(item => ({
-                    id: item.productNo,          // 백엔드: productNo
-                    title: item.productTitle,    // 백엔드: productTitle
-                    maker: item.sellerName,      // 백엔드: sellerName
-                    percent: item.fundingPercent,// 백엔드: fundingPercent
-                    // 썸네일 경로 처리 (http로 시작하면 그대로, 아니면 서버 주소 붙이기)
-                    img: item.thumbnail 
-                        ? (item.thumbnail.startsWith('http') 
-                            ? item.thumbnail 
-                            : `http://localhost:8001/foodding${item.thumbnail}`)
-                        : 'https://via.placeholder.com/260' // 이미지 없을 때 기본값
+                const mappedProjects = response.data.map((item, index) => ({
+                    id: item.productNo || item.PRODUCT_NO || `like-${index}`,
+                    title: item.productTitle || item.PRODUCT_TITLE || '제목 없음',
+                    maker: item.sellerName || item.SELLER_NAME || '메이커',
+                    percent: item.fundingPercent || item.FUNDING_PERCENT || 0,
+                    img: resolveProjectImageUrl(
+                        item.thumbnail ||
+                          item.THUMBNAIL ||
+                          item.thumbnailUrl ||
+                          item.THUMBNAIL_URL ||
+                          item.originThumbnail ||
+                          item.ORIGIN_THUMBNAIL,
+                        'https://via.placeholder.com/260',
+                    ),
                 }));
 
                 setLikedProjects(mappedProjects);
@@ -62,7 +66,7 @@ const LikeProjectsPage = () => {
 
     // 3. 카드 클릭 시 상세 페이지로 이동
     const handleCardClick = (id) => {
-        navigate(`/project/${id}`); // 상세 페이지 라우트 주소에 맞게 수정하세요 (예: /project/1)
+        navigate(`/projects/${id}`);
     };
 
     return (

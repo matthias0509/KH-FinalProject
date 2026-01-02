@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { resolveProjectImageUrl } from '../utils/projectMedia';
 
 import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
@@ -43,17 +44,22 @@ const MyPage = () => {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
-                    // 🚨 [수정 1] DB 컬럼명 대소문자 방어 로직 적용
+                   
                     const mappedLikes = likeRes.data.map((item, index) => ({
-                        // id가 없으면 index라도 사용해서 에러 방지
+                        
                         id: item.productNo || item.PRODUCT_NO || `like-${index}`, 
                         title: item.productTitle || item.PRODUCT_TITLE || '제목 없음',
                         maker: item.sellerName || item.SELLER_NAME || '메이커',
                         percent: item.fundingPercent || item.FUNDING_PERCENT || 0,
-                        // 썸네일 경로 처리
-                        img: (item.thumbnailUrl || item.THUMBNAIL_URL) 
-                            ? `http://localhost:8001/foodding${item.thumbnailUrl || item.THUMBNAIL_URL}` 
-                            : 'https://via.placeholder.com/150'
+                        img: resolveProjectImageUrl(
+                            item.thumbnail ||
+                              item.THUMBNAIL ||
+                              item.thumbnailUrl ||
+                              item.THUMBNAIL_URL ||
+                              item.originThumbnail ||
+                              item.ORIGIN_THUMBNAIL,
+                            'https://via.placeholder.com/150',
+                        ),
                     }));
                     setLikedProjects(mappedLikes);
                 } catch (err) {
@@ -67,17 +73,22 @@ const MyPage = () => {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
-                    // 🚨 [수정 2] DB 컬럼명 대소문자 방어 로직 적용
+                    
                     const mappedHistory = historyRes.data.map((item, index) => ({
                         id: item.fundingNo || item.FUNDING_NO || item.orderNo || item.ORDER_NO || `history-${index}`,
                         title: item.projectTitle || item.PRODUCT_TITLE || '프로젝트',
                         status: item.fundingStatus || item.ORDER_STATUS || '상태없음', 
                         amount: item.totalAmount || item.ORDER_AMOUNT || 0,
                         date: item.fundingDate || item.ORDER_DATE || '', 
-                        // 이미지 경로 처리
-                        img: (item.projectThumb || item.ORIGIN_THUMBNAIL) 
-                            ? `http://localhost:8001/foodding${item.projectThumb || item.ORIGIN_THUMBNAIL}` 
-                            : 'https://via.placeholder.com/100'
+                        img: resolveProjectImageUrl(
+                            item.projectThumb ||
+                              item.PROJECT_THUMB ||
+                              item.thumbnail ||
+                              item.THUMBNAIL ||
+                              item.originThumbnail ||
+                              item.ORIGIN_THUMBNAIL,
+                            'https://via.placeholder.com/100',
+                        ),
                     }));
                     setFundingHistory(mappedHistory);
 
