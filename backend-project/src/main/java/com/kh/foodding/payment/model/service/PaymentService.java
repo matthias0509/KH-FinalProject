@@ -48,7 +48,7 @@ public class PaymentService {
         // 2. DB에 주문 정보 저장
         saveOrderToDatabase(request);
         
-        // 3. 프로젝트 현재 금액 업데이트 (★ 추가)
+        // 3. 프로젝트 현재 금액 업데이트
         updateProjectCurrentAmount(request);
         
         System.out.println("=== 결제 처리 완료 ===");

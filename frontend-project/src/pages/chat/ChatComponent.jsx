@@ -15,7 +15,6 @@ const ChatComponent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [hasLoadedMessages, setHasLoadedMessages] = useState(false);
-  const [hasSentWelcome, setHasSentWelcome] = useState(false);
   const messagesEndRef = useRef(null);
   const pollingIntervalRef = useRef(null);
 
@@ -33,7 +32,7 @@ const ChatComponent = () => {
         setCreator(event.data.creator);
         setBuyerNo(event.data.buyerNo);
         setSellerNo(event.data.sellerNo);
-        setCurrentUserNo(event.data.currentUserNo); // 현재 사용자 번호 저장
+        setCurrentUserNo(event.data.currentUserNo);
       }
     };
     
@@ -103,15 +102,37 @@ const ChatComponent = () => {
       console.log('Messages response:', response.data);
       
       if (response.data && Array.isArray(response.data)) {
-        const formattedMessages = response.data.map(msg => ({
-          id: msg.msgNo,
-          sender: msg.sender === currentUserNo ? 'user' : 'creator', // currentUserNo와 비교
-          text: msg.msgContent,
-          timestamp: msg.sendDate
-        }));
+        const formattedMessages = response.data.map(msg => {
+          console.log('📩 원본 메시지:', msg);
+          console.log('  - sender:', msg.sender, '현재 사용자:', currentUserNo);
+          console.log('  - readYn:', msg.readYn, 'isRead:', msg.isRead);
+          
+          return {
+            id: msg.msgNo,
+            sender: msg.sender === currentUserNo ? 'user' : 'creator',
+            text: msg.msgContent,
+            timestamp: msg.sendDate,
+            isRead: msg.isRead
+          };
+        });
         
         console.log('📨 Formatted messages:', formattedMessages);
         setMessages(formattedMessages);
+        
+        // 메시지 로드 후 읽음 처리 (최초 로드 시에만)
+        if (!silent) {
+          try {
+            const chatroomNoResponse = await axios.get(`${API_BASE_URL}/chat/chatroom-no`, {
+              params: { buyerNo, sellerNo }
+            });
+            
+            if (chatroomNoResponse.data.chatroomNo) {
+              await markMessagesAsRead(chatroomNoResponse.data.chatroomNo);
+            }
+          } catch (error) {
+            console.error('읽음 처리 중 오류:', error);
+          }
+        }
         
         // 메시지가 있으면 폴링 시작
         if (!pollingIntervalRef.current) {
@@ -135,22 +156,22 @@ const ChatComponent = () => {
     }
   };
 
-  // 메시지 읽음 처리 함수 추가
+  // 메시지 읽음 처리 함수
   const markMessagesAsRead = async (chatroomNo) => {
-      try {
-          console.log('📖 메시지 읽음 처리:', { chatroomNo, currentUserNo });
-          
-          await axios.post(`${API_BASE_URL}/chat/messages/read`, null, {
-              params: {
-                  chatroomNo: chatroomNo,
-                  userNo: currentUserNo
-              }
-          });
-          
-          console.log('✅ 읽음 처리 완료');
-      } catch (error) {
-          console.error('❌ 읽음 처리 실패:', error);
-      }
+    try {
+      console.log('📖 메시지 읽음 처리:', { chatroomNo, currentUserNo });
+      
+      await axios.post(`${API_BASE_URL}/chat/messages/read`, null, {
+        params: {
+          chatroomNo: chatroomNo,
+          userNo: currentUserNo
+        }
+      });
+      
+      console.log('✅ 읽음 처리 완료');
+    } catch (error) {
+      console.error('❌ 읽음 처리 실패:', error);
+    }
   };
 
   // 메시지 서버로 전송
@@ -181,7 +202,7 @@ const ChatComponent = () => {
       setMessage('');
       
       try {
-        // 사용자 메시지 전송 (현재 사용자 번호로 전송)
+        // 사용자 메시지 전송
         await sendMessageToServer(currentUserNo, messageText);
         
         // 메시지 목록 새로고침
@@ -210,6 +231,47 @@ const ChatComponent = () => {
     const ampm = hours >= 12 ? '오후' : '오전';
     const displayHours = hours % 12 || 12;
     return `${ampm} ${displayHours}:${minutes.toString().padStart(2, '0')}`;
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // 날짜만 비교 (시간 제외)
+    const isSameDay = (d1, d2) => {
+      return d1.getFullYear() === d2.getFullYear() &&
+             d1.getMonth() === d2.getMonth() &&
+             d1.getDate() === d2.getDate();
+    };
+    
+    if (isSameDay(date, today)) {
+      return '오늘';
+    } else if (isSameDay(date, yesterday)) {
+      return '어제';
+    } else {
+      return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+    }
+  };
+
+  // 날짜별로 메시지 그룹화
+  const groupMessagesByDate = (messages) => {
+    const groups = [];
+    let currentDate = null;
+    
+    messages.forEach((msg) => {
+      const msgDate = formatDate(msg.timestamp);
+      
+      if (msgDate !== currentDate) {
+        groups.push({ type: 'date', date: msgDate });
+        currentDate = msgDate;
+      }
+      
+      groups.push({ type: 'message', data: msg });
+    });
+    
+    return groups;
   };
 
   const handleClose = () => {
@@ -258,31 +320,39 @@ const ChatComponent = () => {
             <Loader size={24} className="chat-page__loading-spinner" />
             <div className="chat-page__messages-loading-text">대화 내역을 불러오는 중...</div>
           </div>
+        ) : messages.length === 0 ? (
+          <div className="chat-page__empty-message">
+            <p>대화를 시작해보세요!</p>
+          </div>
         ) : (
           <>
-            <div className="chat-page__date">오늘</div>
-            {messages.length === 0 ? (
-              <div className="chat-page__empty-message">
-                <p>대화를 시작해보세요!</p>
-              </div>
-            ) : (
-              messages.map((msg) => (
+            {groupMessagesByDate(messages).map((item, index) => (
+              item.type === 'date' ? (
+                <div key={`date-${index}`} className="chat-page__date">{item.date}</div>
+              ) : (
                 <div 
-                  key={msg.id} 
-                  className={`chat-message ${msg.sender === 'user' ? 'chat-message--user' : 'chat-message--creator'}`}
+                  key={item.data.id} 
+                  className={`chat-message ${item.data.sender === 'user' ? 'chat-message--user' : 'chat-message--creator'}`}
                 >
-                  {msg.sender === 'creator' && (
+                  {item.data.sender === 'creator' && (
                     <img src={creator.avatar} alt={creator.name} className="chat-message__avatar" />
                   )}
                   <div className="chat-message__content">
                     <div className="chat-message__bubble">
-                      {msg.text}
+                      {item.data.text}
                     </div>
-                    <span className="chat-message__time">{formatTime(msg.timestamp)}</span>
+                    <div className="chat-message__meta">
+                      <span className="chat-message__time">{formatTime(item.data.timestamp)}</span>
+                      {item.data.sender === 'user' && (
+                        <span className="chat-message__read-status">
+                          {item.data.isRead ? '' : '1'}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              ))
-            )}
+              )
+            ))}
           </>
         )}
         <div ref={messagesEndRef} />

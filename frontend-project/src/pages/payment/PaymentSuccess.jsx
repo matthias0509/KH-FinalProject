@@ -54,7 +54,7 @@ const PaymentSuccess = () => {
           console.log('원본 loginUser 값:', loginUser);
         }
       } else {
-        console.warn('⚠️ 로그인 정보 없음 - userNo를 1로 설정');
+        console.warn('⚠️ 로그인 정보 없음');
       }
       
       console.log('=== 로그인 정보 확인 끝 ===');

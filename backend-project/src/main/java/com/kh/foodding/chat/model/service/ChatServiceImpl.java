@@ -90,4 +90,14 @@ public class ChatServiceImpl implements ChatService {
         
         return chatDao.updateMessagesToRead(sqlSession, params);
     }
+    
+    @Override
+    public Long getChatroomNo(Long buyerNo, Long sellerNo) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("buyer", buyerNo);
+        params.put("seller", sellerNo);
+        
+        Chatroom chatroom = chatDao.selectChatroom(sqlSession, params);
+        return chatroom != null ? chatroom.getChatroomNo() : null;
+    }
 }
