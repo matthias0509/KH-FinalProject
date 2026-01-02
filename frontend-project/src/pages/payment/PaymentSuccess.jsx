@@ -11,6 +11,25 @@ const PaymentSuccess = () => {
   const [orderInfo, setOrderInfo] = useState(null);
   const [error, setError] = useState(null);
 
+  // ✅ 한글을 지원하는 base64 디코딩 함수 추가
+  const base64UrlDecode = (str) => {
+      try {
+          let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+          
+          const jsonPayload = decodeURIComponent(
+              atob(base64)
+                  .split('')
+                  .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                  .join('')
+          );
+          
+          return JSON.parse(jsonPayload);
+      } catch (e) {
+          console.error('Base64 디코딩 실패:', e);
+          return null;
+      }
+  };
+
   useEffect(() => {
     const confirmPayment = async () => {
       console.log('=== PaymentSuccess 로그인 정보 확인 ===');
@@ -35,7 +54,7 @@ const PaymentSuccess = () => {
           console.log('원본 loginUser 값:', loginUser);
         }
       } else {
-        console.warn('⚠️ 로그인 정보 없음 - userNo를 1로 설정');
+        console.warn('⚠️ 로그인 정보 없음');
       }
       
       console.log('=== 로그인 정보 확인 끝 ===');
@@ -43,18 +62,20 @@ const PaymentSuccess = () => {
       // URL 파라미터 가져오기
       const paymentKey = searchParams.get('paymentKey');
       const orderId = searchParams.get('orderId');
-      const amount = searchParams.get('amount');
+      const amount = searchParams.get('amount'); // 토스에서 받은 총 금액
       const postcode = searchParams.get('postcode');
       const address = searchParams.get('address');
       const quantity = searchParams.get('quantity');
       const optionNo = searchParams.get('optionNo');
-      const userNoFromUrl = searchParams.get('userNo'); // URL에서 받은 userNo
+      const userNoFromUrl = searchParams.get('userNo');
+      const productAmount = searchParams.get('productAmount'); // ★ 상품 금액 (배송비 제외)
 
       console.log('=== 결제 승인 시작 ===');
       console.log('URL 파라미터:', { 
         paymentKey, 
         orderId, 
-        amount, 
+        amount, // 총 금액 (상품 + 배송비)
+        productAmount, // 상품 금액만
         postcode, 
         address, 
         quantity, 
@@ -77,7 +98,8 @@ const PaymentSuccess = () => {
         const requestBody = { 
           paymentKey, 
           orderId, 
-          amount: Number(amount),
+          amount: Number(amount), // 토스 검증용 총 금액
+          productAmount: Number(productAmount) || (Number(amount) - 3000), // ★ 상품 금액 (배송비 제외)
           postcode: postcode || '00000',
           address: address || '주소 미입력',
           quantity: Number(quantity) || 1,

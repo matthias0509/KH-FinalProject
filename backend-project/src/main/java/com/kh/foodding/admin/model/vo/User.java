@@ -1,4 +1,4 @@
-package com.kh.foodding.admin.vo;
+package com.kh.foodding.admin.model.vo;
 
 import lombok.Data;
 

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="adminProjectMapper">
+
+    <resultMap id="adminProjectMap" type="com.kh.foodding.admin.model.vo.AdminProject">
+        <id property="productNo" column="PRODUCT_NO"/>
+        <result property="category" column="CATEGORY_NAME"/>
+        <result property="productTitle" column="PRODUCT_TITLE"/>
+        <result property="sellerNo" column="SELLER_NO"/>
+        <result property="sellerName" column="MAKER_NAME"/> 
+        <result property="sellerPhone" column="PHONE"/>
+        <result property="targetAmount" column="TARGET_AMOUNT"/>
+        <result property="createDate" column="CREATE_DATE"/>
+        <result property="fundStartDate" column="START_DATE"/>
+        <result property="fundEndDate" column="END_DATE"/>
+        <result property="productStatus" column="PRODUCT_STATUS"/>
+        <result property="approvalStatus" column="PRODUCT_STATUS"/>
+        <result property="shipStartDate" column="SHIP_DATE"/>
+        <result property="storyHtml" column="PRODUCT_CONTENT"/>
+        <result property="thumbnailUrl" column="MODIFY_THUMBNAIL"/>
+        <result property="rejectReason" column="REJECT_REASON"/> </resultMap>
+
+    <resultMap id="adminRewardMap" type="com.kh.foodding.admin.model.vo.AdminReward">
+        <id property="rewardNo" column="OPTION_NO"/>
+        <result property="title" column="OPTION_NAME"/>
+        <result property="price" column="OPTION_PRICE"/>
+        <result property="description" column="OPTION_NOTE"/>
+    </resultMap>
+
+    <select id="selectProjectList" resultMap="adminProjectMap">
+        SELECT 
+            P.PRODUCT_NO,
+            P.CATEGORY_NAME,
+            P.PRODUCT_TITLE,
+            P.SELLER_NO,
+            U.NICKNAME AS MAKER_NAME, -- 또는 S.BUSINESS_NAME
+            U.PHONE,
+            P.TARGET_AMOUNT,
+            TO_CHAR(P.CREATE_DATE, 'YYYY-MM-DD') AS CREATE_DATE,
+            TO_CHAR(P.START_DATE, 'YYYY-MM-DD') AS START_DATE,
+            TO_CHAR(P.END_DATE, 'YYYY-MM-DD') AS END_DATE,
+            P.PRODUCT_STATUS
+        FROM PRODUCT P
+        JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
+        JOIN TB_USER U ON S.USER_NO = U.USER_NO
+        <where>
+            <if test="status != 'ALL'">
+                AND P.PRODUCT_STATUS = #{status}
+            </if>
+        </where>
+        ORDER BY P.PRODUCT_NO DESC
+    </select>
+
+    <select id="selectProjectDetail" resultMap="adminProjectMap">
+        SELECT 
+            P.PRODUCT_NO, P.CATEGORY_NAME, P.PRODUCT_TITLE, P.SELLER_NO,
+            U.NICKNAME AS MAKER_NAME, U.PHONE,
+            P.TARGET_AMOUNT,
+            TO_CHAR(P.CREATE_DATE, 'YYYY-MM-DD') AS CREATE_DATE,
+            TO_CHAR(P.START_DATE, 'YYYY-MM-DD') AS START_DATE,
+            TO_CHAR(P.END_DATE, 'YYYY-MM-DD') AS END_DATE,
+            TO_CHAR(P.SHIP_DATE, 'YYYY-MM-DD') AS SHIP_DATE,
+            P.PRODUCT_STATUS,
+            P.PRODUCT_CONTENT, -- 스토리 HTML
+            P.MODIFY_THUMBNAIL
+        FROM PRODUCT P
+        JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
+        JOIN TB_USER U ON S.USER_NO = U.USER_NO
+        WHERE P.PRODUCT_NO = #{productNo}
+    </select>
+
+    <select id="selectRewardsByProductNo" resultMap="adminRewardMap">
+        SELECT OPTION_NO, OPTION_NAME, OPTION_PRICE, OPTION_NOTE
+        FROM TB_OPTION
+        WHERE PRODUCT_NO = #{productNo}
+    </select>
+
+    <update id="updateProjectStatus">
+        UPDATE PRODUCT
+        SET PRODUCT_STATUS = #{status}
+            WHERE PRODUCT_NO = #{productNo}
+    </update>
+
+</mapper>

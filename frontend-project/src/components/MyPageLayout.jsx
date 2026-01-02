@@ -1,76 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import Header from './Header'; // 🚨 경로 확인 필요
-import AppFooter from './AppFooter'; // 🚨 경로 확인 필요
-import Sidebar from './Sidebar'; // 사이드바 불러오기
+import Header from './Header'; 
+import AppFooter from './AppFooter'; 
+import Sidebar from './Sidebar'; 
 import '../styles/MyPageLayout.css';
 
-const MyPageLayout = ({ children }) => {
-    console.log('🔵 MyPageLayout 렌더링 시작');
-    const navigate = useNavigate();
+const MyPageLayout = ({ children, userInfo: propUserInfo }) => { // 1. props로 userInfo 받기
     
-    // 1. 내 정보를 저장할 그릇
-    const [userInfo, setUserInfo] = useState({
-        userName: '',
-        nickname: '',
-        modifyProfile: '', 
-        role: ''
-    });
+    // 2. 내 정보를 저장할 그릇 (부모가 줬으면 그거 쓰고, 없으면 null)
+    const [myInfo, setMyInfo] = useState(propUserInfo || null);
 
-    // 2. 페이지가 뜰 때마다 서버에서 내 정보 가져오기
+    // 3. 부모(App.js)가 나중에라도 정보를 주면 업데이트 (동기화)
     useEffect(() => {
-        console.log('🟢 MyPageLayout useEffect 시작');
-        
-        const fetchUserInfo = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                console.log('🔑 토큰 확인:', token ? '있음' : '없음');
-                
-                if (!token) {
-                    console.log('⚠️ 토큰 없음 - 함수 종료');
-                    return; // 토큰 없으면 패스 (로그인 페이지 리다이렉트는 선택)
-                }
+        if (propUserInfo) {
+            setMyInfo(propUserInfo);
+        }
+    }, [propUserInfo]);
 
-                console.log('📡 API 호출 시작:', "http://localhost:8001/foodding/api/mypage/info");
-                
+    // 4. 정보가 없으면 스스로 서버에서 가져오기 (새로고침 대응)
+    useEffect(() => {
+        const fetchUserInfo = async () => {
+            // 이미 정보가 있으면 굳이 또 부르지 않음
+            if (myInfo) return; 
+
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            try {
+                console.log('📡 [MyPageLayout] 내 정보 요청 시작...');
                 const response = await axios.get("http://localhost:8001/foodding/api/mypage/info", {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                console.log('✅ API 응답 성공:', response.data);
-                setUserInfo(response.data); // 받아온 정보를 저장!
+                console.log('✅ [MyPageLayout] 정보 로드 성공:', response.data);
+                setMyInfo(response.data); 
 
             } catch (error) {
-                console.error("❌ 내 정보 로딩 실패:", error);
-                console.error("에러 상세:", {
-                    message: error.message,
-                    status: error.response?.status,
-                    data: error.response?.data
-                });
+                console.error("❌ [MyPageLayout] 정보 로드 실패:", error);
             }
         };
 
         fetchUserInfo();
-    }, []);
-
-    console.log('🔵 MyPageLayout 렌더링 완료, userInfo:', userInfo);
-    console.log('👶 children:', children);
+    }, [myInfo]); // myInfo가 없을 때만 실행
 
     return (
         <div className="page-wrapper">
             <Header />
             
             <div className="mypage-container">
-                {/* 🚨 핵심: 여기서 데이터를 사이드바에 넘겨줍니다! */}
-                <Sidebar userInfo={userInfo} />
+                {/* 🚨 5. 확보한 내 정보(myInfo)를 사이드바에 전달 */}
+                <Sidebar userInfo={myInfo} />
                 
-                {/* 각 페이지의 실제 내용이 들어가는 자리 */}
-                <div className="main-content">
-                    {console.log('📄 children 렌더링 직전')}
+                <main className="main-content">
                     {children}
-                    {console.log('📄 children 렌더링 완료')}
-                </div>
+                </main>
             </div>
 
             <AppFooter />

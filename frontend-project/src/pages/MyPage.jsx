@@ -42,39 +42,47 @@ const MyPage = () => {
                     const likeRes = await axios.get("http://localhost:8001/foodding/api/mypage/like", {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
-                    // 서버 데이터 구조에 맞춰 매핑 (필요시)
-                    const mappedLikes = likeRes.data.map(item => ({
-                        id: item.productNo, // DB 컬럼명에 맞게 수정 필요
-                        title: item.productTitle,
-                        maker: item.sellerName || '메이커',
-                        percent: item.fundingPercent || 0,
-                        img: item.thumbnailUrl ? `http://localhost:8001/foodding${item.thumbnailUrl}` : 'https://via.placeholder.com/150'
+                    
+                    // 🚨 [수정 1] DB 컬럼명 대소문자 방어 로직 적용
+                    const mappedLikes = likeRes.data.map((item, index) => ({
+                        // id가 없으면 index라도 사용해서 에러 방지
+                        id: item.productNo || item.PRODUCT_NO || `like-${index}`, 
+                        title: item.productTitle || item.PRODUCT_TITLE || '제목 없음',
+                        maker: item.sellerName || item.SELLER_NAME || '메이커',
+                        percent: item.fundingPercent || item.FUNDING_PERCENT || 0,
+                        // 썸네일 경로 처리
+                        img: (item.thumbnailUrl || item.THUMBNAIL_URL) 
+                            ? `http://localhost:8001/foodding${item.thumbnailUrl || item.THUMBNAIL_URL}` 
+                            : 'https://via.placeholder.com/150'
                     }));
                     setLikedProjects(mappedLikes);
                 } catch (err) {
                     console.error("좋아요 목록 로딩 실패:", err);
-                    setLikedProjects([]); // 실패 시 빈 배열
+                    setLikedProjects([]); 
                 }
 
-                // 3. 최근 후원 내역 가져오기 (API 호출 - 예시)
+                // 3. 최근 후원 내역 가져오기 (API 호출)
                 try {
-                    const historyRes = await axios.get("http://localhost:8001/foodding/api/mypage/funding/history?limit=3", { // 최근 3개만
+                    const historyRes = await axios.get("http://localhost:8001/foodding/api/mypage/funding/history?limit=3", { 
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
-                    const mappedHistory = historyRes.data.map(item => ({
-                        id: item.fundingNo,
-                        title: item.projectTitle,
-                        status: item.fundingStatus, // '결제완료', '펀딩성공' 등
-                        amount: item.totalAmount,
-                        date: item.fundingDate, // 날짜 포맷팅 필요할 수 있음
-                        img: item.projectThumb ? `http://localhost:8001/foodding${item.projectThumb}` : 'https://via.placeholder.com/100'
+                    // 🚨 [수정 2] DB 컬럼명 대소문자 방어 로직 적용
+                    const mappedHistory = historyRes.data.map((item, index) => ({
+                        id: item.fundingNo || item.FUNDING_NO || item.orderNo || item.ORDER_NO || `history-${index}`,
+                        title: item.projectTitle || item.PRODUCT_TITLE || '프로젝트',
+                        status: item.fundingStatus || item.ORDER_STATUS || '상태없음', 
+                        amount: item.totalAmount || item.ORDER_AMOUNT || 0,
+                        date: item.fundingDate || item.ORDER_DATE || '', 
+                        // 이미지 경로 처리
+                        img: (item.projectThumb || item.ORIGIN_THUMBNAIL) 
+                            ? `http://localhost:8001/foodding${item.projectThumb || item.ORIGIN_THUMBNAIL}` 
+                            : 'https://via.placeholder.com/100'
                     }));
                     setFundingHistory(mappedHistory);
 
                 } catch (err) {
                     console.error("후원 내역 로딩 실패:", err);
-                    // 실패 시 빈 배열 (화면 깨짐 방지)
                     setFundingHistory([]); 
                 }
                 
@@ -121,12 +129,11 @@ const MyPage = () => {
                         {userInfo.userName || userInfo.nickname}님 반가워요! 👋
                     </h2>
 
-                    {/* 활동 현황 배너 (API 데이터 연동) */}
+                    {/* 활동 현황 배너 */}
                     <div className="activity-banner">
                         <div className="activity-item">
                             <span className="icon">🎁</span>
                             <span className="label">후원 참여</span>
-                            {/* userInfo에 stats가 없으면 0 처리 */}
                             <span className="value">{fundingHistory.length || 0}</span> 
                         </div>
                         <div className="divider-vertical"></div>
@@ -136,10 +143,11 @@ const MyPage = () => {
                             <span className="value">{likedProjects.length || 0}</span>
                         </div>
                         <div className="divider-vertical"></div>
-                        <div className="activity-item">
+                       <div className="activity-item">
                             <span className="icon">👀</span>
                             <span className="label">팔로잉</span>
-                            <span className="value">{userInfo.followCount || 0}</span> {/* API에서 followCount를 준다고 가정 */}
+                            {/* userInfo.stats가 null일 경우 대비 */}
+                            <span className="value">{userInfo.stats?.followingCount || 0}</span> 
                         </div>
                     </div>
 
@@ -165,7 +173,7 @@ const MyPage = () => {
                                             <p className="title">{item.title}</p>
                                             <p className="amount">{item.amount.toLocaleString()}원</p>
                                         </div>
-                                        <Link to={`/history/${item.id}`} className="detail-btn">상세 보기</Link>
+                                        <Link to={`/mypage/history/${item.id}`} className="detail-btn">상세 보기</Link>
                                     </div>
                                 ))}
                             </div>
@@ -186,7 +194,7 @@ const MyPage = () => {
                         {likedProjects.length > 0 ? (
                             <div className="card-list">
                                 {likedProjects.map((item) => (
-                                    <div key={item.id} className="product-card" onClick={() => navigate(`/project/${item.id}`)}>
+                                    <div key={item.id} className="product-card" onClick={() => navigate(`/projects/${item.id}`)}>
                                         <div className="img-wrapper">
                                             <img src={item.img} alt={item.title} />
                                             <button className="heart-btn active">♥</button>

@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import '../../App.css';
 import './Login.css';
 import Header from '../../components/Header';
@@ -13,21 +13,16 @@ import { toast, ToastContainer } from "react-toastify";
 
 export default function LoginPage() {
     
-    // 로그인 상태는 컴포넌트 내부에서 State로 관리 (sessionStorage의 JWT 상태)
     const [currentUser, setCurrentUser] = useState(AuthService.getCurrentUser()); 
-    
-    const [user, setUser] = useState({ userId: "", userPwd: "" }); // 사용자 입력 State
+    const [user, setUser] = useState({ userId: "", userPwd: "" });
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
-
     const location = useLocation();
 
     useEffect(() => {
-        // 전달받은 state에 메시지가 있다면 토스트를 띄웁니다.
         if (location.state?.message) {
             toast.success(location.state.message);
-            // 💡 중요: 페이지 새로고침 시 토스트가 또 뜨지 않게 state를 비워주는 것이 좋습니다.
             window.history.replaceState({}, document.title);
         }
 
@@ -41,55 +36,65 @@ export default function LoginPage() {
     // 💡 1. 컴포넌트가 마운트되거나 상태가 변경될 때 로그인 상태 확인
     useEffect(() => {
         if (currentUser) {
-            // 로그인 상태라면 메인 화면으로 이동
             navigate('/', { replace: true }); 
         }
     }, [currentUser, navigate]);
 
-    // 💡 2. 입력 핸들러 (Index.jsx의 handleChange와 동일)
     const handleChange = e => {
         const {name, value} = e.target;
         setUser(prev => ({...prev, [name]: value}));
     };
 
-    // 💡 3. 로그인 처리 함수 (Index.jsx의 loginAxios 로직 통합)
+    // 💡 핵심 수정: 로그인 처리 함수 정리
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMessage('');
         setIsLoading(true);
 
         try {
-            // LoginService를 통해 로그인 요청
-            const jwtToken = await AuthService.login(user.userId, user.userPwd); // 💡 jwtToken이 순수 문자열로 반환됨
+            // AuthService.login 호출
+            const response = await AuthService.login(user.userId, user.userPwd);
             
-            if (jwtToken) { // JWT 문자열이 있으면 성공으로 판단
-                toast.info("로그인에 성공했습니다!");
+            // 1. 응답이 아예 없는 경우 방어
+            if (!response) {
+                throw new Error("서버로부터 응답이 없습니다.");
+            }
 
-                // ✅ [범인 검거] 이 줄을 꼭 추가해야 합니다!! 
-            // 받아온 토큰을 브라우저 저장소에 'token'이라는 이름으로 저장합니다.
-            localStorage.setItem("token", jwtToken);
+            // 2. 토큰 추출 로직 (객체인 경우와 문자열인 경우 모두 대응)
+            // response.token이 있으면 그걸 쓰고, 없으면 response 자체가 문자열인지 확인
+            const token = response.token || (typeof response === 'string' ? response : null);
+            const userData = response.user; // 사용자 정보가 같이 오는 경우
+
+            // 3. 토큰 존재 여부에 따른 처리
+            if (token) {
+                // (1) 토큰 저장
+                localStorage.setItem("token", token);
+
+                // (2) 사용자 정보가 있다면 저장 (선택사항)
+                if (userData) {
+                    localStorage.setItem("user", JSON.stringify(userData));
+                }
+
+                toast.info("로그인에 성공했습니다!");
                 
-                // 💡 State 업데이트: 순수 토큰 문자열을 setCurrentUser에 전달
-                setCurrentUser(jwtToken);
+                // (3) 상태 업데이트 및 페이지 이동
+                setCurrentUser(token);
+                window.location.href = "/"; 
+                
             } else {
-                setMessage("아이디 또는 비밀번호를 확인해주세요.");
+                setMessage("로그인에 실패했습니다. 아이디 또는 비밀번호를 확인해주세요.");
+                toast.info("로그인에 실패했습니다.");
             }
             
         } catch (error) {
-            setMessage("서버와 통신 중 오류가 발생했습니다.");
+            const errorMsg = error.response?.data || "서버와 통신 중 오류가 발생했습니다.";
+            // 에러 메시지가 객체일 수도 있으므로 문자열 처리
+            setMessage(typeof errorMsg === 'string' ? errorMsg : "로그인 중 오류 발생");
             console.error("로그인 실패:", error);
         } finally {
             setIsLoading(false);
         }
     };
-    
-    // 💡 4. 로그아웃 기능 (다른 컴포넌트에서 AuthService.logout()을 직접 호출하도록 분리)
-    // 이 페이지는 로그인 폼만 보여주므로, 로그아웃 버튼은 제거합니다.
-    
-    // 💡 5. 렌더링 분기 (이미 로그인된 경우, useEffect에서 리디렉션하므로 폼만 렌더링)
-    
-    // currentUser가 null이 아니면 useEffect에서 이미 '/'로 리디렉션하므로,
-    // 이 컴포넌트가 렌더링되는 것은 '로그인 전' 상태일 때 뿐입니다.
     
     return (
         <div className='app'>
@@ -100,7 +105,7 @@ export default function LoginPage() {
                     <InputField
                         label="아이디"
                         id="userId"
-                        name="userId" // name 속성 추가 (handleChange를 위해 필요)
+                        name="userId"
                         value={user.userId}
                         onChange={handleChange}
                         placeholder="아이디를 입력하세요"
@@ -111,7 +116,7 @@ export default function LoginPage() {
                         label="비밀번호"
                         type='password'
                         id="userPwd"
-                        name="userPwd" // name 속성 추가 (handleChange를 위해 필요)
+                        name="userPwd"
                         value={user.userPwd}
                         onChange={handleChange}
                         placeholder="비밀번호"
@@ -126,7 +131,6 @@ export default function LoginPage() {
                     <br />
                     <SubmitButton isLoading={isLoading}>로그인</SubmitButton>
                 </form>
-                {/* 💡 AuthLinkGroup을 유지할지 여부는 프로젝트 구조에 따라 결정 */}
                 <AuthLinkGroup /> 
             </AuthLayout>
             <AppFooter />

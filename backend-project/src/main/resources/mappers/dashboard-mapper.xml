@@ -3,8 +3,8 @@
 
 <mapper namespace="com.kh.foodding.admin.model.dao.DashboardDao">
 
-    <select id="selectChartStats" parameterType="com.kh.foodding.admin.vo.Dashboard$Search" 
-            resultType="com.kh.foodding.admin.vo.Dashboard$Result">
+    <select id="selectChartStats" parameterType="com.kh.foodding.admin.model.vo.Dashboard$Search" 
+            resultType="com.kh.foodding.admin.model.vo.Dashboard$Result">
         SELECT 
             <choose>
                 <when test="periodType == 'daily'">TO_CHAR(ORDER_DATE, 'MM/DD')</when>
@@ -32,7 +32,7 @@
         ORDER BY label ASC
     </select>
 
-    <select id="selectSummaryStats" resultType="com.kh.foodding.admin.vo.Dashboard$Result">
+    <select id="selectSummaryStats" resultType="com.kh.foodding.admin.model.vo.Dashboard$Result">
         SELECT 
             (SELECT ROUND(AVG(ORDER_AMOUNT), 0) FROM ORDERS WHERE ORDER_STATUS = 'PAY') AS avgFundingAmount,
             (SELECT COUNT(DISTINCT USER_NO) FROM ORDERS WHERE ORDER_STATUS = 'PAY') AS totalSupporters,

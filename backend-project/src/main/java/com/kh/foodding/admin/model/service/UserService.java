@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.kh.foodding.admin.model.dao.UserDao;
-import com.kh.foodding.admin.vo.User;
+import com.kh.foodding.admin.model.vo.User;
 
 @Service
 public class UserService {

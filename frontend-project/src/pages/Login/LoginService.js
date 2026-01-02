@@ -49,19 +49,27 @@ export const login = async (userId, userPwd) => {
             sessionStorage.setItem("loginUser", jwtToken); 
             return jwtToken; 
         }
-        return null;
+
+        return null; // 응답은 왔지만 토큰이 없는 경우
     } catch (error) {
+        throw error;
+
         console.error("로그인 통신 실패!", error);
         return null;
+
+        // 방법 2: 그냥 여기서 끝내고 null을 반환하고 싶다면 위 throw를 지우고 아래 주석 해제
+        // return null;
     }
 };
 
+// 로그아웃 시 로컬스토리지 정리
 export const logout = () => {
     sessionStorage.removeItem("loginUser");
     // 필요한 경우 localStorage의 토큰도 삭제
     localStorage.removeItem("token");
 };
 
+// 현재 사용자 정보 가져오기 (토큰 여부만 체크하는 경우)
 export const getCurrentUser = () => {
     const token = sessionStorage.getItem("loginUser");
     

@@ -11,16 +11,23 @@ const getFullImageUrl = (filename) => {
     return `${SERVER_URL}${UPLOAD_PATH}${filename}`;
 };
 
-const Sidebar = ({ userInfo = {}, loading = false }) => { 
+const Sidebar = ({ userInfo, loading }) => { 
     const navigate = useNavigate();
     const location = useLocation();
 
-    // null 안전 처리
-    const displayName = userInfo?.nickname || userInfo?.userName || userInfo?.name || '사용자';
-    const userRole = userInfo?.role || 'supporter';
+    // 1. [수정] 서버 데이터(userRole, role)와 대소문자(MAKER)를 모두 잡는 안전한 로직
+    const safeInfo = userInfo || {};
+    
+    // 닉네임 우선 -> 이름 -> 없으면 '사용자'
+    const displayName = safeInfo.nickname || safeInfo.userName || safeInfo.userName || '사용자';
+    
+    // 🚨 역할 체크 로직 강화: safeInfo.userRole(서버응답값)을 먼저 확인
+    const rawRole = safeInfo.userRole || safeInfo.role || 'supporter';
+    const userRole = String(rawRole).toLowerCase(); // 'maker' 또는 'supporter'로 통일
+    
     const isMakerMode = location.pathname.startsWith('/maker');
 
-    const imageTimestamp = useMemo(() => Date.now(), [userInfo?.modifyProfile]);
+    const imageTimestamp = useMemo(() => Date.now(), [safeInfo.modifyProfile]);
 
     const isActive = (path) => {
         if (path === '/mypage' && location.pathname === '/mypage') return 'active-menu';
@@ -30,8 +37,8 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
 
     const handleMakerClick = () => {
         if (userRole !== 'maker') {
-            if (window.confirm("메이커 권한이 없습니다.\n관리자에게 권한을 신청하시겠습니까?")) {
-                alert("관리자에게 메이커 권한을 요청했습니다! (승인 대기 중)");
+            if (window.confirm("메이커 권한이 없습니다.\n전환 신청 페이지로 이동하시겠습니까?")) {
+                navigate('/change');
             }
         } else {
             navigate('/maker');
@@ -49,6 +56,7 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
                     서포터
                 </Link>
                 
+                {/* 🚨 수정됨: userRole 로직 적용 */}
                 {userRole === 'maker' ? (
                     <Link 
                         to="/maker" 
@@ -70,22 +78,12 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
             <div className="profile-section">
                 <div className="profile-img-wrapper">
                     {loading ? (
-                        <div style={{ 
-                            width: '80px', 
-                            height: '80px', 
-                            borderRadius: '50%', 
-                            background: '#e0e0e0',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                        }}>
-                            ...
-                        </div>
+                        <div className="loading-circle">...</div>
                     ) : (
                         <img
                             src={
-                                userInfo?.modifyProfile
-                                    ? `${getFullImageUrl(userInfo.modifyProfile)}?t=${imageTimestamp}`
+                                safeInfo.modifyProfile
+                                    ? `${getFullImageUrl(safeInfo.modifyProfile)}?t=${imageTimestamp}`
                                     : "/placeholder.png"
                             }
                             alt="프로필"
@@ -103,7 +101,7 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
                 </h3>
                 
                 {isMakerMode ? (
-                    <p className="follow-count">팔로워 0</p>
+                    <p className="follow-count">Maker Studio</p>
                 ) : (
                     <Link to="/mypage/profile" className="profile-setting-btn">내 정보 설정</Link>
                 )}
@@ -115,8 +113,8 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
                     <>
                         <p className="menu-category">나의 문의 관리</p>
                         <ul>
-                            <li className={isActive('/maker/chat-history')}>
-                                <Link to='/maker/chat-history'>서포터 문의</Link>
+                            <li className={isActive('/maker/chat')}>
+                                <Link to='/maker/chat'>서포터 문의</Link>
                             </li>
                         </ul>
                         <p className="menu-category">프로젝트 관리</p>
@@ -159,11 +157,11 @@ const Sidebar = ({ userInfo = {}, loading = false }) => {
                             <li className={isActive('/mypage/chat')}>
                                 <Link to='/mypage/chat'>1:1 채팅 내역</Link>
                             </li>
-                            <li className={isActive('/qna')}>
-                                <Link to='/faq'>나의 문의(Q&A)</Link>
+                            <li className={isActive('/mypage/qna')}>
+                                <Link to='/inquiries'>나의 문의(Q&A)</Link>
                             </li>
                             <li>
-                                <Link to='/notice/:noticeNo'>고객센터</Link>
+                                <Link to='/notice'>고객센터</Link>
                             </li>
                         </ul>
                     </>

@@ -1,11 +1,17 @@
-const TOKEN_STORAGE_KEY = 'loginUser';
+// src/utils/auth.js
+
+// 🚨 [수정 1] 저장된 키 이름을 'token'으로 변경 (로그인 페이지와 통일)
+const TOKEN_STORAGE_KEY = 'token';
 
 const getStorage = () => {
-  if (typeof window === 'undefined' || typeof window.sessionStorage === 'undefined') {
+  if (typeof window === 'undefined' || typeof window.localStorage === 'undefined') {
     return null;
   }
-  return window.sessionStorage;
+  // 🚨 [수정 2] sessionStorage -> localStorage로 변경
+  return window.localStorage;
 };
+
+// --- 아래부터는 원래 있던 좋은 코드들입니다 (유지) ---
 
 const decodeBase64Url = (value) => {
   if (!value) return '';
@@ -54,14 +60,21 @@ export const getStoredToken = () => {
 export const getLoginUserInfo = () => {
   const token = getStoredToken();
   if (!token) return null;
+  
+  // 토큰 파싱해서 정보 추출
   const payload = parseJwt(token);
-  if (!payload) return null;
+  
+  // 파싱 실패해도 토큰이 있으면 최소한의 객체는 반환
+  if (!payload) {
+      return { token };
+  }
 
   return {
     token,
-    userNo: payload.userNo ?? null,
-    userId: payload.sub ?? null,
-    name: payload.name ?? null,
+    // 백엔드 JWT 필드명에 따라 다를 수 있으므로 안전하게 처리
+    userNo: payload.userNo ?? payload.user_no ?? null,
+    userId: payload.sub ?? payload.userId ?? null,
+    name: payload.name ?? payload.nickname ?? null,
     role: payload.userRole ?? payload.role ?? null,
     payload,
   };

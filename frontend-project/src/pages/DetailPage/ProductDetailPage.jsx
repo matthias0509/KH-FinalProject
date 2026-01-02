@@ -61,6 +61,29 @@ const DEFAULT_AVATAR = 'https://placehold.co/80x80?text=Maker';
 
 const stripHtml = (value = '') => value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
+const enhanceStoryHtml = (html) => {
+  if (!html || typeof window === 'undefined' || typeof window.DOMParser === 'undefined') {
+    return html || '';
+  }
+
+  try {
+    const parser = new window.DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+    const images = doc.querySelectorAll('img');
+    images.forEach((img) => {
+      const src = img.getAttribute('src');
+      if (!src || /^https?:/i.test(src) || src.startsWith('data:')) {
+        return;
+      }
+      img.setAttribute('src', resolveProjectImageUrl(src));
+    });
+    return doc.body.innerHTML;
+  } catch (error) {
+    console.error('스토리 HTML 파싱 실패', error);
+    return html;
+  }
+};
+
 const mapCreatorFromSeller = (seller) => {
   if (!seller) {
     return {
@@ -114,11 +137,13 @@ const normalizeProjectDetail = (data = {}) => {
     },
   ].filter(Boolean);
 
-  const storyBlocks = data.storyHtml
+  const normalizedStoryHtml = enhanceStoryHtml(data.storyHtml);
+
+  const storyBlocks = normalizedStoryHtml
     ? [
         {
           heading: data.productTitle ?? '프로젝트 스토리',
-          body: [stripHtml(data.storyHtml) || '프로젝트 소개 내용이 등록되었습니다.'],
+          body: [stripHtml(normalizedStoryHtml) || '프로젝트 소개 내용이 등록되었습니다.'],
         },
       ]
     : projectInit.story;
@@ -153,6 +178,7 @@ const normalizeProjectDetail = (data = {}) => {
       daysLeft,
     },
     story: storyBlocks,
+    storyHtml: normalizedStoryHtml,
     timeline: timeline.length ? timeline : projectInit.timeline,
     creator: creator ?? projectInit.creator,
     rewards: normalizedRewards,
@@ -491,12 +517,12 @@ export default function ProductDetailPage() {
                   <span>달성률</span>
                 </div>
                 <div>
-                  <strong>{currencyFormatter.format(project.funding.raised)}원</strong>
-                  <span>모인 금액</span>
+                  <strong>{currencyFormatter.format(project.funding.goal)}원</strong>
+                  <span>목표 금액</span>
                 </div>
                 <div>
-                  <strong>{project.funding.backers.toLocaleString()}명</strong>
-                  <span>후원자</span>
+                  <strong>{currencyFormatter.format(project.funding.raised)}원</strong>
+                  <span>달성 금액</span>
                 </div>
                 <div>
                   <strong>{project.funding.daysLeft}일</strong>
@@ -548,27 +574,34 @@ export default function ProductDetailPage() {
               {activeDetailTab === 'story' && (
                 <div role="tabpanel">
                   <h2>프로젝트 스토리</h2>
-                  {project.story.map((block) => (
-                    <article key={block.heading} className="detail-story-block">
-                      <h3>{block.heading}</h3>
-                      {block.body.map((paragraph, index) => (
-                        <p key={index}>{paragraph}</p>
-                      ))}
-                      {block.highlights && (
-                        <ul className="detail-story-list">
-                          {block.highlights.map((highlight) => (
-                            <li key={highlight}>{highlight}</li>
-                          ))}
-                        </ul>
-                      )}
-                      {block.image && (
-                        <figure>
-                          <img src={block.image} alt={block.caption ?? block.heading} />
-                          {block.caption && <figcaption>{block.caption}</figcaption>}
-                        </figure>
-                      )}
-                    </article>
-                  ))}
+                  {project.storyHtml ? (
+                    <article
+                      className="detail-story-content"
+                      dangerouslySetInnerHTML={{ __html: project.storyHtml }}
+                    />
+                  ) : (
+                    project.story.map((block) => (
+                      <article key={block.heading} className="detail-story-block">
+                        <h3>{block.heading}</h3>
+                        {block.body.map((paragraph, index) => (
+                          <p key={index}>{paragraph}</p>
+                        ))}
+                        {block.highlights && (
+                          <ul className="detail-story-list">
+                            {block.highlights.map((highlight) => (
+                              <li key={highlight}>{highlight}</li>
+                            ))}
+                          </ul>
+                        )}
+                        {block.image && (
+                          <figure>
+                            <img src={block.image} alt={block.caption ?? block.heading} />
+                            {block.caption && <figcaption>{block.caption}</figcaption>}
+                          </figure>
+                        )}
+                      </article>
+                    ))
+                  )}
                 </div>
               )}
 
@@ -616,34 +649,20 @@ export default function ProductDetailPage() {
             </section>
 
             {activeDetailTab === 'story' && (
-              <>
-                <section className="detail-section">
-                  <h2>생산 및 배송 일정</h2>
-                  <ul className="detail-timeline">
-                    {project.timeline.map((item) => (
-                      <li key={item.title}>
-                        <div className="detail-timeline__date">{item.date}</div>
-                        <div>
-                          <h3>{item.title}</h3>
-                          <p>{item.description}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-
-                <section className="detail-section">
-                  <h2>FAQ</h2>
-                  <div className="detail-faq">
-                    {project.faqs.map((faq) => (
-                      <details key={faq.question}>
-                        <summary>{faq.question}</summary>
-                        <p>{faq.answer}</p>
-                      </details>
-                    ))}
-                  </div>
-                </section>
-              </>
+              <section className="detail-section">
+                <h2>생산 및 배송 일정</h2>
+                <ul className="detail-timeline">
+                  {project.timeline.map((item) => (
+                    <li key={item.title}>
+                      <div className="detail-timeline__date">{item.date}</div>
+                      <div>
+                        <h3>{item.title}</h3>
+                        <p>{item.description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
           </div>
 

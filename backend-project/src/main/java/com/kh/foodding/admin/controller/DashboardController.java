@@ -2,7 +2,7 @@ package com.kh.foodding.admin.controller;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,18 +11,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.foodding.admin.model.service.DashboardService;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
-@RequestMapping("/admin/dashboard") // 기본 URL 변경
-@CrossOrigin(origins = "http://localhost:5173") // React 포트 허용
+@RequestMapping("/admin/dashboard")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173") // React 포트 허용 (CORS 해결)
 public class DashboardController {
 
-    @Autowired
-    private DashboardService dashboardService;
+    private final DashboardService dashboardService;
 
-    // 통계 데이터 조회 API
-    // GET: /admin/dashboard/stats?period=monthly
+    /**
+     * 대시보드 통계 데이터 반환 API
+     * @param period 기간 필터 (daily, monthly, yearly)
+     * @return chartData(List) + summary(Object)
+     */
     @GetMapping("/stats")
-    public Map<String, Object> getStats(@RequestParam(defaultValue = "monthly") String period) {
-        return dashboardService.getDashboardData(period);
+    public ResponseEntity<Map<String, Object>> getStats(
+            @RequestParam(value = "period", defaultValue = "monthly") String period) {
+        
+        // 서비스 호출
+        Map<String, Object> data = dashboardService.getDashboardStats(period);
+        
+        return ResponseEntity.ok(data);
     }
 }

@@ -9,19 +9,34 @@ import '../../styles/ChatListPage.css';
 
 const API_BASE_URL = 'http://localhost:8001/foodding';
 
-const ChatListPage = () => {
+// 🚨 [수정 1] props로 isMaker를 받아옵니다.
+const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
   const navigate = useNavigate();
-  const [chatrooms, setChatrooms] = useState([]);
+  const [chatRooms, setChatrooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentUserNo, setCurrentUserNo] = useState(null);
+  
+  // 내부 state용 userInfo (App.js에서 못 받을 경우 대비)
   const [userInfo, setUserInfo] = useState(null);
   const [userInfoLoading, setUserInfoLoading] = useState(true);
+
+  // 디버깅용 로그
+  useEffect(() => {
+    console.log(`현재 모드: ${isMaker ? '메이커(판매자)' : '서포터(구매자)'}`);
+  }, [isMaker]);
 
   // 사용자 정보 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
+      // App.js에서 받은 정보가 있으면 그걸 우선 사용
+      if (propUserInfo) {
+        setUserInfo(propUserInfo);
+        setUserInfoLoading(false);
+        return;
+      }
+
       const token = localStorage.getItem('token');
       
       if (!token) {
@@ -42,7 +57,6 @@ const ChatListPage = () => {
       } catch (error) {
         console.error('❌ 사용자 정보 로딩 실패:', error);
         
-        // 401 에러(인증 실패) 시 처리
         if (error.response && error.response.status === 401) {
           alert('로그인 정보가 만료되었습니다. 다시 로그인해주세요.');
           localStorage.removeItem('token');
@@ -54,88 +68,72 @@ const ChatListPage = () => {
     };
 
     fetchUserInfo();
-  }, [navigate]);
+  }, [navigate, propUserInfo]);
 
+  // 채팅방 목록 및 유저 번호 로드
   useEffect(() => {
     console.log('🔵 ChatListPage 마운트');
     
     const getUserInfo = async () => {
       const token = localStorage.getItem('token');
-      console.log('🔑 토큰:', token ? '있음' : '없음');
       
       if (!token) {
-        console.log('❌ 토큰 없음');
         setError('로그인이 필요합니다');
         setLoading(false);
         return null;
       }
       
       try {
-        // JWT에서 userNo 추출
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('📦 JWT Payload:', payload);
+        let userNo = null;
+        try {
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1]));
+            userNo = payload.userNo || payload.sub || payload.id || payload.user_no || payload.USER_NO;
+          }
+        } catch (jwtError) {
+          console.warn('⚠️ JWT 파싱 실패, API로 사용자 정보 조회:', jwtError.message);
+        }
         
-        let userNo = payload.userNo || payload.sub || payload.id || payload.user_no || payload.USER_NO;
-        console.log('👤 추출된 userNo:', userNo);
-        
-        // JWT에서 못 찾으면 API 호출
         if (!userNo) {
-          console.log('📡 API로 사용자 정보 가져오기 시도');
           const response = await axios.get(`${API_BASE_URL}/api/mypage/info`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
-          console.log('✅ API 응답:', response.data);
           userNo = response.data.userNo || response.data.USER_NO;
         }
         
         return userNo;
       } catch (e) {
         console.error('❌ 사용자 정보 가져오기 실패:', e);
-        setError('인증 정보가 올바르지 않습니다');
+        if (e.response && e.response.status === 401) {
+            localStorage.removeItem('token');
+            navigate('/login');
+        } else {
+            setError('인증 정보가 올바르지 않습니다');
+        }
         setLoading(false);
         return null;
       }
     };
 
     const loadChatrooms = async (userNo) => {
-      console.log('📡 채팅방 목록 API 호출:', { userNo });
-      
       try {
         const response = await axios.get(`${API_BASE_URL}/chat/rooms`, {
           params: { userNo }
         });
         
-        console.log('✅ 채팅방 목록 응답:', response.data);
-        
         if (Array.isArray(response.data)) {
           setChatrooms(response.data);
-          console.log(`📋 채팅방 ${response.data.length}개 로드 완료`);
+          console.log(`📋 전체 채팅방 ${response.data.length}개 로드 완료`);
         } else {
-          console.warn('⚠️ 응답이 배열이 아님:', response.data);
           setChatrooms([]);
         }
       } catch (error) {
         console.error('❌ 채팅방 목록 로딩 실패:', error);
-        
-        if (error.response) {
-          console.error('에러 상태:', error.response.status);
-          console.error('에러 데이터:', error.response.data);
-          
-          if (error.response.status === 401) {
-            setError('로그인이 만료되었습니다');
-          } else {
-            setError(`서버 오류 (${error.response.status})`);
-          }
-        } else if (error.request) {
-          setError('서버에 연결할 수 없습니다');
-        } else {
-          setError('요청 중 오류가 발생했습니다');
-        }
-        
+        setError('채팅 목록을 불러오지 못했습니다');
         setChatrooms([]);
       } finally {
         setLoading(false);
-        console.log('🏁 로딩 완료');
       }
     };
 
@@ -150,8 +148,9 @@ const ChatListPage = () => {
     };
 
     initialize();
-  }, []);
+  }, [navigate]); // 의존성 배열 유지
 
+  // 채팅방 클릭 핸들러
   const handleChatroomClick = async (chatroom) => {
     if (!currentUserNo) {
         alert('사용자 정보를 불러오지 못했습니다');
@@ -161,14 +160,7 @@ const ChatListPage = () => {
     const buyerNo = chatroom.BUYER;
     const sellerNo = chatroom.SELLER;
     
-    console.log('💬 채팅방 열기:', {
-        chatroomNo: chatroom.CHATROOM_NO,
-        currentUserNo,
-        buyerNo,
-        sellerNo,
-        otherUserNo: chatroom.OTHER_USER_NO
-    });
-    
+    // 읽음 처리 요청
     try {
         await axios.post(`${API_BASE_URL}/chat/messages/read`, null, {
             params: {
@@ -176,9 +168,8 @@ const ChatListPage = () => {
                 userNo: currentUserNo
             }
         });
-        console.log('✅ 읽음 처리 완료');
         
-        // 🔥 읽음 처리 후 채팅방 목록 새로고침
+        // 읽음 처리 후 목록 새로고침
         const response = await axios.get(`${API_BASE_URL}/chat/rooms`, {
             params: { userNo: currentUserNo }
         });
@@ -189,6 +180,7 @@ const ChatListPage = () => {
         console.error('❌ 읽음 처리 실패:', error);
     }
     
+    // 팝업 열기
     const width = 400;
     const height = 650;
     const left = window.screen.width - width - 100;
@@ -200,28 +192,27 @@ const ChatListPage = () => {
         `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no`
     );
 
-        if (chatWindow) {
-            setTimeout(() => {
-                chatWindow.postMessage(
-                    {
-                        type: 'CREATOR_DATA',
-                        creator: {
-                            name: chatroom.OTHER_USER_NAME || '사용자',
-                            avatar: chatroom.OTHER_USER_AVATAR || 'https://placehold.co/80x80?text=User'
-                        },
-                        buyerNo: buyerNo,
-                        sellerNo: sellerNo,
-                        currentUserNo: currentUserNo
+    if (chatWindow) {
+        setTimeout(() => {
+            chatWindow.postMessage(
+                {
+                    type: 'CREATOR_DATA',
+                    creator: {
+                        name: chatroom.OTHER_USER_NAME || '사용자',
+                        avatar: chatroom.OTHER_USER_AVATAR || 'https://placehold.co/80x80?text=User'
                     },
-                    window.location.origin
-                );
-            }, 500);
-        }
-    };
+                    buyerNo: buyerNo,
+                    sellerNo: sellerNo,
+                    currentUserNo: currentUserNo
+                },
+                window.location.origin
+            );
+        }, 500);
+    }
+  };
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
-    
     try {
       const date = new Date(dateString);
       const now = new Date();
@@ -234,16 +225,33 @@ const ChatListPage = () => {
       if (diffMins < 60) return `${diffMins}분 전`;
       if (diffHours < 24) return `${diffHours}시간 전`;
       if (diffDays < 7) return `${diffDays}일 전`;
-      
       return date.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
     } catch (e) {
       return '';
     }
   };
 
-  const filteredChatrooms = chatrooms.filter(chatroom =>
-    chatroom.OTHER_USER_NAME?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // 🚨 [수정 2] 검색어 필터링 + 모드(메이커/서포터) 필터링 적용
+  const filteredChatrooms = chatRooms.filter(chatroom => {
+    // 1. 검색어 일치 확인
+    const matchesSearch = chatroom.OTHER_USER_NAME?.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    // 2. 모드에 따른 구분 (판매자 vs 구매자)
+    // currentUserNo가 로드되기 전이면 필터링하지 않음 (안전장치)
+    if (!currentUserNo) return matchesSearch;
+
+    let matchesMode = true;
+    if (isMaker) {
+        // 메이커 모드: 내가 판매자인 방만 표시 (SELLER가 나인 경우)
+        // 주의: DB 타입에 따라 문자열/숫자 비교가 다를 수 있으니 == 사용
+        matchesMode = (chatroom.SELLER == currentUserNo);
+    } else {
+        // 서포터 모드: 내가 구매자인 방만 표시 (BUYER가 나인 경우)
+        matchesMode = (chatroom.BUYER == currentUserNo);
+    }
+
+    return matchesSearch && matchesMode;
+  });
 
   return (
     <div className="page-wrapper">
@@ -270,15 +278,16 @@ const ChatListPage = () => {
           ) : (
             <div className="chat-list-page">
               <div className="chat-list-page__header">
+                {/* 🚨 [수정 3] 제목 동적 변경 */}
                 <h1 className="chat-list-page__title">
                   <MessageCircle size={28} />
-                  메시지
+                  {isMaker ? '서포터 문의 관리' : '나의 메시지'}
                 </h1>
                 <div className="chat-list-page__search">
                   <Search size={18} className="chat-list-page__search-icon" />
                   <input
                     type="text"
-                    placeholder="대화 검색..."
+                    placeholder={isMaker ? "서포터 이름 검색" : "메이커 이름 검색"}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="chat-list-page__search-input"
@@ -290,8 +299,12 @@ const ChatListPage = () => {
                 {filteredChatrooms.length === 0 ? (
                   <div className="chat-list-page__empty">
                     <MessageCircle size={48} className="chat-list-page__empty-icon" />
-                    <p className="chat-list-page__empty-text">아직 대화가 없습니다</p>
-                    <p className="chat-list-page__empty-subtext">프로젝트에서 판매자와 대화를 시작해보세요</p>
+                    <p className="chat-list-page__empty-text">
+                        {isMaker ? '접수된 문의가 없습니다' : '아직 대화가 없습니다'}
+                    </p>
+                    <p className="chat-list-page__empty-subtext">
+                        {isMaker ? '새로운 문의가 오면 여기에 표시됩니다' : '프로젝트에서 판매자와 대화를 시작해보세요'}
+                    </p>
                   </div>
                 ) : (
                   filteredChatrooms.map((chatroom) => (

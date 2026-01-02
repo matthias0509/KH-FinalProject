@@ -40,7 +40,7 @@ public class ProjectController {
     private final ProjectAssetStorageService projectAssetStorageService;
 
 
-
+    // 프로젝트 제출
     @Operation(summary="프로젝트 제출 메소드", description="프로젝트 제출 시 상품 테이블에 저장됩니다.")
     @PostMapping("insert")
     public String insertProject(@RequestBody Project p) {
@@ -52,7 +52,7 @@ public class ProjectController {
         }
     }
     
-
+    // 프로젝트 임시저장
      @Operation(summary="프로젝트 임시 저장 메소드", description="프로젝트 임시 저장 시 임시 테이블에 저장됩니다.")
     @PostMapping("imsi")
     public String imsiProject(@RequestBody Project p) {
@@ -64,19 +64,22 @@ public class ProjectController {
         }
     }
     
-    
+
+    // 임시저장한 프로젝트들 불러오는 기능
     @GetMapping("drafts")
     public ArrayList<Project> selectProject(@RequestParam int userNo){
 
         return ProjectService.selectProject(userNo);
     } 
 
+    // 임시저장한 프로젝트들 이어쓰기 위한 기능
     @GetMapping("drafts/{tempNo}")
     public Project selectProjectDetail(@PathVariable long tempNo, @RequestParam int userNo){
 
         return ProjectService.selectProjectById(userNo, tempNo);
     }
 
+    // 썸네일 저장 API
     @PostMapping("thumbnail")
     public Map<String, String> uploadThumbnail(@RequestPart("file") MultipartFile file) {
 
@@ -92,7 +95,7 @@ public class ProjectController {
     }
     
 
-    // 삭제 기능
+    // 임시저장 프로젝트 삭제
     @PatchMapping("drafts/{tempNo}")
     public String deleteProject(@PathVariable long tempNo, @RequestParam int userNo) {
         int result = ProjectService.deleteProject(userNo, tempNo);

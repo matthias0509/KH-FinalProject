@@ -6,35 +6,39 @@
 .page-wrapper {
     background-color: #f9fafb;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .mypage-container {
     display: flex;
     max-width: 1200px;
+    width: 100%;
     margin: 0 auto;
     padding: 40px 20px;
     gap: 40px;
     font-family: 'Pretendard', sans-serif;
     color: #333;
+    box-sizing: border-box;
 }
 
-/* --- 사이드바 레이아웃 --- */
+/* 사이드바 고정 */
 .sidebar { 
-    width: 250px; 
-    flex-shrink: 0;
+    width: 250px !important;
+    min-width: 250px !important;
+    flex-shrink: 0 !important;
     display: flex;
     flex-direction: column;
-    gap: 20px; /* 요소 간 간격 */
+    gap: 20px;
 }
 
-/* --- 모드 스위치 (서포터/메이커) --- */
+/* 모드 스위치 */
 .mode-switch {
     display: flex; 
     background-color: #fff; 
     border-radius: 20px;
     padding: 4px; 
-    /* margin-bottom: 30px; -> sidebar gap으로 대체 */
-    border: 1px solid #e9ecef; /* 테두리 추가로 선명하게 */
+    border: 1px solid #e9ecef;
 }
 
 .mode-btn {
@@ -59,43 +63,24 @@
     background-color: #fff; 
     color: #b91c1c; 
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border: 1px solid #eee; /* 활성 버튼 테두리 */
+    border: 1px solid #eee;
 }
 
-.mode-btn.link-btn:hover { 
-    color: #b91c1c; 
-    background-color: #fff5f5;
-}
+.mode-btn.link-btn:hover { color: #b91c1c; background-color: #fff5f5; }
+.mode-btn.locked { cursor: not-allowed; color: #adb5bd; }
+.lock-icon { font-size: 12px; margin-left: 6px; }
 
-.mode-btn.locked {
-    cursor: not-allowed; 
-    color: #adb5bd; 
-    background-color: transparent;
-}
-.mode-btn.locked:hover { 
-    background-color: #f1f3f5; 
-    color: #868e96; 
-}
-
-.lock-icon { 
-    font-size: 12px; 
-    margin-left: 6px; 
-    margin-bottom: 2px; 
-}
-
-
-/* --- [수정됨] 프로필 영역 디자인 --- */
+/* 프로필 영역 */
 .profile-section { 
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 30px 20px;
     background-color: #fff;
-    border-radius: 12px; /* 카드 형태 */
+    border-radius: 12px;
     border: 1px solid #e9ecef;
 }
 
-/* 1. 프로필 이미지 래퍼 (둥근 틀) */
 .profile-img-wrapper {
     width: 100px;
     height: 100px;
@@ -103,138 +88,434 @@
     overflow: hidden;
     background-color: #f0f0f0;
     border: 2px solid #eaeaea;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     margin-bottom: 15px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-/* 2. 실제 이미지 */
-.sidebar-profile-img {
+.sidebar-profile-img { width: 100%; height: 100%; object-fit: cover; }
+.username { font-size: 18px; font-weight: 700; color: #333; margin: 0 0 10px 0; text-align: center; }
+.follow-count { font-size: 13px; color: #868e96; margin: 0; }
+
+.profile-setting-btn {
+    display: inline-block; padding: 6px 16px; border: 1px solid #e9ecef;
+    background: #fff; border-radius: 20px; cursor: pointer;
+    font-size: 13px; text-decoration: none; color: #868e96; transition: all 0.2s;
+}
+.profile-setting-btn:hover { border-color: #ced4da; color: #495057; background-color: #f8f9fa; }
+
+/* 메뉴 리스트 */
+.menu-list ul { list-style: none; padding: 0; margin-bottom: 25px; }
+.menu-category { font-size: 12px; color: #adb5bd; margin-bottom: 10px; font-weight: 600; }
+.menu-list li { padding: 0; font-size: 15px; color: #495057; margin-bottom: 2px; }
+.menu-list ul li a {
+    text-decoration: none; color: inherit; display: flex; align-items: center;
+    justify-content: space-between; width: 100%; padding: 10px 12px;
+    border-radius: 8px; transition: all 0.2s;
+}
+.menu-list ul li a:hover { color: #333; background-color: #f1f3f5; }
+.active-menu a { color: #b91c1c !important; font-weight: bold; background-color: #fff5f5; }
+
+/* 메인 콘텐츠 영역 */
+.main-content { flex: 1; min-width: 0; width: 100%; }
+.greeting { font-size: 26px; margin-bottom: 20px; }
+.page-title { font-size: 24px; margin-bottom: 24px; font-weight: bold; color: #333; border-bottom: 2px solid #333; padding-bottom: 15px; }
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .mypage-container { flex-direction: column; padding: 20px 16px; }
+    .sidebar { width: 100% !important; }
+}
+
+/* =================================================================
+   [★ 후원 내역 리스트 (History) - "좋아요" 페이지 같은 카드형 그리드]
+   ================================================================= */
+
+/* 1. 컨테이너: Flex를 끄고 Grid를 강제 적용 (!important) */
+.funding-list-container {
+    display: grid !important; /* Flex 무시하고 Grid 강제 */
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important; /* 반응형 바둑판 */
+    gap: 24px;
+    margin-top: 20px;
     width: 100%;
+}
+
+/* 2. 개별 카드: 세로형 박스 */
+.history-card {
+    display: flex !important;
+    flex-direction: column !important; /* 세로 배치 */
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
     height: 100%;
+    position: relative;
+    text-align: left;
+}
+
+.history-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border-color: #ff7a00;
+}
+
+/* 3. 이미지: 카드 상단에 꽉 차게 */
+.history-thumb {
+    width: 100%;
+    height: 160px; /* 이미지 높이 고정 */
     object-fit: cover;
-    transition: transform 0.3s ease;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #f1f3f5;
+    border-radius: 0; /* 둥근 모서리 제거 (카드 안쪽) */
 }
 
-.profile-img-wrapper:hover .sidebar-profile-img {
-    transform: scale(1.05); /* 마우스 올리면 살짝 확대 */
+/* 4. 내용 영역 */
+.history-content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 8px;
 }
 
-/* 3. 닉네임 텍스트 */
-.username { 
-    font-size: 18px; 
+/* 메타 정보 (날짜, 상태) */
+.history-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: #868e96;
+}
+
+.history-status {
+    font-weight: 700;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background-color: #fff5f0;
+    color: #ff7a00;
+}
+
+/* 제목 */
+.history-title {
+    font-size: 16px;
     font-weight: 700;
     color: #333;
-    margin: 0 0 10px 0;
-    letter-spacing: -0.5px;
-    text-align: center;
-    cursor: default; /* 클릭 안 됨 표시 */
-}
-
-/* 4. 내 정보 설정 버튼 */
-.profile-setting-btn {
-    display: inline-block; 
-    padding: 6px 16px; 
-    border: 1px solid #e9ecef;
-    background: #fff; 
-    border-radius: 20px; 
-    cursor: pointer; 
-    font-size: 13px;
-    text-decoration: none; 
-    color: #868e96; 
-    transition: all 0.2s;
-}
-
-.profile-setting-btn:hover { 
-    border-color: #ced4da; 
-    color: #495057; 
-    background-color: #f8f9fa;
-}
-
-/* 5. 메이커 뱃지 */
-.maker-badge {
-    display: inline-block;
-    font-size: 11px;
-    background-color: #ff4757;
-    color: white;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 6px;
-    vertical-align: middle;
-    font-weight: 500;
-    transform: translateY(-1px);
-}
-
-/* 6. 팔로워 카운트 */
-.follow-count {
-    font-size: 13px;
-    color: #868e96;
     margin: 0;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 44px;
 }
 
+.history-maker { font-size: 12px; color: #adb5bd; margin: 0; }
 
-/* --- 메뉴 리스트 --- */
-.menu-list ul { 
-    list-style: none; 
-    padding: 0; 
-    margin-bottom: 25px; 
-}
-
-.menu-category { 
-    font-size: 12px; 
-    color: #adb5bd; 
-    margin-bottom: 10px; 
-    font-weight: 600;
-}
-
-.menu-list li { 
-    padding: 0; 
-    font-size: 15px; 
-    color: #495057; 
-    margin-bottom: 2px; 
-}
-
-.menu-list ul li a {
-    text-decoration: none; 
-    color: inherit; 
-    display: flex; 
+/* 5. 하단 액션 */
+.history-actions {
+    padding: 12px 16px;
+    border-top: 1px solid #f8f9fa;
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: space-between; 
-    width: 100%; 
-    padding: 10px 12px; /* 클릭 영역 확보 */
-    border-radius: 8px; /* 메뉴 배경 둥글게 */
+    margin-top: auto;
+}
+
+.history-price { font-size: 16px; font-weight: 800; color: #333; }
+
+.history-btn {
+    padding: 6px 14px;
+    background-color: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #868e96;
+    font-weight: 600;
+    text-decoration: none;
     transition: all 0.2s;
 }
 
-.menu-list ul li a:hover { 
-    color: #333; 
-    background-color: #f1f3f5; /* 호버 시 연한 회색 배경 */
+.history-btn:hover { border-color: #ff7a00; color: #ff7a00; }
+
+/* 페이지네이션 */
+.pagination {
+    display: flex; justify-content: center; gap: 6px; margin-top: 40px;
+    width: 100%; grid-column: 1 / -1;
+}
+.page-btn {
+    width: 32px; height: 32px; border: 1px solid #e9ecef;
+    background: #fff; border-radius: 4px; color: #495057;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 14px; transition: all 0.2s;
+}
+.page-btn:hover:not(:disabled) { border-color: #ff7a00; color: #ff7a00; }
+.page-btn.active { background: #ff7a00; color: #fff; border-color: #ff7a00; font-weight: bold; }
+.page-btn:disabled { color: #ced4da; cursor: not-allowed; background: #f8f9fa; }
+
+/* 결과 없음 */
+.empty-state-box {
+    text-align: center; padding: 80px 0; color: #868e96;
+    font-size: 15px; background: #f8f9fa; border-radius: 12px;
+    border: 1px dashed #dee2e6; grid-column: 1 / -1;
 }
 
-.active-menu a { 
-    color: #b91c1c !important; 
-    font-weight: bold; 
-    background-color: #fff5f5; /* 활성 메뉴 배경색 */
+/* =======================================================
+   [2. 후원 내역 상세 페이지 (Detail) - 깔끔한 대시보드형]
+   ======================================================= */
+
+/* 프로젝트 정보 카드 (상단 큰 박스) */
+.project-info-card {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
 }
 
-/* --- 메인 콘텐츠 영역 공통 --- */
-.main-content { 
-    flex: 1; 
-    min-width: 0; /* flexbox 오버플로우 방지 */
+.project-info-card:hover {
+    border-color: #ff7a00;
+    box-shadow: 0 8px 20px rgba(255, 122, 0, 0.1);
+    transform: translateY(-2px);
 }
 
-.greeting { 
-    font-size: 26px; 
-    margin-bottom: 20px; 
+/* 상단 상태 뱃지 */
+.status-badge-lg {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    background: #f8f9fa;
+    color: #495057;
 }
 
-.page-title { 
-    font-size: 24px; 
-    margin-bottom: 24px; 
-    font-weight: bold; 
+.status-badge-lg.done {
+    background: #fff5f0;
+    color: #ff7a00;
+}
+
+/* 프로젝트 레이아웃 (이미지 + 텍스트) */
+.project-detail-row {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.project-thumb-lg {
+    width: 120px;
+    height: 90px;
+    border-radius: 8px;
+    object-fit: cover;
+    background-color: #f1f3f5;
+    border: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.project-text-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.maker-name { font-size: 13px; color: #adb5bd; font-weight: 500; }
+.project-title-lg { font-size: 18px; font-weight: 700; color: #333; line-height: 1.3; }
+.funding-date { font-size: 13px; color: #868e96; margin-top: 4px; }
+
+/* --- [핵심] 상세 정보 그리드 (좌우 배치) --- */
+.detail-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 1:1 비율로 나란히 */
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+/* 반응형: 모바일에서는 위아래로 쌓임 */
+@media (max-width: 768px) {
+    .detail-grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* 정보 섹션 박스 */
+.info-section {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 24px;
+    height: 100%; /* 높이 맞춤 */
+}
+
+.info-section h3 {
+    font-size: 16px;
+    font-weight: 700;
     color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
     border-bottom: 2px solid #333;
+}
+
+/* 정보 리스트 */
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.info-row span:first-child { color: #868e96; font-weight: 500; } /* 라벨 */
+.info-row span:last-child { color: #333; font-weight: 500; text-align: right; } /* 값 */
+
+.info-row.highlight {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed #e9ecef;
+}
+
+.total-price {
+    color: #ff7a00 !important;
+    font-size: 18px;
+    font-weight: 800 !important;
+}
+
+/* 하단 버튼 */
+.btn-group-center { display: flex; justify-content: center; margin-top: 20px; }
+
+.list-btn {
+    padding: 12px 40px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.list-btn:hover {
+    background: #ff7a00;
+}
+/* =======================================================
+   [결제 정보 & 배송지 정보 - 디자인 리뉴얼]
+   ======================================================= */
+
+/* 그리드 컨테이너 (좌우 배치 유지) */
+.detail-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px; /* 간격 넓힘 */
+    margin-bottom: 40px;
+}
+
+@media (max-width: 768px) {
+    .detail-grid-container { grid-template-columns: 1fr; }
+}
+
+/* 1. 결제 정보 (영수증 스타일) */
+.payment-summary-box {
+    background-color: #fafafa; /* 연한 회색 배경 */
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 30px;
+    position: relative;
+}
+
+.payment-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 25px;
     padding-bottom: 15px;
+    border-bottom: 2px solid #333; /* 제목 아래 굵은 선 */
+}
+
+/* 결제 리스트 아이템 */
+.payment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    font-size: 15px;
+    color: #555;
+}
+
+.payment-label { color: #666; }
+.payment-value { font-weight: 600; color: #333; }
+
+/* 총 결제금액 강조 (점선 구분) */
+.payment-total-row {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 2px dashed #ddd; /* 영수증 느낌 점선 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-label { font-size: 16px; font-weight: 700; color: #333; }
+.total-amount { font-size: 24px; font-weight: 800; color: #ff7a00; } /* 주황색 대형 폰트 */
+
+
+/* 2. 배송지 정보 (깔끔한 박스 스타일) */
+.delivery-info-box {
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 내용 위아래 분산 */
+}
+
+.delivery-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.delivery-row {
+    display: flex;
+    margin-bottom: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.delivery-label {
+    width: 80px; /* 라벨 너비 고정 */
+    color: #888;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.delivery-value {
+    color: #333;
+    font-weight: 500;
+    word-break: keep-all; /* 주소 줄바꿈 예쁘게 */
+}
+
+/* 배송 상태 뱃지 */
+.delivery-status-badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 16px;
+    background-color: #f1f3f5;
+    color: #495057;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 14px;
+    align-self: flex-start;
 }

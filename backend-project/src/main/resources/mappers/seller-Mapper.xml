@@ -1,41 +1,107 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="sellerMapper">
+<mapper namespace="sellerApplicationMapper">
 
-    <select id="selectSellerNoByUser" parameterType="long" resultType="long">
-        SELECT SELLER_NO
-        FROM SELLER_PROFILE
-        WHERE USER_NO = #{userNo}
-    </select>
+    <resultMap id="sellerApplicationResult" type="com.kh.foodding.seller.model.vo.SellerApplication">
+        <id property="applicationNo" column="APPLICATION_NO" />
+        <result property="userNo" column="USER_NO" />
+        
+        <result property="applicantName" column="APPLICANT_NAME" />
+        <result property="applicantEmail" column="APPLICANT_EMAIL" />
+        <result property="applicantPhone" column="APPLICANT_PHONE" />
+        
+        <result property="businessName" column="BUSINESS_NAME" />
+        <result property="businessNumber" column="BUSINESS_NUMBER" />
+        <result property="website" column="WEBSITE" />
+        <result property="brandDescription" column="BRAND_DESCRIPTION" />
+        <result property="documentPath" column="DOCUMENT_PATH" />
+        
+        <result property="status" column="STATUS" />
+        <result property="adminMemo" column="ADMIN_MEMO" />
+        <result property="createdAt" column="CREATED_AT" />
+        <result property="updatedAt" column="UPDATED_AT" />
+    </resultMap>
 
-    <insert id="insertSellerProfile" parameterType="map">
-        <selectKey resultType="long" keyProperty="sellerNo" order="BEFORE">
-            SELECT SEQ_SELLER_PROFILE_NO.NEXTVAL FROM DUAL
+    <insert id="insertApplication" parameterType="com.kh.foodding.seller.model.vo.SellerApplication">
+        <selectKey resultType="long" keyProperty="applicationNo" order="BEFORE">
+            SELECT SEQ_SELLER_APP_NO.NEXTVAL FROM DUAL
         </selectKey>
-        INSERT INTO SELLER_PROFILE (
-            SELLER_NO,
-            INTRODUCTION,
-            USER_NO
+        INSERT INTO SELLER_APPLICATION (
+            APPLICATION_NO, 
+            USER_NO,
+            APPLICANT_NAME, 
+            APPLICANT_EMAIL, 
+            APPLICANT_PHONE,
+            BUSINESS_NAME, 
+            BUSINESS_NUMBER, 
+            STATUS, 
+            CREATED_AT
         ) VALUES (
-            #{sellerNo},
-            NVL(#{introduction}, '신규 메이커입니다.'),
-            #{userNo}
+            #{applicationNo}, 
+            #{userNo},
+            #{applicantName}, 
+            #{applicantEmail}, 
+            #{applicantPhone},
+            #{businessName}, 
+            #{businessNumber}, 
+            'PENDING', 
+            SYSDATE
         )
     </insert>
 
-    <select id="selectSellerProfile" parameterType="long" resultType="com.kh.foodding.project.model.vo.SellerProfile">
-        SELECT
-            sp.SELLER_NO AS sellerNo,
-            sp.USER_NO AS userNo,
-            sp.INTRODUCTION AS introduction,
-            u.USER_NAME AS sellerName,
-            u.NICKNAME,
-            u.EMAIL,
-            u.PHONE,
-            u.MODIFY_PROFILE AS profileImage
-        FROM SELLER_PROFILE sp
-        JOIN TB_USER u ON sp.USER_NO = u.USER_NO
-        WHERE sp.SELLER_NO = #{sellerNo}
+    <select id="selectLatestByUser" parameterType="long" resultMap="sellerApplicationResult">
+        SELECT * FROM (
+            SELECT * FROM SELLER_APPLICATION
+            WHERE USER_NO = #{userNo}
+            ORDER BY CREATED_AT DESC
+        ) WHERE ROWNUM = 1
     </select>
+    
+    <select id="selectActivePendingByUser" parameterType="long" resultMap="sellerApplicationResult">
+        SELECT * FROM SELLER_APPLICATION
+        WHERE USER_NO = #{userNo} AND STATUS = 'PENDING'
+    </select>
+
+    <select id="selectByStatus" parameterType="map" resultMap="sellerApplicationResult">
+        SELECT * FROM SELLER_APPLICATION
+        <where>
+            <if test="status != null and status != '' and status != 'ALL'">
+                AND STATUS = #{status}
+            </if>
+        </where>
+        ORDER BY CREATED_AT DESC
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="sellerApplicationResult">
+        SELECT * FROM SELLER_APPLICATION WHERE APPLICATION_NO = #{applicationNo}
+    </select>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE SELLER_APPLICATION
+        SET STATUS = #{status}, 
+            ADMIN_MEMO = #{adminMemo},
+            UPDATED_AT = SYSDATE
+        WHERE APPLICATION_NO = #{applicationNo}
+    </update>
+
+    <update id="updateUserRole" parameterType="long">
+        UPDATE TB_USER
+        SET USER_ROLE = 'MAKER'
+        WHERE USER_NO = (
+            SELECT USER_NO 
+            FROM SELLER_APPLICATION 
+            WHERE APPLICATION_NO = #{applicationNo}
+        )
+    </update>
+
+    <insert id="insertSellerProfile" parameterType="long">
+        INSERT INTO SELLER_PROFILE (SELLER_NO, USER_NO, INTRODUCTION)
+        SELECT 
+            SEQ_SELLER_PROFILE_NO.NEXTVAL, 
+            USER_NO, 
+            '안녕하세요. ' || BUSINESS_NAME || ' 입니다.' 
+        FROM SELLER_APPLICATION 
+        WHERE APPLICATION_NO = #{applicationNo}
+    </insert>
 
 </mapper>

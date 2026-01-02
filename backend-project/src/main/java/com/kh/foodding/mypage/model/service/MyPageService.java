@@ -14,21 +14,22 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.foodding.mypage.model.dao.MyPageDao;
-import com.kh.foodding.mypage.model.vo.FundingHistory;
-import com.kh.foodding.mypage.model.vo.LikedProject;
 import com.kh.foodding.mypage.model.vo.MyPage;
+import com.kh.foodding.mypage.model.vo.LikedProject;    
+import com.kh.foodding.mypage.model.vo.FundingHistory; 
+import com.kh.foodding.mypage.model.vo.FollowedSeller; 
 
 @Service
 public class MyPageService {
 
     @Autowired
-    private MyPageDao mypageDao;
+    private MyPageDao myPageDao; // 🚨 변수명 myPageDao로 통일
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     public MyPage selectMemberInfo(String userId) {
-        return mypageDao.selectMemberById(userId);
+        return myPageDao.selectMemberById(userId);
     }
 
     /**
@@ -36,7 +37,7 @@ public class MyPageService {
      */
     @Transactional
     public boolean updateAccountInfo(MyPage myPage) {
-        MyPage current = mypageDao.selectMemberById(myPage.getUserId());
+        MyPage current = myPageDao.selectMemberById(myPage.getUserId());
         
         if (myPage.getUserName() == null || myPage.getUserName().trim().isEmpty()) {
             myPage.setUserName(current.getUserName());
@@ -49,17 +50,17 @@ public class MyPageService {
         if (myPage.getUserPwd() != null && !myPage.getUserPwd().trim().isEmpty()) {
             String encodedPwd = passwordEncoder.encode(myPage.getUserPwd());
             myPage.setUserPwd(encodedPwd);
-            mypageDao.updatePassword(myPage.getUserId(), encodedPwd);
+            myPageDao.updatePassword(myPage.getUserId(), encodedPwd);
         }
 
-        return mypageDao.updateMemberInfo(myPage) == 1;
+        return myPageDao.updateMemberInfo(myPage) == 1;
     }
 
     /**
      * 비밀번호 확인 로직
      */
     public boolean verifyPassword(String userId, String rawPassword) {
-        String storedHashedPassword = mypageDao.selectHashedPassword(userId);
+        String storedHashedPassword = myPageDao.selectHashedPassword(userId);
         if (storedHashedPassword == null) return false;
         
         return passwordEncoder.matches(rawPassword, storedHashedPassword);
@@ -72,14 +73,13 @@ public class MyPageService {
     public String updateProfileImage(String userId, MultipartFile file) {
         if (file == null || file.isEmpty()) return null;
 
-        // 🚨 [수정 완료] 실제 파일이 있는 폴더(WebConfig와 통일)
+        // 실제 파일이 있는 폴더(WebConfig와 통일)
         String savePath = "C:/foodding/profile_images/"; 
         
         File folder = new File(savePath);
         if (!folder.exists()) folder.mkdirs();
 
         String originalName = file.getOriginalFilename();
-        // 확장자 추출 안전장치 (파일에 확장자가 없을 경우 대비)
         String ext = "";
         if (originalName != null && originalName.contains(".")) {
             ext = originalName.substring(originalName.lastIndexOf("."));
@@ -93,54 +93,49 @@ public class MyPageService {
             return null;
         }
 
-        // DB에는 파일명만 저장 (Sidebar.js에서 경로를 붙여줌)
         String dbPath = storedName;
-        int result = mypageDao.updateProfileImage(userId, dbPath);
+        int result = myPageDao.updateProfileImage(userId, dbPath);
 
         return (result == 1) ? dbPath : null;
     }
 
     @Transactional
     public boolean deleteProfileImage(String userId) {
-        return mypageDao.updateProfileImage(userId, null) == 1;
+        return myPageDao.updateProfileImage(userId, null) == 1;
     }
 
     @Transactional
     public boolean updateBaseInfo(MyPage myPage) {
         if (myPage.getUserName() == null || myPage.getUserName().trim().isEmpty()) {
-            MyPage current = mypageDao.selectMemberById(myPage.getUserId());
+            MyPage current = myPageDao.selectMemberById(myPage.getUserId());
             myPage.setUserName(current.getUserName());
         }
-        return mypageDao.updateMemberInfo(myPage) == 1;
+        return myPageDao.updateMemberInfo(myPage) == 1;
     }
 
     @Transactional
     public boolean withdrawMember(String userId) {
-        return mypageDao.deleteMember(userId) == 1;
+        return myPageDao.deleteMember(userId) == 1;
     }
     
     /**
      * [추가] 마이페이지 메인 정보 (회원정보 + 통계 같이 줌)
      */
     public Map<String, Object> getMyPageInfo(String userId) {
-        // 1. 회원 기본 정보
-        MyPage member = mypageDao.selectMemberById(userId);
+        MyPage member = myPageDao.selectMemberById(userId);
         
-        // 2. 통계 정보 (좋아요 수, 팔로잉 수)
-        Map<String, Object> stats = mypageDao.selectMyPageStats(member.getUserNo());
+        Map<String, Object> stats = myPageDao.selectMyPageStats(member.getUserNo());
         
-        // 3. 결과 합치기
         Map<String, Object> result = new HashMap<>();
         
-        // 기존 Member 객체 필드들을 map에 풀어서 넣기 (프론트에서 쓰기 편하게)
         result.put("userNo", member.getUserNo());
         result.put("userId", member.getUserId());
         result.put("userName", member.getUserName());
         result.put("nickname", member.getNickname());
         result.put("modifyProfile", member.getModifyProfile());
-        result.put("role", member.getUserRole());
+        // 🚨 필드명 확인 필요 (보통 userRole 또는 role)
+        result.put("role", member.getUserRole()); 
         
-        // 통계가 없으면 0으로 채워서 넣기
         if (stats == null) {
             stats = new HashMap<>();
             stats.put("likedCount", 0);
@@ -152,20 +147,67 @@ public class MyPageService {
         return result;
     }
 
-
+    /**
+     * [추가] 좋아요한 프로젝트 목록 조회
+     */
     public List<LikedProject> getLikedProjects(String userId) {
-        // userId로 userNo를 알아내야 함
-        MyPage member = mypageDao.selectMemberById(userId);
-        return mypageDao.selectLikedProjects(member.getUserNo());
+        MyPage member = myPageDao.selectMemberById(userId);
+        return myPageDao.selectLikedProjects(member.getUserNo());
     }
     
     /**
      * ✅ [추가] 내 후원 내역 가져오기
      */
     public List<FundingHistory> getFundingHistory(String userId) {
-        MyPage member = mypageDao.selectMemberById(userId);
+        MyPage member = myPageDao.selectMemberById(userId);
         if (member == null) return List.of();
         
-        return mypageDao.selectFundingHistory(member.getUserNo());
+        return myPageDao.selectFundingHistory(member.getUserNo());
+    }
+    
+    /**
+     * ✅ [추가] 팔로우 목록 가져오기
+     */
+    public List<FollowedSeller> getFollowList(String userId) {
+        MyPage member = myPageDao.selectMemberById(userId);
+        if (member == null) return List.of();
+        
+        return myPageDao.selectFollowList(member.getUserNo());
+    }
+    
+    // 후원 상세 조회 서비스
+    public Map<String, Object> selectFundingDetail(String orderNo, int userNo) {
+        // Mapper에 파라미터를 2개 넘겨야 하므로 Map으로 묶음
+        Map<String, Object> params = new HashMap<>();
+        params.put("orderNo", orderNo);
+        params.put("userNo", userNo);
+        
+        return myPageDao.selectFundingDetail(params);
+    }
+    @Transactional
+    public int cancelFunding(String orderNo, int userNo) {
+        // 1. 주문 상태 변경 ('PAY' -> 'CANCEL')
+        int result = myPageDao.updateOrderStatusToCancel(orderNo, userNo);
+        
+        if (result > 0) {
+            // 2. 상태 변경 성공 시, 프로젝트 모금액 차감
+            myPageDao.updateProductAmountDecrease(orderNo);
+        }
+        
+        return result; // 1이면 성공, 0이면 실패
+    }
+    /**
+     * 🚨 [필수 확인] 취소된 후원 내역 가져오기
+     * (이게 없으면 Controller에서 빨간 줄 에러가 뜹니다)
+     */
+    public List<FundingHistory> getCanceledFundingHistory(String userId) {
+        // 1. 유저 정보 조회
+        MyPage member = myPageDao.selectMemberById(userId);
+        
+        // 2. 없으면 빈 리스트 리턴
+        if (member == null) return List.of();
+        
+        // 3. 방금 작성하신 DAO 메서드 호출
+        return myPageDao.selectCanceledFundingHistory(member.getUserNo());
     }
 }
