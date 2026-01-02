@@ -31,7 +31,7 @@ export const login = async (userId, userPwd) => {
 export const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    // sessionStorage.removeItem("loginUser"); // 필요하다면 유지
+    sessionStorage.removeItem("loginUser");
 };
 
 export const getCurrentUser = () => {

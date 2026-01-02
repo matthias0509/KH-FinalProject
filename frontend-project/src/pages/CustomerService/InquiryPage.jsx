@@ -25,7 +25,7 @@ export default function InquiryPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        const token = sessionStorage.getItem("loginUser");
+        const token = sessionStorage.getItem("loginUser") || localStorage.getItem("token");
         if (!token) {
             alert("로그인 정보가 없습니다. 다시 로그인 해주세요.");
             navigate('/login');

@@ -53,14 +53,12 @@ export default function LoginPage() {
                 throw new Error("서버로부터 응답이 없습니다.");
             }
 
-            // 2. 토큰 추출 로직 (객체인 경우와 문자열인 경우 모두 대응)
-            // response.token이 있으면 그걸 쓰고, 없으면 response 자체가 문자열인지 확인
             const token = response.token || (typeof response === 'string' ? response : null);
             const userData = response.user; // 사용자 정보가 같이 오는 경우
 
             // 3. 토큰 존재 여부에 따른 처리
             if (token) {
-                // (1) 토큰 저장
+                sessionStorage.setItem('loginUser', token);
                 localStorage.setItem("token", token);
 
                 // (2) 사용자 정보가 있다면 저장 (선택사항)
