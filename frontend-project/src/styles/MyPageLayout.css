@@ -120,7 +120,45 @@
 /* 메인 콘텐츠 영역 */
 .main-content { flex: 1; min-width: 0; width: 100%; }
 .greeting { font-size: 26px; margin-bottom: 20px; }
-.page-title { font-size: 24px; margin-bottom: 24px; font-weight: bold; color: #333; border-bottom: 2px solid #333; padding-bottom: 15px; }
+.page-title { 
+    font-size: 24px; 
+    margin-bottom: 30px; 
+    font-weight: bold; 
+    color: #333; 
+    border-bottom: 2px solid #f97316; 
+    padding-bottom: 15px; 
+}
+
+/* 필터 버튼 영역 */
+.funding-filter-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.funding-filter-tab {
+    padding: 10px 24px;
+    border: 1px solid #e9ecef;
+    background: #fff;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #868e96;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.funding-filter-tab:hover {
+    border-color: #f97316;
+    color: #f97316;
+}
+
+.funding-filter-tab.active {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+}
 
 /* 반응형 */
 @media (max-width: 768px) {
@@ -132,27 +170,28 @@
    [★ 후원 내역 리스트 (History) - "좋아요" 페이지 같은 카드형 그리드]
    ================================================================= */
 
-/* 1. 컨테이너: Flex를 끄고 Grid를 강제 적용 (!important) */
+/* 1. 컨테이너: Grid 강제 적용 */
 .funding-list-container {
-    display: grid !important; /* Flex 무시하고 Grid 강제 */
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)) !important; /* 반응형 바둑판 */
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
     gap: 24px;
-    margin-top: 20px;
+    margin-top: 30px;
     width: 100%;
+    padding-top: 20px;
 }
 
 /* 2. 개별 카드: 세로형 박스 */
 .history-card {
     display: flex !important;
-    flex-direction: column !important; /* 세로 배치 */
+    flex-direction: column !important;
     background: #fff;
     border: 1px solid #eee;
     border-radius: 12px;
     overflow: hidden;
     transition: all 0.2s ease;
-    height: 100%;
     position: relative;
     text-align: left;
+    height: auto;
 }
 
 .history-card:hover {
@@ -164,11 +203,11 @@
 /* 3. 이미지: 카드 상단에 꽉 차게 */
 .history-thumb {
     width: 100%;
-    height: 160px; /* 이미지 높이 고정 */
+    height: 160px;
     object-fit: cover;
     background-color: #f8f9fa;
     border-bottom: 1px solid #f1f3f5;
-    border-radius: 0; /* 둥근 모서리 제거 (카드 안쪽) */
+    flex-shrink: 0;
 }
 
 /* 4. 내용 영역 */
@@ -187,79 +226,153 @@
     align-items: center;
     font-size: 12px;
     color: #868e96;
+    margin-bottom: 8px;
+}
+
+.history-date {
+    color: #868e96;
 }
 
 .history-status {
     font-weight: 700;
     font-size: 11px;
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: 4px;
+    background-color: #f1f3f5;
+    color: #495057;
+}
+
+.history-status.pay {
     background-color: #fff5f0;
     color: #ff7a00;
 }
 
+.history-status.cancel {
+    background-color: #fee;
+    color: #dc2626;
+}
+
 /* 제목 */
 .history-title {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: #333;
-    margin: 0;
+    margin: 8px 0;
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 44px;
+    min-height: 42px;
 }
 
-.history-maker { font-size: 12px; color: #adb5bd; margin: 0; }
+.history-maker { 
+    font-size: 12px; 
+    color: #adb5bd; 
+    margin: 0; 
+}
 
 /* 5. 하단 액션 */
 .history-actions {
-    padding: 12px 16px;
+    padding: 16px;
     border-top: 1px solid #f8f9fa;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 10px;
     margin-top: auto;
 }
 
-.history-price { font-size: 16px; font-weight: 800; color: #333; }
+.history-actions > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.history-price { 
+    font-size: 17px; 
+    font-weight: 800; 
+    color: #333; 
+    margin-bottom: 6px;
+}
 
 .history-btn {
-    padding: 6px 14px;
+    padding: 10px 14px;
     background-color: #fff;
     border: 1px solid #e9ecef;
     border-radius: 6px;
-    font-size: 12px;
+    font-size: 13px;
     color: #868e96;
     font-weight: 600;
     text-decoration: none;
     transition: all 0.2s;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    display: block;
+    box-sizing: border-box;
+    line-height: 1.3;
 }
 
-.history-btn:hover { border-color: #ff7a00; color: #ff7a00; }
+.history-btn:hover { 
+    border-color: #ff7a00; 
+    color: #ff7a00; 
+    background-color: #fff5f0;
+}
 
 /* 페이지네이션 */
 .pagination {
-    display: flex; justify-content: center; gap: 6px; margin-top: 40px;
-    width: 100%; grid-column: 1 / -1;
+    display: flex; 
+    justify-content: center; 
+    gap: 6px; 
+    margin-top: 40px;
+    width: 100%; 
+    grid-column: 1 / -1;
 }
+
 .page-btn {
-    width: 32px; height: 32px; border: 1px solid #e9ecef;
-    background: #fff; border-radius: 4px; color: #495057;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    font-size: 14px; transition: all 0.2s;
+    width: 32px; 
+    height: 32px; 
+    border: 1px solid #e9ecef;
+    background: #fff; 
+    border-radius: 4px; 
+    color: #495057;
+    cursor: pointer; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 14px; 
+    transition: all 0.2s;
 }
-.page-btn:hover:not(:disabled) { border-color: #ff7a00; color: #ff7a00; }
-.page-btn.active { background: #ff7a00; color: #fff; border-color: #ff7a00; font-weight: bold; }
-.page-btn:disabled { color: #ced4da; cursor: not-allowed; background: #f8f9fa; }
+
+.page-btn:hover:not(:disabled) { 
+    border-color: #ff7a00; 
+    color: #ff7a00; 
+}
+
+.page-btn.active { 
+    background: #ff7a00; 
+    color: #fff; 
+    border-color: #ff7a00; 
+    font-weight: bold; 
+}
+
+.page-btn:disabled { 
+    color: #ced4da; 
+    cursor: not-allowed; 
+    background: #f8f9fa; 
+}
 
 /* 결과 없음 */
 .empty-state-box {
-    text-align: center; padding: 80px 0; color: #868e96;
-    font-size: 15px; background: #f8f9fa; border-radius: 12px;
-    border: 1px dashed #dee2e6; grid-column: 1 / -1;
+    text-align: center; 
+    padding: 80px 0; 
+    color: #868e96;
+    font-size: 15px; 
+    background: #f8f9fa; 
+    border-radius: 12px;
+    border: 1px dashed #dee2e6; 
+    grid-column: 1 / -1;
 }
 
 /* =======================================================
@@ -333,12 +446,11 @@
 /* --- [핵심] 상세 정보 그리드 (좌우 배치) --- */
 .detail-grid-container {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* 1:1 비율로 나란히 */
-    gap: 24px;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
     margin-bottom: 40px;
 }
 
-/* 반응형: 모바일에서는 위아래로 쌓임 */
 @media (max-width: 768px) {
     .detail-grid-container {
         grid-template-columns: 1fr;
@@ -351,7 +463,7 @@
     border: 1px solid #eee;
     border-radius: 12px;
     padding: 24px;
-    height: 100%; /* 높이 맞춤 */
+    height: 100%;
 }
 
 .info-section h3 {
@@ -360,7 +472,7 @@
     color: #333;
     margin-bottom: 20px;
     padding-bottom: 12px;
-    border-bottom: 2px solid #333;
+    border-bottom: 2px solid #f97316;
 }
 
 /* 정보 리스트 */
@@ -373,8 +485,8 @@
     line-height: 1.5;
 }
 
-.info-row span:first-child { color: #868e96; font-weight: 500; } /* 라벨 */
-.info-row span:last-child { color: #333; font-weight: 500; text-align: right; } /* 값 */
+.info-row span:first-child { color: #868e96; font-weight: 500; }
+.info-row span:last-child { color: #333; font-weight: 500; text-align: right; }
 
 .info-row.highlight {
     margin-top: 16px;
@@ -406,25 +518,14 @@
 .list-btn:hover {
     background: #ff7a00;
 }
+
 /* =======================================================
    [결제 정보 & 배송지 정보 - 디자인 리뉴얼]
    ======================================================= */
 
-/* 그리드 컨테이너 (좌우 배치 유지) */
-.detail-grid-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px; /* 간격 넓힘 */
-    margin-bottom: 40px;
-}
-
-@media (max-width: 768px) {
-    .detail-grid-container { grid-template-columns: 1fr; }
-}
-
 /* 1. 결제 정보 (영수증 스타일) */
 .payment-summary-box {
-    background-color: #fafafa; /* 연한 회색 배경 */
+    background-color: #fafafa;
     border: 1px solid #eee;
     border-radius: 12px;
     padding: 30px;
@@ -437,7 +538,7 @@
     color: #333;
     margin-bottom: 25px;
     padding-bottom: 15px;
-    border-bottom: 2px solid #333; /* 제목 아래 굵은 선 */
+    border-bottom: 2px solid #f97316;
 }
 
 /* 결제 리스트 아이템 */
@@ -457,15 +558,14 @@
 .payment-total-row {
     margin-top: 25px;
     padding-top: 25px;
-    border-top: 2px dashed #ddd; /* 영수증 느낌 점선 */
+    border-top: 2px dashed #ddd;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .total-label { font-size: 16px; font-weight: 700; color: #333; }
-.total-amount { font-size: 24px; font-weight: 800; color: #ff7a00; } /* 주황색 대형 폰트 */
-
+.total-amount { font-size: 24px; font-weight: 800; color: #ff7a00; }
 
 /* 2. 배송지 정보 (깔끔한 박스 스타일) */
 .delivery-info-box {
@@ -475,7 +575,7 @@
     padding: 30px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* 내용 위아래 분산 */
+    justify-content: space-between;
 }
 
 .delivery-title {
@@ -495,7 +595,7 @@
 }
 
 .delivery-label {
-    width: 80px; /* 라벨 너비 고정 */
+    width: 80px;
     color: #888;
     font-weight: 500;
     flex-shrink: 0;
@@ -504,7 +604,7 @@
 .delivery-value {
     color: #333;
     font-weight: 500;
-    word-break: keep-all; /* 주소 줄바꿈 예쁘게 */
+    word-break: keep-all;
 }
 
 /* 배송 상태 뱃지 */

@@ -1,7 +1,8 @@
 package com.kh.foodding.mypage.model.service;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kh.foodding.common.FileStorageUtils;
 import com.kh.foodding.mypage.model.dao.MyPageDao;
 import com.kh.foodding.mypage.model.vo.MyPage;
 import com.kh.foodding.mypage.model.vo.LikedProject;    
@@ -73,11 +75,7 @@ public class MyPageService {
     public String updateProfileImage(String userId, MultipartFile file) {
         if (file == null || file.isEmpty()) return null;
 
-        // 실제 파일이 있는 폴더(WebConfig와 통일)
-        String savePath = "C:/foodding/profile_images/"; 
-        
-        File folder = new File(savePath);
-        if (!folder.exists()) folder.mkdirs();
+        Path profileDir = FileStorageUtils.getProfileImagesDir();
 
         String originalName = file.getOriginalFilename();
         String ext = "";
@@ -87,7 +85,9 @@ public class MyPageService {
         String storedName = UUID.randomUUID() + ext;
 
         try {
-            file.transferTo(new File(savePath + storedName));
+            Path target = profileDir.resolve(storedName);
+            Files.createDirectories(target.getParent());
+            file.transferTo(target.toFile());
         } catch (IOException e) {
             e.printStackTrace();
             return null;

@@ -10,27 +10,30 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kh.foodding.common.FileStorageUtils;
+
 /**
  * 프로젝트 생성 중 업로드되는 에셋(썸네일 등)을 로컬에 저장하는 단순 서비스.
  */
 @Service
 public class ProjectAssetStorageService {
 
-    private static final String DEFAULT_THUMBNAIL_DIR = "uploads/thumbnails";
-
     private final Path thumbnailRoot;
+    private final Path storyImageRoot;
 
     public ProjectAssetStorageService() {
-        this(DEFAULT_THUMBNAIL_DIR);
+        Path baseUploads = FileStorageUtils.getUploadsDir();
+        this.thumbnailRoot = createDirectory(baseUploads.resolve("thumbnails"));
+        this.storyImageRoot = createDirectory(baseUploads.resolve("stories"));
     }
 
-    ProjectAssetStorageService(String thumbnailDir) {
-        this.thumbnailRoot = Paths.get(System.getProperty("user.dir"), thumbnailDir).toAbsolutePath().normalize();
+    private Path createDirectory(Path path) {
         try {
-            Files.createDirectories(this.thumbnailRoot);
+            Files.createDirectories(path);
         } catch (Exception e) {
-            throw new IllegalStateException("썸네일 디렉토리를 생성할 수 없습니다.", e);
+            throw new IllegalStateException("에셋 디렉토리를 생성할 수 없습니다.", e);
         }
+        return path;
     }
 
     public String storeThumbnail(MultipartFile thumbnail) {
@@ -53,5 +56,27 @@ public class ProjectAssetStorageService {
         }
 
         return "/uploads/thumbnails/" + filename;
+    }
+
+    public String storeStoryImage(MultipartFile image) {
+        if (image == null || image.isEmpty()) {
+            throw new IllegalArgumentException("이미지 파일이 비어 있습니다.");
+        }
+
+        String extension = StringUtils.getFilenameExtension(image.getOriginalFilename());
+        String filename = UUID.randomUUID().toString().replaceAll("-", "");
+        if (StringUtils.hasText(extension)) {
+            filename += "." + extension;
+        }
+
+        Path target = this.storyImageRoot.resolve(filename);
+
+        try {
+            image.transferTo(target.toFile());
+        } catch (IOException e) {
+            throw new RuntimeException("스토리 이미지 저장 중 오류가 발생했습니다.", e);
+        }
+
+        return "/uploads/stories/" + filename;
     }
 }

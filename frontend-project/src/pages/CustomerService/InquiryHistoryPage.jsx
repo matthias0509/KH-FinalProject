@@ -16,8 +16,12 @@ export default function InquiryHistoryPage() {
     const [loading, setLoading] = useState(true);
 
     const fetchInquiries = async () => {
-        const token = sessionStorage.getItem("loginUser");
-        if (!token) return;
+        const token = sessionStorage.getItem("loginUser") || localStorage.getItem("token");
+        if (!token) {
+            alert('로그인이 필요한 서비스입니다.');
+            setLoading(false);
+            return;
+        }
 
         try {
             const response = await axios({

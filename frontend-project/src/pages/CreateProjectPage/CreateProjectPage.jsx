@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 import { getLoginUserNo } from '../../utils/auth';
 import { fetchSellerProfileStatus } from '../../api/sellerApplicationApi';
 
-import { imsiProjectAxios, insertProjectAxios, fetchDraftDetailAxios, uploadThumbnailAxios } from './ProjectApi';
+import { imsiProjectAxios, insertProjectAxios, fetchDraftDetailAxios, uploadThumbnailAxios, uploadStoryImageAxios } from './ProjectApi';
 import DatePickerField from '../../components/DatePickerField';
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
@@ -381,18 +381,24 @@ export default function CreateProjectPage() {
 
     const limitedFiles = files.slice(0, remainingSlots);
 
-    limitedFiles.forEach((file) => {
+    limitedFiles.forEach(async (file) => {
       if (!file.type.startsWith('image/')) {
         window.alert(`${file.name}은(는) 이미지가 아닙니다.`);
         return;
       }
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          editor.chain().focus().setImage({ src: reader.result, alt: file.name, width: '50%', align: 'center' }).run();
+
+      try {
+        const { url, path: relativePath } = await uploadStoryImageAxios(file);
+        const imageUrl = url || resolveProjectImageUrl(relativePath || '');
+        if (imageUrl) {
+          editor.chain().focus().setImage({ src: imageUrl, alt: file.name, width: '50%', align: 'center' }).run();
+        } else {
+          window.alert('이미지 업로드 URL을 가져올 수 없습니다.');
         }
-      };
-      reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('스토리 이미지 업로드 실패', error);
+        window.alert('이미지 업로드에 실패했습니다. 다시 시도해 주세요.');
+      }
     });
 
     if (files.length > limitedFiles.length) {
