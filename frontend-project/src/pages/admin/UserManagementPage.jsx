@@ -6,30 +6,33 @@ import '../../styles/UserManagement.css'; // CSS 경로 확인 필요
 // [Helper] 상태/권한 한글 변환 함수
 // ===================================================
 const formatStatus = (yn) => {
-    switch(yn) {
-        case 'Y': return '활성';
-        case 'N': return '탈퇴';
+    // ✅ 값이 없으면 기본값 'N'(활성)으로 처리
+    const status = yn || 'N'; 
+    switch(status) {
+        case 'N': return '활성';
+        case 'Y': return '탈퇴';
         case 'S': return '정지';
-        default: return yn;
+        default: return '활성';
     }
 };
 
 const formatRole = (role) => {
-    switch(role) {
+    const userRole = role || 'SUPPORTER'; // 기본값 서포터
+    switch(userRole) {
         case 'SUPPORTER': return '서포터';
         case 'USER':      return '서포터';
         case 'MAKER':     return '메이커';
-        default: return role;
+        default: return userRole;
     }
 };
 
 // ===================================================
-// A. 회원 상세 정보 및 수정 모달 (기존 코드 유지 + 안전장치 추가)
+// A. 회원 상세 정보 및 수정 모달
 // ===================================================
 const UserDetailModal = ({ user, onClose, onRefresh }) => {
     if (!user) return null;
 
-    // 초기값 세팅 (null 방지)
+    // ✅ 초기값 세팅 (null 방지 및 기본값 N 설정)
     const [editData, setEditData] = useState({
         userNo: user.userNo,
         nickname: user.nickname,
@@ -37,7 +40,7 @@ const UserDetailModal = ({ user, onClose, onRefresh }) => {
         mainAddress: user.mainAddress || '',
         detailAddress: user.detailAddress || '',
         email: user.email,
-        userYn: user.userYn || 'Y',      // 값이 없으면 활성(Y) 기본
+        userYn: user.userYn || 'N',      // 값이 없으면 활성(N) 기본
         userRole: user.userRole || 'SUPPORTER', // 값이 없으면 서포터 기본
     });
 
@@ -48,7 +51,6 @@ const UserDetailModal = ({ user, onClose, onRefresh }) => {
 
     const handleSave = async () => {
         try {
-            // 포트 8001 확인
             await axios.put('http://localhost:8001/foodding/api/admin/user/update', editData);
             alert(`[System] ${user.userId} 님의 정보가 수정되었습니다.`);
             onRefresh(); 
@@ -64,10 +66,10 @@ const UserDetailModal = ({ user, onClose, onRefresh }) => {
         let confirmMsg = '';
 
         if (actionType === '정지') {
-            newUserYn = user.userYn === 'S' ? 'Y' : 'S';
+            newUserYn = user.userYn === 'S' ? 'N' : 'S'; // 정지(S) <-> 활성(N)
             confirmMsg = user.userYn === 'S' ? '정지 해제' : '활동 정지';
         } else if (actionType === '탈퇴') {
-            newUserYn = 'N';
+            newUserYn = 'Y'; // 탈퇴는 Y
             confirmMsg = '강제 탈퇴';
         }
 
@@ -134,8 +136,9 @@ const UserDetailModal = ({ user, onClose, onRefresh }) => {
 
                             <label>회원상태</label>
                             <select name="userYn" value={editData.userYn} onChange={handleChange} className="input-field">
-                                <option value="Y">활성 (Y)</option>
-                                <option value="N">탈퇴 (N)</option>
+                                {/* ✅ N이 활성, Y가 탈퇴 */}
+                                <option value="N">활성 (N)</option>
+                                <option value="Y">탈퇴 (Y)</option>
                                 <option value="S">정지 (S)</option>
                             </select>
                             
@@ -170,40 +173,33 @@ const UserDetailModal = ({ user, onClose, onRefresh }) => {
 };
 
 // ===================================================
-// B. 메인 탭 컴포넌트 (검색/페이징 로직 수정됨)
+// B. 메인 탭 컴포넌트
 // ===================================================
 const UserManagementTab = () => {
-    // 1. 상태 관리
     const [userList, setUserList] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [totalCount, setTotalCount] = useState(0); // 전체 인원수 표시용
+    const [totalCount, setTotalCount] = useState(0); 
     
-    // 검색 및 필터
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('all');
     
     const [modalUser, setModalUser] = useState(null); 
 
-    // 2. 데이터 불러오기 함수 (useCallback 사용)
     const fetchUsers = useCallback(async (currentPage, currentFilter, currentSearch) => {
         try {
-            console.log(`[API 요청] 페이지:${currentPage}, 상태:${currentFilter}, 검색어:${currentSearch}`);
-            
             const response = await axios.get('http://localhost:8001/foodding/api/admin/user/list', {
                 params: {
                     page: currentPage,
-                    size: 10,               // 10명씩 보기 고정
+                    size: 10,
                     status: currentFilter,
                     keyword: currentSearch
                 }
             });
 
-            console.log("✅ 백엔드 응답 데이터:", response.data);
-
             const list = response.data.list || [];
             const pages = response.data.totalPages || 1;
-            const count = response.data.totalCount || 0; // 백엔드에서 totalCount 보내준다고 가정
+            const count = response.data.totalCount || 0;
 
             setUserList(list);
             setTotalPages(pages);
@@ -215,19 +211,15 @@ const UserManagementTab = () => {
         }
     }, []);
 
-    // 3. 페이지나 필터 상태가 변하면 실행 (검색어는 제외 - 버튼 클릭시 실행)
     useEffect(() => {
         fetchUsers(page, filterStatus, searchTerm);
-    }, [page, filterStatus, fetchUsers]); // searchTerm을 빼서 타이핑할 때마다 검색되는 것 방지
+    }, [page, filterStatus, fetchUsers]); 
 
-    // 4. 검색 버튼 클릭 핸들러
     const handleSearch = () => {
-        setPage(1); // 검색 시 1페이지로 초기화
-        // setPage가 비동기라 바로 반영이 안 될 수 있으므로, 인자로 1을 직접 넘겨서 호출
+        setPage(1); 
         fetchUsers(1, filterStatus, searchTerm);
     };
     
-    // 엔터키 지원
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') handleSearch();
     };
@@ -263,8 +255,9 @@ const UserManagementTab = () => {
                         className="filter-select"
                     >
                         <option value="all">전체</option>
-                        <option value="Y">활동중 (Y)</option>
-                        <option value="N">탈퇴 (N)</option>
+                        {/* ✅ N이 활성, Y가 탈퇴로 수정됨 */}
+                        <option value="N">활동중 (N)</option>
+                        <option value="Y">탈퇴 (Y)</option>
                         <option value="S">정지 (S)</option>
                     </select>
                 </div>
@@ -288,14 +281,15 @@ const UserManagementTab = () => {
                     <tbody>
                         {userList && userList.length > 0 ? (
                             userList.map((user) => (
-                                <tr key={user.userNo} className={`user-row ${user.userYn === 'N' ? 'status-deleted' : ''}`}>
+                                <tr key={user.userNo} className={`user-row ${user.userYn === 'Y' ? 'status-deleted' : ''}`}>
                                     <td>{user.userNo}</td>
                                     <td>{user.userId}</td>
                                     <td>{user.userName} <span className="sub-text">({user.nickname})</span></td>
                                     <td>{user.email}</td>
                                     <td>{formatRole(user.userRole)}</td>
                                     <td>
-                                        <span className={`status-badge ${user.userYn}`}>
+                                        {/* ✅ 상태 배지 표시 로직도 N/Y에 맞춰 수정 */}
+                                        <span className={`status-badge ${user.userYn || 'N'}`}>
                                             {formatStatus(user.userYn)}
                                         </span>
                                     </td>
@@ -319,7 +313,7 @@ const UserManagementTab = () => {
                 </table>
             </div>
 
-            {/* 페이지네이션 (10명 초과시에만 작동) */}
+            {/* 페이지네이션 */}
             {totalPages > 0 && (
                 <div className="pagination-area">
                     <button 

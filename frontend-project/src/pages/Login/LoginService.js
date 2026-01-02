@@ -1,48 +1,40 @@
-import axios from "axios";
+import axios from 'axios';
 
-const API_URL = "http://localhost:8001/foodding";
+// 포트번호 8001 확인 (백엔드 주소)
+const API_URL = "http://localhost:8001/foodding"; 
 
-const api = axios.create({
-  baseURL: API_URL,
-});
-
-// ✅ 요청 인터셉터 (JWT 첨부)
-api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("accessToken");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// ✅ 응답 인터셉터
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      sessionStorage.removeItem("accessToken");
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login?expired=true";
-      }
-    }
-    return Promise.reject(error);
-  }
-);
+const api = axios.create({ baseURL: API_URL });
 
 export const login = async (userId, userPwd) => {
-  try {
-    const res = await api.post("/login", { userId, userPwd });
-    const token = res.data;
+    try {
+        const response = await api.post("/login", { userId, userPwd });
+        
+        // 🚨 [핵심 수정] 백엔드가 { token: "...", user: {...} } 객체를 줍니다.
+        // 기존처럼 문자열 길이를 체크하거나 sessionStorage에 바로 넣지 말고,
+        // 데이터를 있는 그대로 LoginPage로 넘겨줘야 합니다.
+        
+        if (response.data && response.data.token) {
+            return response.data; // { token, user } 객체 전체 반환
+        }
 
-    if (token && token.split(".").length === 3) {
-      sessionStorage.setItem("accessToken", token);
-      return token;
+        return null;
+    } catch (error) {
+        throw error;
+
+        console.error("로그인 통신 실패!", error);
+        return null;
+
     }
-    return null;
-  } catch (e) {
-    console.error("로그인 실패", e);
-    return null;
-  }
 };
 
-export default api;
+// 로그아웃 시 로컬스토리지 정리 (App.js와 맞춤)
+export const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    // sessionStorage.removeItem("loginUser"); // 필요하다면 유지
+};
+
+export const getCurrentUser = () => {
+    // App.js가 localStorage를 쓰므로 여기도 맞추는 게 좋습니다.
+    return localStorage.getItem("token");
+};
