@@ -67,4 +67,9 @@ public class Message {
     public void setChatroomNo(Long chatroomNo) {
         this.chatroomNo = chatroomNo;
     }
+    
+    // JSON 응답을 위한 isRead 필드 (readYn을 boolean으로 변환)
+    public boolean getIsRead() {
+        return "Y".equals(this.readYn);
+    }
 }
