@@ -160,25 +160,43 @@ const DashboardTab = () => {
                     </div>
                 </div>
 
-                <div className="chart-card">
-                    <h3>👥 기간별 후원자 수</h3>
-                    <div className="chart-wrapper">
-                        {chartData.length > 0 ? (
-                            <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="label" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Bar dataKey="supporterCount" fill="#82ca9d" name="후원자 수(명)" barSize={30} radius={[5, 5, 0, 0]} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        ) : (
-                            <div className="no-data">데이터가 없습니다.</div>
-                        )}
+                {/* 차트 영역 (후원자 수) */}
+                    <div className="chart-card">
+                        <h3>👥 기간별 후원자 수</h3>
+                        <div className="chart-wrapper">
+                            {chartData.length > 0 ? (
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                        <XAxis dataKey="label" />
+                                        
+                                       
+                                        <YAxis 
+                                            allowDecimals={false} 
+                                            domain={[0, dataMax => (dataMax < 5 ? dataMax + 1 : 'auto')]}
+                                            tickCount={
+                                                Math.max(...chartData.map(d => d.supporterCount)) < 5 
+                                                ? Math.max(...chartData.map(d => d.supporterCount)) + 1 
+                                                : undefined
+                                            }
+                                        />
+                                        
+                                        <Tooltip cursor={{fill: 'transparent'}} />
+                                        <Legend />
+                                        <Bar 
+                                            dataKey="supporterCount" 
+                                            fill="#82ca9d" 
+                                            name="후원자 수(명)" 
+                                            barSize={30} 
+                                            radius={[5, 5, 0, 0]} 
+                                        />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className="no-data">데이터가 없습니다.</div>
+                            )}
+                        </div>
                     </div>
-                </div>
             </section>
         </div>
     );

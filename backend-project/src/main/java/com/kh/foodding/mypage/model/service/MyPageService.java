@@ -147,17 +147,14 @@ public class MyPageService {
         return result;
     }
 
-    /**
-     * [추가] 좋아요한 프로젝트 목록 조회
-     */
+ 
+    //좋아요한 프로젝트 목록 조회
     public List<LikedProject> getLikedProjects(String userId) {
         MyPage member = myPageDao.selectMemberById(userId);
         return myPageDao.selectLikedProjects(member.getUserNo());
     }
     
-    /**
-     * ✅ [추가] 내 후원 내역 가져오기
-     */
+    // 내 후원 내역 가져오기
     public List<FundingHistory> getFundingHistory(String userId) {
         MyPage member = myPageDao.selectMemberById(userId);
         if (member == null) return List.of();
@@ -165,9 +162,7 @@ public class MyPageService {
         return myPageDao.selectFundingHistory(member.getUserNo());
     }
     
-    /**
-     * ✅ [추가] 팔로우 목록 가져오기
-     */
+    // 팔로우 목록 가져오기
     public List<FollowedSeller> getFollowList(String userId) {
         MyPage member = myPageDao.selectMemberById(userId);
         if (member == null) return List.of();
