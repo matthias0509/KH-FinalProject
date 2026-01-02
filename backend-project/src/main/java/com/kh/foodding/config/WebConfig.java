@@ -12,6 +12,8 @@ import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistra
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.kh.foodding.common.FileStorageUtils;
+
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
@@ -23,13 +25,14 @@ public class WebConfig implements WebMvcConfigurer {
         ensureDirectory(projectUploads);
         uploadLocations.add(projectUploads.toUri().toString());
 
-        // 2. 기존 코드 (C:/foodding/uploads) - 건드리지 않음
-        Path windowsUploads = Paths.get("C:/foodding/uploads");
-        uploadLocations.add(windowsUploads.toUri().toString());
-        
-        // 🚨 [여기만 추가하세요!] 실제 파일이 있는 'profile_images' 폴더를 리스트에 추가
-        Path profileUploads = Paths.get("C:/foodding/profile_images"); 
-        uploadLocations.add(profileUploads.toUri().toString());
+        // 2. OS에 관계없이 사용자 디렉터리 하위 저장소 사용
+        Path storageUploads = FileStorageUtils.getUploadsDir();
+        uploadLocations.add(storageUploads.toUri().toString());
+
+        Path profileUploads = FileStorageUtils.getProfileImagesDir();
+        if (!profileUploads.equals(storageUploads)) {
+            uploadLocations.add(profileUploads.toUri().toString());
+        }
     }
 
     // ... 아래 ensureDirectory랑 addResourceHandlers는 그대로 두세요 ...

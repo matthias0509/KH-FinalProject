@@ -1,12 +1,14 @@
 package com.kh.foodding.member.model.service;
 
 import java.io.File;
+import java.nio.file.Path;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.foodding.member.dao.MemberDao;
 import com.kh.foodding.member.model.vo.Member;
+import com.kh.foodding.common.FileStorageUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,15 +17,10 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 	
 	private final MemberDao memberDao;
-    private final String savePath = "c:/foodding/profile_images/"; // 파일 저장 경로를 상수로 관리
 
     public int insertMember(Member m, MultipartFile upfile) {
-    	System.out.println("전달된 upfile: " + (upfile != null ? upfile.getOriginalFilename() : "NULL"));
-    	// 💡 저장 경로 폴더가 없으면 생성하는 코드 추가
-        File folder = new File(savePath);
-        if (!folder.exists()) {
-            folder.mkdirs(); // d:/foodding/profile_images/ 폴더를 생성함
-        }
+		System.out.println("전달된 upfile: " + (upfile != null ? upfile.getOriginalFilename() : "NULL"));
+		Path profileDir = FileStorageUtils.getProfileImagesDir();
         
         if (upfile != null && !upfile.isEmpty()) {
             // 💡 파일 첨부가 있을 경우
@@ -40,7 +37,8 @@ public class MemberService {
             
             // 2. 파일을 지정된 경로에 실제로 저장
             try {
-                upfile.transferTo(new File(savePath + changeFileName));
+                File dest = profileDir.resolve(changeFileName).toFile();
+                upfile.transferTo(dest);
             } catch (Exception e) {
                 // 파일 저장 실패 시 예외 처리
                 e.printStackTrace();
