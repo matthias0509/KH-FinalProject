@@ -97,9 +97,7 @@ export default function Header() {
               (로그인)
             </Link>
 
-             <Link to="/logout" className='header__nav-link'>
-              (로그아웃)
-            </Link>
+             
             
            
           </nav>

@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // 👈 추가 필요
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -20,24 +21,39 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    // 🚨 핵심 1: JwtFilter 주입 (이게 있어야 토큰 검사를 합니다)
+    private final JwtFilter jwtFilter; 
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // CSRF 비활성화 (JWT 사용 시 필수)
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 1. CORS 설정 연결
+            .csrf(csrf -> csrf.disable()) 
+            .cors(cors -> cors.configurationSource(corsConfigurationSource())) 
             .authorizeHttpRequests(auth -> auth
-                // 2. Preflight(OPTIONS) 요청은 무조건 허용 (CORS 필수)
+                // 1. Preflight 요청 허용
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
-                // 3. 정적 리소스 및 API 경로 허용
-                .requestMatchers("/uploads/**").permitAll()      // 이미지 업로드 경로
-                .requestMatchers("/api/payment/**").permitAll()  // 결제 관련
-                .requestMatchers("/api/**").permitAll()          // 일반 API
-                .requestMatchers("/admin/**").permitAll()        // 🚨 관리자 대시보드 경로 추가
+                // 2. 누구나 접근 가능한 경로 (로그인, 회원가입, 이미지 등)
+                .requestMatchers("/foodding/uploads/**").permitAll()
+                .requestMatchers("/foodding/login", "/foodding/member/insert", "/foodding/findId/**").permitAll()
                 
-                // 그 외 모든 요청 허용 (개발 중 편의를 위해)
+                // 👑 3. [관리자] 전용 API 잠금 (가장 중요!)
+                // /api/admin/ 으로 시작하는 모든 요청은 'ADMIN' 권한이 있어야 함
+                .requestMatchers("/foodding/api/admin/**").hasAuthority("ADMIN")
+                
+                // 🏭 4. [메이커] 전용 API 잠금
+                .requestMatchers("/foodding/api/maker/**").hasAuthority("MAKER")
+
+                // 👤 5. [회원] 로그인 필수 API (마이페이지, 결제 등)
+                // authenticated(): 권한 상관없이 로그인만 되어 있으면 OK
+                .requestMatchers("/foodding/api/my/**", "/foodding/api/payment/**").authenticated()
+                
+                // 6. 나머지 요청은 일단 허용 (개발 완료 후 .authenticated()로 잠그는 것 추천)
                 .anyRequest().permitAll()
             )
+            // 🚨 핵심 2: 필터 배치 (ID/PW 검사 전에 JWT 필터가 먼저 돌도록 설정)
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            
             .httpBasic(basic -> basic.disable())
             .formLogin(form -> form.disable());
 
@@ -48,26 +64,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         
-        // 4. 프론트엔드 주소 허용 (포트 번호 5173, 3000 등)
-        // setAllowedOrigins 대신 setAllowedOriginPatterns 사용 (Credentials 허용 시 권장)
         config.setAllowedOriginPatterns(List.of(
             "http://localhost:5173", 
             "http://localhost:3000"
         ));
         
-        // 허용할 HTTP 메서드
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        
-        // 모든 헤더 허용
         config.setAllowedHeaders(List.of("*"));
-        
-        // 인증 정보(쿠키/토큰/세션) 포함 허용
         config.setAllowCredentials(true);
-        
-        // Preflight 요청 캐시 시간 (1시간)
         config.setMaxAge(3600L);
 
-        // 모든 경로에 대해 위 설정 적용
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

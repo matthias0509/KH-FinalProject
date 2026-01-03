@@ -12,18 +12,14 @@
     </select>
 
     <select id="countTempProjects" resultType="int">
-        SELECT COUNT(*) FROM TEMPORARY WHERE USER_NO = #{userNo}
+        SELECT COUNT(*) FROM TEMPORARY WHERE SELLER_NO = #{userNo}
     </select>
 
     <select id="selectProjectStatusCounts" resultType="map">
         SELECT 
-            -- 심사중: 승인여부(N) 이면서 상태가 OPEN인 경우 (혹은 별도 상태값 정의)
             COUNT(CASE WHEN PRODUCT_YN = 'N' THEN 1 END) AS "reviewing",
-            -- 진행중: 승인됨(Y) AND 상태가 OPEN
             COUNT(CASE WHEN PRODUCT_YN = 'Y' AND PRODUCT_STATUS = 'OPEN' THEN 1 END) AS "progress",
-            -- 종료: 상태가 SUCCESS, FAIL, CLOSE 인 경우
             COUNT(CASE WHEN PRODUCT_STATUS IN ('SUCCESS', 'FAIL', 'CLOSE') THEN 1 END) AS "ended",
-            -- 전체 프로젝트 수
             COUNT(*) AS "total"
         FROM PRODUCT
         WHERE SELLER_NO = #{sellerNo}
@@ -49,19 +45,20 @@
     </select>
     
     <select id="selectTempProjectList" resultType="map">
-        SELECT 
-            TEMP_NO AS "id",
-            NVL(TEMP_TITLE, '제목 없음') AS "title",
-            NVL(CATEGORY, '미정') AS "category",
-            'draft' AS "status",
-            '펀딩' AS "type", -- 임시값
-            0 AS "reward",
-            0 AS "backers",
-            MODIFY_THUMBNAIL AS "thumbnail"
-        FROM TEMPORARY
-        WHERE USER_NO = #{userNo}
-        ORDER BY UPDATE_DATE DESC
-    </select>
+    SELECT 
+        TEMP_NO AS "id",
+        NVL(TEMP_TITLE, '제목 없음') AS "title",
+        NVL(CATEGORY, '미정') AS "category",
+        'draft' AS "status",
+        '펀딩' AS "type",
+        0 AS "reward",
+        0 AS "backers",
+        -- 🚨 MODIFY_THUMBNAIL 대신 ORIGIN_THUMBNAIL을 조회하거나 둘 다 체크
+        NVL(ORIGIN_THUMBNAIL, MODIFY_THUMBNAIL) AS "thumbnail"
+    FROM TEMPORARY
+    WHERE SELLER_NO = #{userNo}
+    ORDER BY UPDATE_DATE DESC
+</select>
 
     <select id="selectProductListByStatus" resultType="map">
         SELECT 
@@ -72,7 +69,7 @@
                 WHEN P.PRODUCT_STATUS = 'OPEN' THEN 'open'
                 ELSE 'closed'
             END AS "status",
-            '펀딩' AS "type", -- 고정값 또는 DB 컬럼 추가 필요
+            '펀딩' AS "type",
             P.CURRENT_AMOUNT AS "reward",
             (SELECT COUNT(*) FROM ORDERS O 
              JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO 
@@ -96,29 +93,15 @@
             P.PRODUCT_TITLE AS "title",
             P.CURRENT_AMOUNT AS "amount", 
             TO_CHAR(P.FUND_END_DATE, 'YYYY.MM.DD') AS "projectEndDate",
-            
-            -- 프로젝트 상태에 따른 정산 상태 변환
             CASE 
-                -- 1. 성공한 경우 -> 지급 완료 (또는 날짜 비교하여 대기/완료 나눌 수 있음)
                 WHEN P.PRODUCT_STATUS = 'SUCCESS' THEN 'paid'
-                
-                -- 2. 진행 중이거나 오픈 상태 -> 지급 대기
                 WHEN P.PRODUCT_STATUS = 'OPEN' THEN 'pending'
-                
-                -- 3. 실패, 종료, 반려 등 -> 정산 취소
                 WHEN P.PRODUCT_STATUS IN ('FAIL', 'CLOSE') THEN 'canceled'
-                
-                -- 그 외 (심사 중 등)
                 ELSE 'pending'
             END AS "status",
-            
-            -- 지급 예정일: 펀딩 종료일 + 7일 뒤로 설정
             TO_CHAR(P.FUND_END_DATE + 7, 'YYYY.MM.DD') AS "paidDate"
-            
         FROM PRODUCT P
         WHERE P.SELLER_NO = #{sellerNo}
-        -- 아직 펀딩 금액이 0원인(시작 안한) 프로젝트 제외하려면 주석 해제
-        -- AND P.CURRENT_AMOUNT > 0 
         ORDER BY P.FUND_END_DATE DESC
     </select>
 

@@ -1,20 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
 import Sidebar from '../../components/Sidebar';
 import '../../styles/MakerPage.css';
+import '../../styles/UserManagement.css'; 
+
+// 🚨 유틸리티 함수 가져오기
+import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
 const SERVER_URL = "http://localhost:8001/foodding";
-const UPLOAD_PATH = "/uploads/";
-
-// 이미지 경로 처리
-const getFullImageUrl = (filename) => {
-    if (!filename || filename === "null") return null;
-    if (filename.startsWith("http")) return filename;
-    return `${SERVER_URL}${UPLOAD_PATH}${filename}`;
-};
 
 // --- [컴포넌트] 프로젝트 리스트 아이템 ---
 const ProjectListItem = ({ project }) => {
@@ -25,38 +21,62 @@ const ProjectListItem = ({ project }) => {
     const type = project.type || '펀딩';
     const reward = Number(project.reward || 0);
     const backers = Number(project.backers || 0);
-    const thumbnail = project.thumbnail;
     const status = project.status || 'draft';
     const id = project.id || project.productNo;
 
+    // 🚨 모든 가능성 있는 필드명을 전부 체크합니다 (매퍼 별칭 대응)
+    const thumbnailPath = project.thumbnail || 
+                         project.thumbnailUrl || 
+                         project.MODIFY_THUMBNAIL || 
+                         project.ORIGIN_THUMBNAIL || 
+                         project.modifyThumbnail;
+
     const formatCurrency = (amount) => amount.toLocaleString('ko-KR');
 
-    // 상태 뱃지
-    const getStatusBadge = (status) => {
-        switch (String(status).toLowerCase()) {
-            case 'draft': return <span className="list-status-badge status-draft">작성 중</span>;
-            case 'open': return <span className="list-status-badge status-open">진행 중</span>;
-            case 'closed': return <span className="list-status-badge status-closed">종료</span>;
-            default: return null;
+    const handleDetailClick = () => {
+        if (status === 'draft') {
+            navigate(`/create/new?draft=${id}`);
+        } else {
+            navigate(`/projects/${id}`);
         }
     };
 
     return (
         <div className="project-list-item">
-            <div className="project-info-row">
-                {/* 🚨 [수정] 외부 이미지 대신 회색 박스 사용 (에러 방지) */}
-                {thumbnail ? (
-                    <img src={getFullImageUrl(thumbnail)} alt={title} className="project-thumb-small" 
-                         onError={(e) => { e.target.style.display='none'; }} />
-                ) : (
-                    <div className="project-thumb-small" style={{backgroundColor: '#eee', display:'flex', alignItems:'center', justifyContent:'center', color:'#999', fontSize:'12px'}}>
-                        No Image
-                    </div>
-                )}
+            <div className="project-info-row" onClick={handleDetailClick} style={{ cursor: 'pointer' }}>
+                {/* 🚨 유효한 파일명이 있고, 기본 이미지명이 아닐 때만 출력 */}
+                {thumbnailPath && 
+                 thumbnailPath !== "null" && 
+                 thumbnailPath !== "undefined" && 
+                 thumbnailPath !== "DEFAULT_THUMBNAIL.png" ? (
+                    <img 
+                        src={resolveProjectImageUrl(thumbnailPath)} 
+                        alt={title} 
+                        className="project-thumb-small" 
+                        onError={(e) => { 
+                            e.target.style.display = 'none'; // 에러 시 이미지 숨기고 배경색 노출
+                            e.target.nextSibling.style.display = 'flex'; 
+                        }} 
+                    />
+                ) : null}
+                
+                {/* 이미지가 없거나 에러일 때 보여줄 대체 박스 */}
+                <div className="project-thumb-small fallback-box" style={{
+                    backgroundColor: '#eee', 
+                    display: (thumbnailPath && thumbnailPath !== "DEFAULT_THUMBNAIL.png") ? 'none' : 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center', 
+                    color: '#999', 
+                    fontSize: '12px'
+                }}>
+                    No Image
+                </div>
 
                 <div className="project-details">
                     <h4>
-                        {getStatusBadge(status)}
+                        {status === 'draft' && <span className="list-status-badge status-draft">작성 중</span>}
+                        {status === 'open' && <span className="list-status-badge status-open">진행 중</span>}
+                        {status === 'closed' && <span className="list-status-badge status-closed">종료</span>}
                         {title}
                     </h4>
                     <div className="project-stats">
@@ -73,12 +93,15 @@ const ProjectListItem = ({ project }) => {
             </div>
 
             <div className="project-actions">
-                {status === 'draft' && (
-                    <button className="action-btn primary-btn" onClick={() => navigate(`/maker/project/edit/${id}`)}>
+                {status === 'draft' ? (
+                    <button className="action-btn primary-btn" onClick={() => navigate(`/create/new?draft=${id}`)}>
                         이어서 작성
                     </button>
+                ) : (
+                    <button className="action-btn" onClick={() => navigate(`/projects/${id}`)}>
+                        상세 보기
+                    </button>
                 )}
-                {/* ... 버튼 로직 생략 ... */}
             </div>
         </div>
     );
@@ -88,39 +111,28 @@ const ProjectListItem = ({ project }) => {
 const ProjectPage = ({ userInfo: propUserInfo }) => {
     const navigate = useNavigate();
     
-    // 1. 내 정보 상태 관리
     const [myInfo, setMyInfo] = useState(propUserInfo || null);
-    
-    // 2. 프로젝트 리스트 상태
     const [currentTab, setCurrentTab] = useState('draft'); 
     const [projects, setProjects] = useState([]);          
     const [loading, setLoading] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 5; 
 
-    // 3. props 동기화
+    // 페이지네이션 설정
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 4; 
+
     useEffect(() => {
-        if (propUserInfo) {
-            console.log("✅ [ProjectPage] 부모에게서 유저정보 받음:", propUserInfo);
-            setMyInfo(propUserInfo);
-        }
+        if (propUserInfo) setMyInfo(propUserInfo);
     }, [propUserInfo]);
 
-    // 4. 내 정보 직접 가져오기 (새로고침 대응)
     useEffect(() => {
         const fetchUserInfo = async () => {
-            // 이미 정보가 있으면 패스
             if (myInfo) return; 
-
             const token = localStorage.getItem('token');
             if (!token) return;
-
             try {
-                console.log("📡 [ProjectPage] 내 정보 서버 요청 시작...");
                 const response = await axios.get(`${SERVER_URL}/api/mypage/info`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                console.log("👤 [ProjectPage] 내 정보 로드 성공:", response.data);
                 setMyInfo(response.data);
             } catch (error) {
                 console.error("❌ 내 정보 로딩 실패:", error);
@@ -129,7 +141,6 @@ const ProjectPage = ({ userInfo: propUserInfo }) => {
         fetchUserInfo();
     }, [myInfo]);
 
-    // 5. 프로젝트 리스트 가져오기
     useEffect(() => {
         const fetchProjects = async () => {
             const token = localStorage.getItem('token');
@@ -145,13 +156,11 @@ const ProjectPage = ({ userInfo: propUserInfo }) => {
                     params: { status: currentTab },
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                
-                console.log(`📂 [${currentTab}] 프로젝트 리스트 로드됨:`, response.data);
                 setProjects(response.data);
-                setCurrentPage(1);
-
+                setCurrentPage(1); 
             } catch (error) {
                 console.error("프로젝트 목록 로딩 실패:", error);
+                setProjects([]);
             } finally {
                 setLoading(false);
             }
@@ -160,16 +169,12 @@ const ProjectPage = ({ userInfo: propUserInfo }) => {
         fetchProjects();
     }, [currentTab, navigate]);
 
-    // 페이지네이션 계산
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = projects.slice(indexOfFirstItem, indexOfLastItem);
+    // 페이지네이션 로직
     const totalPages = Math.ceil(projects.length / itemsPerPage);
-
-    const handlePageChange = (pageNumber) => {
-        setCurrentPage(pageNumber);
-        window.scrollTo(0, 0); 
-    };
+    const currentItems = projects.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const tabs = [
         { key: 'draft', name: '작성 중' },
@@ -181,7 +186,6 @@ const ProjectPage = ({ userInfo: propUserInfo }) => {
         <div className="page-wrapper">
             <Header />
             <div className="mypage-container">
-                {/* 🚨 Sidebar에 myInfo 전달 (콘솔에서 myInfo 데이터 확인) */}
                 <Sidebar userInfo={myInfo} />
 
                 <main className="main-content">
@@ -207,11 +211,33 @@ const ProjectPage = ({ userInfo: propUserInfo }) => {
                         {loading ? (
                             <div className="empty-state"><p>불러오는 중...</p></div>
                         ) : currentItems.length > 0 ? (
-                            <div className="project-card-list">
-                                {currentItems.map((project, index) => (
-                                    <ProjectListItem key={project.id || index} project={project} />
-                                ))}
-                            </div>
+                            <>
+                                <div className="project-card-list">
+                                    {currentItems.map((project, index) => (
+                                        <ProjectListItem key={project.id || index} project={project} />
+                                    ))}
+                                </div>
+
+                                {totalPages > 1 && (
+                                    <div className="pagination-area" style={{ marginTop: '30px' }}>
+                                        <button 
+                                            className="btn-page" 
+                                            onClick={() => { setCurrentPage(p => Math.max(1, p - 1)); window.scrollTo(0,0); }}
+                                            disabled={currentPage === 1}
+                                        >
+                                            &lt;
+                                        </button>
+                                        <span className="page-info">{currentPage} / {totalPages}</span>
+                                        <button 
+                                            className="btn-page" 
+                                            onClick={() => { setCurrentPage(p => Math.min(totalPages, p + 1)); window.scrollTo(0,0); }}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            &gt;
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="empty-state">
                                 <p className="empty-title">
@@ -222,13 +248,6 @@ const ProjectPage = ({ userInfo: propUserInfo }) => {
                                         새 프로젝트 만들기
                                     </Link>
                                 )}
-                            </div>
-                        )}
-                        
-                        {/* 페이지네이션 UI */}
-                        {projects.length > itemsPerPage && (
-                            <div className="pagination" style={{marginTop:'40px', display:'flex', justifyContent:'center', gap:'8px'}}>
-                                {/* ... 페이지네이션 버튼 ... */}
                             </div>
                         )}
                     </div>

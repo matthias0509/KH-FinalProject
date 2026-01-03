@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // 1. useNavigate 추가
 
 // 💡 각 페이지 컴포넌트 Import
 import UserManagementPage from './UserManagementPage';
@@ -16,7 +17,7 @@ import '../../styles/MyPageLayout.css'; // 공통 레이아웃
 // ===================================================
 // A. 관리자 사이드바 컴포넌트
 // ===================================================
-const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
+const AdminSidebar = ({ activeMenu, setActiveMenu, onLogout }) => { // 2. onLogout prop 받기
     
     const adminMenus = [
         { id: 'dashboard', name: '📊 대시보드 (통계)', category: '주요 기능' },
@@ -43,7 +44,10 @@ const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
 
     return (
         <aside className="admin-sidebar">
-            <h3 className="admin-title">관리자 콘솔</h3>
+            <div className="sidebar-header-area">
+                <h3 className="admin-title">관리자 콘솔</h3>
+            </div>
+
             <div className="menu-list">
                 {groupedMenus.map(group => (
                     <div key={group.category} className="menu-group">
@@ -62,6 +66,13 @@ const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
                     </div>
                 ))}
             </div>
+
+            {/* 3. 로그아웃 버튼 영역 추가 */}
+            <div className="admin-logout-area">
+                <button onClick={onLogout} className="btn-admin-logout">
+                    로그아웃
+                </button>
+            </div>
         </aside>
     );
 };
@@ -70,7 +81,6 @@ const AdminSidebar = ({ activeMenu, setActiveMenu }) => {
 // B. 메인 콘텐츠 뷰어 (ActiveMenu에 따라 내용 변경)
 // ===================================================
 const AdminContent = ({ activeMenu }) => {
-    // 모든 콘텐츠를 <main> 태그 하나로 감싸서 일관성 있게 반환합니다.
     return (
         <main className="main-content admin-main-content">
             {activeMenu === 'dashboard' && <DashBoardPage />}
@@ -90,14 +100,29 @@ const AdminContent = ({ activeMenu }) => {
 // ===================================================
 const AdminPage = () => {
     const [activeMenu, setActiveMenu] = useState('dashboard');
+    const navigate = useNavigate(); // 4. 네비게이션 훅 사용
+
+    // 5. 로그아웃 핸들러 함수
+    const handleLogout = () => {
+        if (window.confirm("관리자 로그아웃 하시겠습니까?")) {
+            sessionStorage.removeItem('loginUser'); // 관리자 세션 삭제
+            localStorage.removeItem('user'); // (혹시 몰라 로컬도 삭제)
+            
+            alert("로그아웃 되었습니다.");
+            navigate('/adminlogin'); // 로그인 페이지로 이동
+        }
+    };
 
     return (
         <div className="admin-full-page-wrapper"> 
             <div className="mypage-container admin-container no-header"> 
-                {/* --- 왼쪽 사이드바 --- */}
-                <AdminSidebar activeMenu={activeMenu} setActiveMenu={setActiveMenu} />
+                {/* 6. onLogout prop 전달 */}
+                <AdminSidebar 
+                    activeMenu={activeMenu} 
+                    setActiveMenu={setActiveMenu} 
+                    onLogout={handleLogout} 
+                />
 
-                {/* --- 오른쪽 메인 콘텐츠 --- */}
                 <AdminContent activeMenu={activeMenu} />
             </div>
         </div>

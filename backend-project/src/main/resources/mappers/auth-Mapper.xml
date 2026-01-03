@@ -71,6 +71,7 @@
     	SELECT COUNT(*)
     	  FROM TB_USER
     	 WHERE USER_ID = #{userId}
+    	 AND USER_YN = 'N' 
     </select>
     
     <select id="nicknameCheck" parameterType="string" resultType="_int">
