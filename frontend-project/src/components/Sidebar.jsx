@@ -172,7 +172,7 @@ const Sidebar = ({ userInfo, loading }) => {
                           <p className="menu-category">계정</p>
                         <ul>
                             <li>
-                                <Link to='/logout'>로그아웃</Link>
+                                <Link to='/logout' style={{ color: '#e03131', fontWeight: 'bold' }}>로그아웃</Link>
                             </li>
                             </ul>
                     </>

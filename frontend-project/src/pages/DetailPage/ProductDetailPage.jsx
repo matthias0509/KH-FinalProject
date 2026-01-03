@@ -15,7 +15,7 @@ import {
 } from '../../api/interactionApi';
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { resolveProjectImageUrl } from '../../utils/projectMedia';
+import { resolveProjectImageUrl, resolveProfileImageUrl } from '../../utils/projectMedia';
 import { getLoginUserInfo } from '../../utils/auth';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
@@ -97,7 +97,8 @@ const mapCreatorFromSeller = (seller) => {
       userNo: null, // 추가
     };
   }
-  const avatar = resolveProjectImageUrl(seller.profileImage) || DEFAULT_AVATAR;
+  const profileImage = seller.profileImage || seller.profileImg || null;
+  const avatar = resolveProfileImageUrl(String(profileImage || '').trim(), DEFAULT_AVATAR);
   return {
     name: seller.nickname || seller.sellerName || '메이커',
     profileImage: avatar,

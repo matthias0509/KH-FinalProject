@@ -10,7 +10,7 @@ INSERT INTO TB_USER (
     'tester', SYSDATE, 'M', 'test@example.com',
     '010-0000-0000', NULL, NULL,
     '00000', '서울시', '어딘가 101',
-    SYSDATE, 'Y', 'USER'
+    SYSDATE, 'N', 'USER'
 );
 
 -- 테스트 유저용 판매자 프로필 더미 데이터

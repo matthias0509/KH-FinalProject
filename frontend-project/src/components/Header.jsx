@@ -93,9 +93,9 @@ export default function Header() {
               공지사항
             </Link>
             
-            <Link to="/login" className='header__nav-link'>
+            {/* <Link to="/login" className='header__nav-link'>
               (로그인)
-            </Link>
+            </Link> */}
 
              
             
