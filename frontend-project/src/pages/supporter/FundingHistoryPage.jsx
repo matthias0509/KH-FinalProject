@@ -100,7 +100,7 @@ const FundingHistoryPage = () => {
 
     const getStatusText = (status) => {
         if (status === 'PAY') return '결제완료';
-        if (status === 'CANCEL') return '후원취소';
+        if (status === 'CANCLE') return '후원취소';
         return status;
     };
 
