@@ -52,6 +52,7 @@ import UserManagementPage from './pages/admin/UserManagementPage';
 import DashBoardPage from './pages/admin/DashBoardPage';
 import ChatListPage from './pages/chat/ChatListPage';
 import FAQManagementPage from './pages/admin/FAQManagementPage';
+import InquiryManagement from './pages/admin/InquiryManagement';
 
 // ==========================================
 // 🔒 1. 로그인한 유저만 접근 가능 (마이페이지용)
@@ -202,6 +203,7 @@ export default function App() {
       <Route path="/dashboard" element={<AdminRoute><DashBoardPage /></AdminRoute>} />
       <Route path="/projectapproval" element={<AdminRoute><ProjectApprovalPage /></AdminRoute>} />
       <Route path="/faqmanagement" element={<AdminRoute><FAQManagementPage /></AdminRoute>} />
+      <Route path="/inquirymanagement" element={<AdminRoute><InquiryManagement /></AdminRoute>} />
 
       {/* 강호형 - 결제 관련 */}
       <Route path='/payment' element={<PrivateRoute><PaymentComponent/></PrivateRoute>}/>

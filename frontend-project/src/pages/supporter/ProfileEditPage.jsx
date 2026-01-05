@@ -149,6 +149,7 @@ const ProfileEditPage = () => {
     } catch (e) { toast.error("사진 삭제 실패"); }
   };
 
+  // 🚨 에러 메시지 처리가 강화된 저장 함수
   const handleSaveAccount = async () => {
     // 1. 비밀번호 유효성 검사
     if (accountForm.newPassword) {
@@ -162,8 +163,7 @@ const ProfileEditPage = () => {
       }
     }
 
-    // 2. 이메일 인증 체크 (이메일이 실제로 바뀌었을 때만 체크)
-    // profile.email은 서버에서 가져온 초기값입니다.
+    // 2. 이메일 인증 체크
     if (accountForm.email !== profile.email && !emailVerified) {
       toast.warning("이메일 변경 시 인증이 필요합니다.");
       return;
@@ -172,12 +172,11 @@ const ProfileEditPage = () => {
     try {
       const token = localStorage.getItem('token');
       
-      // 서버로 보낼 데이터 객체
       const requestData = {
         userId: profile.userId,
         userName: profile.userName,
         nickname: profile.nickname,
-        userPwd: accountForm.newPassword || null, // 비밀번호 변경 안 하면 null
+        userPwd: accountForm.newPassword || null, // 비밀번호
         email: accountForm.email,
         postcode: accountForm.postcode,
         mainAddress: accountForm.mainAddress,
@@ -190,17 +189,14 @@ const ProfileEditPage = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      // 3. 성공 문구 출력 (res.status가 200번대면 실행)
+      // 3. 성공 처리
       if (res.status === 200 || res.status === 201) {
-        console.log("✅ 저장 성공 응답:", res.data);
+        const successMsg = res.data.message || "계정 정보가 변경되었습니다!";
+        toast.success(successMsg); 
         
-        // 🔥 이 문구가 실행되려면 위에서 return이 발생하면 안 됩니다.
-        toast.success("계정 정보가 변경되었습니다!"); 
-        
-        // 데이터 리로드 (화면 동기화)
         await loadUserData();
         
-        // 비밀번호 입력창 초기화
+        // 비밀번호 필드 초기화
         setAccountForm(prev => ({ 
           ...prev, 
           newPassword: "", 
@@ -208,14 +204,20 @@ const ProfileEditPage = () => {
         }));
       }
     } catch (e) { 
-      console.error("❌ 저장 실패 상세:", e.response?.data || e.message);
-      toast.error("저장 중 오류가 발생했습니다."); 
+      console.error("❌ 저장 실패 상세:", e);
+      
+      // 🚨 백엔드에서 보낸 에러 메시지(message)를 잡아서 띄움
+      if (e.response && e.response.data && e.response.data.message) {
+        toast.error(e.response.data.message);
+      } else {
+        toast.error("저장 중 오류가 발생했습니다.");
+      }
     }
   };
 
   const handleWithdraw = () => {
     if (!window.confirm("정말 탈퇴하시겠습니까? 탈퇴 시 모든 데이터가 삭제됩니다.")) return;
-    // 탈퇴 API 호출 로직 (생략된 경우 아래와 같이 작성 가능)
+    
     axios.delete(`${API_BASE_URL}/withdraw`, { headers: getAuthHeader() })
       .then(() => {
         toast.success("탈퇴 처리가 완료되었습니다.");
@@ -263,7 +265,6 @@ const ProfileEditPage = () => {
               {activeTab === "account" && (
                 <div className="form-container account-info-form">
                   {!isVerified ? (
-                    /* 🔒 비밀번호 확인 UI (기존 레이아웃 유지하며 추가) */
                     <div style={{textAlign:'center', padding:'40px 0'}}>
                       <FiLock size={48} color="#ff5757" style={{marginBottom:'16px'}} />
                       <p style={{marginBottom:'20px', color:'#666'}}>보안을 위해 현재 비밀번호를 입력해주세요.</p>
@@ -273,20 +274,45 @@ const ProfileEditPage = () => {
                       </div>
                     </div>
                   ) : (
-                    /* ✅ 인증 성공 시 실제 폼 노출 */
                     <>
                       <InputField label="이름" value={profile.userName || ""} readOnly />
                       <InputField label="아이디" value={profile.userId || ""} readOnly />
                       <div>
-                        <InputField label="새 비밀번호" type="password" placeholder="변경 시에만 입력하세요" value={accountForm.newPassword} 
+                        <InputField 
+                          label="새 비밀번호" 
+                          type="password" 
+                          placeholder="변경 시에만 입력하세요" 
+                          value={accountForm.newPassword} 
                           onChange={(e) => {
                             const val = e.target.value;
                             setAccountForm({...accountForm, newPassword: val});
-                            if (val && !pwdRegex.test(val)) { setPwdMsg("형식이 올바르지 않습니다."); setIsPwdValid(false); } 
-                            else { setPwdMsg(val ? "사용 가능합니다." : ""); setIsPwdValid(true); }
+
+                            if (!val) {
+                              setPwdMsg("");
+                              setIsPwdValid(false);
+                              return;
+                            }
+
+                            if (!pwdRegex.test(val)) { 
+                              setPwdMsg("형식이 올바르지 않습니다."); 
+                              setIsPwdValid(false); 
+                            } 
+                            else if (val === currentPwd) {
+                              setPwdMsg("현재 비밀번호와 동일합니다."); 
+                              setIsPwdValid(false); 
+                            }
+                            else { 
+                              setPwdMsg("사용 가능합니다."); 
+                              setIsPwdValid(true); 
+                            }
                           }} 
                         />
-                        {pwdMsg && <p style={{ fontSize: '12px', color: isPwdValid ? '#2ecc71' : '#ff4757', marginTop: '4px' }}>{pwdMsg}</p>}
+                        {/* 🌟 메시지 출력 부분 (하나만 남김) */}
+                        {pwdMsg && (
+                          <p style={{ fontSize: '12px', color: isPwdValid ? '#2ecc71' : '#ff4757', marginTop: '4px' }}>
+                            {pwdMsg}
+                          </p>
+                        )}
                       </div>
                       <InputField label="새 비밀번호 확인" type="password" placeholder="새 비밀번호 다시 입력" value={accountForm.newPasswordConfirm} onChange={(e) => setAccountForm({...accountForm, newPasswordConfirm: e.target.value})} error={accountForm.newPassword && accountForm.newPasswordConfirm && accountForm.newPassword !== accountForm.newPasswordConfirm ? "비밀번호가 일치하지 않습니다." : null} />
                       <InputField label="전화번호" value={profile.phone || ""} readOnly />

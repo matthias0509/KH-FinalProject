@@ -12,7 +12,11 @@ export default function InquiryManagement() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    const token = sessionStorage.getItem("loginUser");
+   // 1. 세션에서 저장된 데이터를 가져옵니다.
+const storedData = sessionStorage.getItem("loginUser");
+
+// 2. JSON으로 파싱한 뒤, '.token' 값만 추출합니다.
+const token = storedData ? JSON.parse(storedData).token : null;
 
     useEffect(() => {
         fetchInquiries();
@@ -27,15 +31,38 @@ export default function InquiryManagement() {
         }
     }, [selectedIq]);
 
+    // InquiryManagement.js 내부 수정
+
     const fetchInquiries = async () => {
         setLoading(true);
         try {
+            // 1. 요청 전 토큰과 주소 확인 (콘솔에 출력됨)
+            console.log("📡 요청 주소:", 'http://localhost:8001/foodding/inquiry/list/admin');
+            console.log("🔑 현재 토큰:", token);
+
             const response = await axios.get('http://localhost:8001/foodding/inquiry/list/admin', {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            
+            console.log("✅ 데이터 수신 성공:", response.data); // 데이터가 어떻게 오는지 확인
             setInquiries(response.data);
+
         } catch (error) {
-            toast.error("목록 로드 실패");
+            // 2. 에러 상세 내용을 콘솔에 출력
+            console.error("❌ 데이터 로드 에러 상세:", error);
+            
+            if (error.response) {
+                // 서버가 응답은 했으나 에러인 경우 (401, 403, 500 등)
+                console.error("응답 상태 코드:", error.response.status);
+                console.error("응답 데이터:", error.response.data);
+                toast.error(`로드 실패 (${error.response.status}): 관리자에게 문의하세요.`);
+            } else if (error.request) {
+                // 서버로 요청이 가지 못한 경우 (서버 꺼짐, 포트 틀림, CORS)
+                console.error("서버 응답 없음 (포트나 서버 상태 확인 필요)");
+                toast.error("서버와 연결할 수 없습니다.");
+            } else {
+                toast.error("요청 설정 중 오류 발생");
+            }
         } finally {
             setLoading(false);
         }

@@ -41,6 +41,7 @@ public class MyPageService {
     public boolean updateAccountInfo(MyPage myPage) {
         MyPage current = myPageDao.selectMemberById(myPage.getUserId());
         
+        // 1. 이름/닉네임 유지 로직 (기존 동일)
         if (myPage.getUserName() == null || myPage.getUserName().trim().isEmpty()) {
             myPage.setUserName(current.getUserName());
         }
@@ -49,8 +50,26 @@ public class MyPageService {
             myPage.setNickname(current.getNickname());
         }
 
-        // 비밀번호 변경 요청이 있을 경우 암호화 처리
+        // 2. 비밀번호 변경 요청이 있을 경우
         if (myPage.getUserPwd() != null && !myPage.getUserPwd().trim().isEmpty()) {
+            
+            // ==========================================
+            // 🚨 [추가된 로직] 현재 비밀번호와 동일한지 검사
+            // ==========================================
+            
+            // A. DB에 저장된 현재 암호화된 비밀번호 가져오기
+            String dbHashedPwd = myPageDao.selectHashedPassword(myPage.getUserId());
+            
+            // B. 입력한 새 비밀번호(평문)와 DB 비밀번호(암호문) 비교
+            // matches(rawPassword, encodedPassword)가 true면 두 비밀번호가 같다는 뜻
+            if (passwordEncoder.matches(myPage.getUserPwd(), dbHashedPwd)) {
+                // 예외를 던져서 Controller가 이를 잡아 "비밀번호가 같습니다"라고 응답하게 함
+                throw new IllegalArgumentException("현재 비밀번호와 동일한 비밀번호로 변경할 수 없습니다.");
+            }
+            
+            // ==========================================
+            
+            // 3. 다를 경우에만 암호화 진행 후 업데이트
             String encodedPwd = passwordEncoder.encode(myPage.getUserPwd());
             myPage.setUserPwd(encodedPwd);
             myPageDao.updatePassword(myPage.getUserId(), encodedPwd);
