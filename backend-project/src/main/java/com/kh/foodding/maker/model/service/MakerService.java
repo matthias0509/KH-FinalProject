@@ -108,20 +108,39 @@ public class MakerService {
     }
 
     /**
-     * 특정 판매자의 공개 프로필 정보 (프로젝트 목록 + 통계)
+     * 특정 판매자의 공개 프로필 정보 (프로젝트 목록 + 통계) - 페이징 포함
      */
-    public Map<String, Object> getSellerPublicProfile(int sellerNo) {
+    public Map<String, Object> getSellerPublicProfileWithPaging(int sellerNo, int page, int size) {
         Map<String, Object> result = new HashMap<>();
         
         // 1. 판매자 통계 (프로젝트 수, 팔로워 수)
         Map<String, Object> stats = makerDao.selectSellerStats(sellerNo);
         
-        // 2. 공개된 프로젝트 목록 (진행 중 + 종료된 프로젝트만)
-        List<Map<String, Object>> projects = makerDao.selectSellerPublicProjects(sellerNo);
+        // 2. 전체 프로젝트 수 조회 (페이징 계산용)
+        int totalProjects = makerDao.countSellerPublicProjects(sellerNo);
         
+        // 3. 페이징 계산
+        int totalPages = (int) Math.ceil((double) totalProjects / size);
+        int offset = (page - 1) * size;
+        
+        // 4. 페이징된 프로젝트 목록 조회
+        List<Map<String, Object>> projects = makerDao.selectSellerPublicProjectsWithPaging(sellerNo, offset, size);
+        
+        // 5. 결과 조립
         result.put("stats", stats);
         result.put("recentProjects", projects);
+        result.put("totalProjects", totalProjects);
+        result.put("totalPages", totalPages);
+        result.put("currentPage", page);
         
         return result;
+    }
+
+    /**
+     * 기존 메서드 (페이징 없음) - 호환성 유지
+     */
+    public Map<String, Object> getSellerPublicProfile(int sellerNo) {
+        // 기본값으로 1페이지, 10개 조회
+        return getSellerPublicProfileWithPaging(sellerNo, 1, 10);
     }
 }

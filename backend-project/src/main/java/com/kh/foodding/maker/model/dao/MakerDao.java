@@ -61,6 +61,17 @@ public interface MakerDao {
     /**
      * 특정 판매자의 공개 프로젝트 목록 조회
      */
-    List<Map<String, Object>> selectSellerPublicProjects(int sellerNo);    
+    List<Map<String, Object>> selectSellerPublicProjects(int sellerNo);
+    
+    int countSellerPublicProjects(int sellerNo);
+    
+    /**
+     * ✅ 판매자의 공개 프로젝트 목록 조회 (페이징)
+     */
+    List<Map<String, Object>> selectSellerPublicProjectsWithPaging(
+        @Param("sellerNo") int sellerNo, 
+        @Param("offset") int offset, 
+        @Param("size") int size
+    );
     
 }
