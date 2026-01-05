@@ -1,5 +1,7 @@
 package com.kh.foodding.member.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Repository;
 
@@ -38,7 +40,12 @@ public class MemberDao {
     }
     
     public String findId(String email) {
-    	return sqlSession.selectOne("authMapper.findId", email);
+    	List<String> idList = sqlSession.selectList("authMapper.findId", email);
+    	if (idList == null || idList.isEmpty()) {
+    		return "";
+    	}
+    	
+    	return String.join(", ", idList);
     }
     
     public int idEmailCheck(Member m) {

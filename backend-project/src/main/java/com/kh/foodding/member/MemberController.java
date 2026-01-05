@@ -74,8 +74,8 @@ public class MemberController {
     
     @GetMapping("/findId")
     public String findId(String email) {
-    	String userId = memberService.findId(email);
-    	return userId;
+    	String idList = memberService.findId(email);
+    	return idList;
     }
     
     @PostMapping("/idEmailCheck")

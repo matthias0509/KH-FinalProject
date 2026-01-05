@@ -63,7 +63,7 @@ export default function LoginPage() {
                 toast.info("로그인에 실패했습니다.");
             }
         } catch (error) {
-            const errorMsg = error.response?.data || "아이디 또는 비밀번호를 잘못 입력하셨습니다.";
+            const errorMsg = error.response?.data || "아이디 또는 비밀번호를 확인해주세요.";
             // 에러 메시지가 객체일 수도 있으므로 문자열 처리
             setMessage(typeof errorMsg === 'string' ? errorMsg : "로그인 중 오류 발생");
             console.error("로그인 실패:", error);
@@ -93,7 +93,7 @@ export default function LoginPage() {
                         name="userPwd"
                         value={user.userPwd}
                         onChange={handleChange}
-                        placeholder="비밀번호"
+                        placeholder="비밀번호를 입력하세요"
                         required
                     />
                     {message && (
