@@ -292,7 +292,16 @@ export default function ProductDetailPage() {
 
   // 판매자 프로필로 이동기능 넣을 예정
   const handleCreatorProfileClick = () => {
-    console.log('Creator profile clicked');
+    const sellerUserNo = project.sellerProfile?.userNo || project.creator?.userNo || project.sellerNo;
+    
+    if (!sellerUserNo) {
+      toast.error('판매자 정보를 찾을 수 없습니다.');
+      console.error('판매자 번호가 없습니다:', project);
+      return;
+    }
+
+    console.log('판매자 프로필로 이동:', sellerUserNo);
+    navigate(`/seller/${sellerUserNo}`);
   };
 
   // 후원하기 버튼 클릭 시 아래 후원 옵션 선택창으로 이동

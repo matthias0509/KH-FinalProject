@@ -36,7 +36,7 @@ public interface MakerDao {
     List<Map<String, Object>> selectRecentProjects(int sellerNo);
     
     
- // 작성 중인 프로젝트 리스트
+    // 작성 중인 프로젝트 리스트
     List<Map<String, Object>> selectTempProjectList(int userNo);
 
     // 진행 중 또는 종료된 프로젝트 리스트
@@ -48,15 +48,19 @@ public interface MakerDao {
     List<Map<String, Object>> selectSettlementList(int sellerNo);
     
     
+    /**
+     * 특정 판매자의 기본 정보 조회
+     */
+    Map<String, Object> selectSellerInfo(int sellerNo);
     
+    /**
+     * 특정 판매자의 통계 조회 (프로젝트 수, 팔로워 수)
+     */
+    Map<String, Object> selectSellerStats(int sellerNo);
     
-    
-    
-    
-    
-    
-    
-    
-    
+    /**
+     * 특정 판매자의 공개 프로젝트 목록 조회
+     */
+    List<Map<String, Object>> selectSellerPublicProjects(int sellerNo);    
     
 }

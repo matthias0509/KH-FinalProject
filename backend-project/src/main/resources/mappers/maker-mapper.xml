@@ -104,5 +104,61 @@
         WHERE P.SELLER_NO = #{sellerNo}
         ORDER BY P.FUND_END_DATE DESC
     </select>
+    
+    <!-- 특정 판매자의 기본 정보 조회 -->
+    <select id="selectSellerInfo" resultType="map">
+        SELECT 
+            M.USER_NO AS "userNo",
+            M.USER_NAME AS "userName",
+            M.NICKNAME AS "nickname",
+            M.MODIFY_PROFILE AS "modifyProfile",
+            SP.INTRODUCTION AS "introduction",
+            M.EMAIL AS "email",
+            M.PHONE AS "phone"
+        FROM TB_USER M
+        JOIN SELLER_PROFILE SP ON M.USER_NO = SP.USER_NO
+        WHERE M.USER_NO = #{sellerNo}
+          AND M.USER_ROLE = 'MAKER'
+          AND M.USER_YN = 'N'
+    </select>
+
+    <!-- 특정 판매자의 통계 조회 (프로젝트 수, 팔로워 수) -->
+    <select id="selectSellerStats" resultType="map">
+        SELECT 
+            (SELECT COUNT(*) 
+             FROM PRODUCT 
+             WHERE SELLER_NO = (SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{sellerNo})
+               AND PRODUCT_YN = 'Y'
+               AND PRODUCT_STATUS IN ('OPEN', 'SUCCESS', 'FAIL', 'CLOSE')
+            ) AS "projectCount",
+            (SELECT COUNT(*) 
+             FROM "FOLLOW" 
+             WHERE SELLER_NO = (SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{sellerNo})
+            ) AS "followerCount"
+        FROM DUAL
+    </select>
+
+    <!--  특정 판매자의 공개 프로젝트 목록 조회 -->
+    <select id="selectSellerPublicProjects" resultType="map">
+        SELECT * FROM (
+            SELECT 
+                P.PRODUCT_NO AS "projectNo",
+                P.PRODUCT_NO AS "id",
+                P.PRODUCT_TITLE AS "title",
+                P.CATEGORY AS "category",
+                CASE 
+                    WHEN P.PRODUCT_STATUS = 'OPEN' THEN 'OPEN'
+                    ELSE 'END'
+                END AS "status",
+                TO_CHAR(P.CREATE_DATE, 'YYYY-MM-DD') AS "date",
+                P.MODIFY_THUMBNAIL AS "thumbnail"
+            FROM PRODUCT P
+            WHERE P.SELLER_NO = (SELECT SELLER_NO FROM SELLER_PROFILE WHERE USER_NO = #{sellerNo})
+              AND P.PRODUCT_YN = 'Y'
+              AND P.PRODUCT_STATUS IN ('OPEN', 'SUCCESS', 'FAIL', 'CLOSE')
+            ORDER BY P.CREATE_DATE DESC
+        )
+        WHERE ROWNUM &lt;= 10
+    </select>
 
 </mapper>

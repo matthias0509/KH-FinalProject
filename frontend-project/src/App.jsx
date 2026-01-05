@@ -37,6 +37,7 @@ import FollowProjectPage from './pages/supporter/FollowProjectPage'
 import ProfileEditPage from './pages/supporter/ProfileEditPage'
 import QnAPage from './pages/supporter/QnAPage'
 import ProjectApprovalPage from './pages/admin/ProjectApprovalPage';
+import SellerProfile from './pages/SellerProfile';
 
 // 강호형
 import ChatComponent from './pages/chat/ChatComponent';
@@ -246,6 +247,7 @@ export default function App() {
       <Route path="/maker/project" element={<MakerRoute><ProjectPage userInfo={userInfo} /></MakerRoute>} />
       <Route path="/maker/settlement" element={<MakerRoute><SettlementPage userInfo={userInfo} /></MakerRoute>} />
       <Route path="/maker/chat" element={<MakerRoute><ChatListPage isMaker={true} /></MakerRoute>} />
+      <Route path="/seller/:sellerNo" element={<SellerProfile />} />
 
       {/* 👑 [관리자 페이지] */}
       <Route path="/adminlogin" element={<AdminLoginPage />} />

@@ -85,8 +85,7 @@ public class MakerService {
     }
     
     /**
-     * 🚨 [수정됨] 정산 내역 조회 서비스
-     * (아까 이 메서드 선언부가 빠져 있었습니다)
+     * 정산 내역 조회 서비스
      */
     public List<Map<String, Object>> getSettlementList(int userNo) {
         // 1. 유저 번호로 판매자 번호 조회
@@ -101,4 +100,28 @@ public class MakerService {
         return makerDao.selectSettlementList(sellerNo);
     }
 
+    /**
+     * 특정 판매자의 기본 정보 조회
+     */
+    public Map<String, Object> getSellerInfo(int sellerNo) {
+        return makerDao.selectSellerInfo(sellerNo);
+    }
+
+    /**
+     * 특정 판매자의 공개 프로필 정보 (프로젝트 목록 + 통계)
+     */
+    public Map<String, Object> getSellerPublicProfile(int sellerNo) {
+        Map<String, Object> result = new HashMap<>();
+        
+        // 1. 판매자 통계 (프로젝트 수, 팔로워 수)
+        Map<String, Object> stats = makerDao.selectSellerStats(sellerNo);
+        
+        // 2. 공개된 프로젝트 목록 (진행 중 + 종료된 프로젝트만)
+        List<Map<String, Object>> projects = makerDao.selectSellerPublicProjects(sellerNo);
+        
+        result.put("stats", stats);
+        result.put("recentProjects", projects);
+        
+        return result;
+    }
 }
