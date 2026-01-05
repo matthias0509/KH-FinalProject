@@ -109,6 +109,22 @@
     	   AND USER_YN = 'N'
     </update>
     
+    <select id="loginMember" parameterType="string" resultMap="memberResultSet">
+        SELECT 
+            USER_NO,
+            USER_ID,
+            USER_PWD,
+            USER_NAME,
+            NICKNAME,
+            EMAIL,
+            PHONE,
+            USER_ROLE,
+            USER_YN
+        FROM TB_USER
+        WHERE USER_ID = #{userId}
+          AND USER_YN = 'N' 
+	</select>
+    
 	<insert id="insertAuthCode" parameterType="map">
         MERGE INTO AUTH
         USING DUAL

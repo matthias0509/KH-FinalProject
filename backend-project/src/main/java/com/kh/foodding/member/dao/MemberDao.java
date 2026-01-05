@@ -48,5 +48,9 @@ public class MemberDao {
     public int updatePassword(Member m) {
     	return sqlSession.update("authMapper.updatePassword", m);
     }
+    
+    public Member login(String userId) {
+    	return sqlSession.selectOne("authMapper.loginMember", userId);
+    }
 
 }

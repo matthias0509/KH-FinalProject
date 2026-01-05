@@ -92,15 +92,8 @@ public class MemberController {
     
     @PostMapping("/updatePassword")
     public String updatePassword(@RequestBody Member m) {
-    	// System.out.println(m);
-    	
-    	String encodedPassword = bCryptPasswordEncoder.encode(m.getUserPwd());
-        m.setUserPwd(encodedPassword);
-    	int result = memberService.updatePassword(m);
-    	if (result>0) {
-    		return "success";
-    	} else {
-    		return "fail";
-    	}
+        // 💡 서비스에서 검증(matches) 및 암호화(encode)를 모두 처리하고 결과를 문자열로 받음
+        return memberService.updatePassword(m); 
     }
+    
 }

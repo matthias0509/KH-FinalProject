@@ -26,7 +26,6 @@ export default function HeroSlider({ slides, interval = 5000 }) {
                 <div className="hero__content">
                   <h2 className="hero__title">{slide.title}</h2>
                   <p className="hero__subtitle">{slide.subtitle}</p>
-                  <button type="button" className="hero__cta">자세히 보기</button>
                 </div>
               </div>
             </div>

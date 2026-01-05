@@ -109,7 +109,7 @@
         JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
         JOIN TB_USER U ON S.USER_NO = U.USER_NO
         WHERE O.USER_NO = #{userNo}
-          AND O.ORDER_STATUS = 'PAY'
+          AND ORDER_STATUS = 'PAY'
         ORDER BY O.ORDER_DATE DESC
     </select>
     
@@ -161,7 +161,7 @@
     
     <update id="updateOrderStatusToCancel">
         UPDATE ORDERS
-        SET ORDER_STATUS = 'CANCEL'
+        SET ORDER_STATUS = 'CANCLE'
         WHERE ORDER_NO = #{orderNo}
           AND USER_NO = #{userNo}
           AND ORDER_STATUS = 'PAY'
@@ -200,7 +200,7 @@
         JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
         JOIN TB_USER U ON S.USER_NO = U.USER_NO
         WHERE O.USER_NO = #{userNo}
-          AND O.ORDER_STATUS = 'CANCEL'
+          AND O.ORDER_STATUS = 'CANCLE'  -- 🚨 취소된 건만 조회
         ORDER BY O.ORDER_DATE DESC
     </select>
 </mapper>

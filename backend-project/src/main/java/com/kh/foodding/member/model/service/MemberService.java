@@ -3,12 +3,14 @@ package com.kh.foodding.member.model.service;
 import java.io.File;
 import java.nio.file.Path;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kh.foodding.common.FileStorageUtils;
 import com.kh.foodding.member.dao.MemberDao;
 import com.kh.foodding.member.model.vo.Member;
-import com.kh.foodding.common.FileStorageUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,6 +19,9 @@ import lombok.RequiredArgsConstructor;
 public class MemberService {
 	
 	private final MemberDao memberDao;
+	
+	@Autowired
+	private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public int insertMember(Member m, MultipartFile upfile) {
 		System.out.println("전달된 upfile: " + (upfile != null ? upfile.getOriginalFilename() : "NULL"));
@@ -76,8 +81,25 @@ public class MemberService {
     	return memberDao.idEmailCheck(m);
     }
     
-    public int updatePassword(Member m) {
-    	return memberDao.updatePassword(m);
+    public String updatePassword(Member m) {
+        // 1. DB에서 현재 저장된 회원 정보(암호화된 비밀번호 포함) 조회
+        Member loginUser = memberDao.login(m.getUserId()); 
+        
+        if (loginUser == null) return "fail";
+
+        // 2. 💡 기존 비밀번호와 새 비밀번호가 같은지 대조
+        // matches(평문, 암호화된것)
+        if (bCryptPasswordEncoder.matches(m.getUserPwd(), loginUser.getUserPwd())) {
+            return "same"; // 이전 비밀번호와 동일한 경우
+        }
+
+        // 3. 기존과 다르다면 새 비밀번호 암호화 후 DB 업데이트
+        String encodedPassword = bCryptPasswordEncoder.encode(m.getUserPwd());
+        m.setUserPwd(encodedPassword);
+        
+        int result = memberDao.updatePassword(m);
+        
+        return (result > 0) ? "success" : "fail";
     }
 
 }
