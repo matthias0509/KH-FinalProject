@@ -36,6 +36,7 @@ import LikeProjectPage from './pages/supporter/LikeProjectPage'
 import FollowProjectPage from './pages/supporter/FollowProjectPage'
 import ProfileEditPage from './pages/supporter/ProfileEditPage'
 import QnAPage from './pages/supporter/QnAPage'
+import ReviewWritePage from './pages/review/ReviewWritePage';
 import ProjectApprovalPage from './pages/admin/ProjectApprovalPage';
 import SellerProfile from './pages/SellerProfile';
 
@@ -231,6 +232,7 @@ export default function App() {
       {/* 🔒 [마이페이지] */}
       <Route path="/mypage" element={<PrivateRoute><MyPage userInfo={userInfo} /></PrivateRoute>} />
       <Route path="/mypage/profile" element={<PrivateRoute><ProfileEditPage userInfo={userInfo} /></PrivateRoute>} />
+      <Route path="/mypage/review/:orderNo" element={<PrivateRoute><ReviewWritePage /></PrivateRoute>} />
       <Route path="/mypage/history" element={<PrivateRoute><FundingHistoryPage userInfo={userInfo} /></PrivateRoute>} />
       <Route path="/mypage/cancel" element={<PrivateRoute><FundingCancelPage userInfo={userInfo} /></PrivateRoute>} />
       <Route path="/mypage/history/:fundingNo" element={<PrivateRoute><FundingDetailPage userInfo={userInfo} /></PrivateRoute>} />

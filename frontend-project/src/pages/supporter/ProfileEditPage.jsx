@@ -256,10 +256,10 @@ const ProfileEditPage = () => {
                     <div className="photo-section">
                       <div className="photo-wrapper">
                         <img 
-                            src={profile.modifyProfile ? `${getFullImageUrl(profile.modifyProfile)}?t=${Date.now()}` : "/placeholder.png"} 
+                            src={profile.modifyProfile ? `${getFullImageUrl(profile.modifyProfile)}?t=${Date.now()}` : "https://placehold.co/80x80?text=User"} 
                             alt="프로필" 
                             className="current-photo" 
-                            onError={(e) => { e.target.src = "/placeholder.png"; }} 
+                            onError={(e) => { e.target.src = "https://placehold.co/80x80?text=User"; }} 
                         />
                       </div>
                       <div className="photo-buttons">

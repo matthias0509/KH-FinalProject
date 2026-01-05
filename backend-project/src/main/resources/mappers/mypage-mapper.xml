@@ -101,7 +101,13 @@
             O.ORDER_STATUS AS fundingStatus,
             P.MODIFY_THUMBNAIL AS projectThumb,
             P.ORIGIN_THUMBNAIL AS originThumbnail,
-            P.PRODUCT_NO AS productNo
+            P.PRODUCT_NO AS productNo,
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 FROM REVIEW R 
+                    WHERE R.ORDER_NO = O.ORDER_NO AND R.USER_NO = O.USER_NO
+                ) THEN 1 ELSE 0
+            END AS hasReview
         FROM ORDERS O
         JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO
         JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO 
@@ -192,7 +198,13 @@
             O.ORDER_STATUS AS fundingStatus,
             P.MODIFY_THUMBNAIL AS projectThumb,
             P.ORIGIN_THUMBNAIL AS originThumbnail,
-            P.PRODUCT_NO AS productNo
+            P.PRODUCT_NO AS productNo,
+            CASE 
+                WHEN EXISTS (
+                    SELECT 1 FROM REVIEW R 
+                    WHERE R.ORDER_NO = O.ORDER_NO AND R.USER_NO = O.USER_NO
+                ) THEN 1 ELSE 0
+            END AS hasReview
         FROM ORDERS O
         JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO
         JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO

@@ -13,4 +13,5 @@ public class FundingHistory {
     private String projectThumb;    // 썸네일 이미지 (TB_PRODUCT)
     private String originThumbnail; // ORIGIN_THUMBNAIL
     private int productNo;          // 상품 번호 (상세페이지 이동용)
+    private boolean hasReview;      // 후기 작성 여부
 }

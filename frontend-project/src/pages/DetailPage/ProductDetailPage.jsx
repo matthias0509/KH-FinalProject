@@ -16,10 +16,11 @@ import {
 import { useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { resolveProjectImageUrl, resolveProfileImageUrl } from '../../utils/projectMedia';
+import { fetchProductReviews } from '../../api/reviewApi';
 import { getLoginUserInfo } from '../../utils/auth';
 
 const currencyFormatter = new Intl.NumberFormat('ko-KR');
-const DEFAULT_AVATAR = 'https://placehold.co/80x80?text=Maker';
+const DEFAULT_AVATAR = 'https://placehold.co/80x80?text=User';
 
 
 
@@ -192,6 +193,8 @@ export default function ProductDetailPage() {
 
   // 프로젝트에 들어갈 정보들
   const [project, setProject] = useState(projectInit);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   const [loadError, setLoadError] = useState('');
   //
   const REVIEWS_PER_PAGE = 5;
@@ -206,7 +209,6 @@ export default function ProductDetailPage() {
   const [activeDetailTab, setActiveDetailTab] = useState('story');
   const [reviewPage, setReviewPage] = useState(1);
   const rewardSectionRef = useRef(null);
-  const reviews = project.reviews ?? [];
   const detailTabs = [
     { id: 'story', label: '프로젝트 스토리' },
     { id: 'reviews', label: `후기 (${reviews.length})` },
@@ -217,6 +219,20 @@ export default function ProductDetailPage() {
     (currentReviewPage - 1) * REVIEWS_PER_PAGE,
     currentReviewPage * REVIEWS_PER_PAGE,
   );
+  const formatReviewDate = (value) => {
+    if (!value) {
+      return '';
+    }
+    try {
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) {
+        return value;
+      }
+      return parsed.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    } catch (error) {
+      return value;
+    }
+  };
 
 
 
@@ -468,6 +484,36 @@ export default function ProductDetailPage() {
   }, [project.productNo]);
 
   useEffect(() => {
+    if (!project.productNo) {
+      setReviews([]);
+      return;
+    }
+
+    const loadReviews = async () => {
+      setReviewsLoading(true);
+      try {
+        const data = await fetchProductReviews(project.productNo);
+        const mapped = (data || []).map((review) => ({
+          id: review.reviewNo ?? review.orderNo,
+          title: review.reviewTitle || '후기',
+          date: formatReviewDate(review.reviewCreateDate),
+          author: review.nickname || '익명',
+          rating: review.rating || 0,
+          body: review.reviewContent || '',
+        }));
+        setReviews(mapped);
+      } catch (error) {
+        console.error('후기 목록 조회 실패', error);
+        setReviews([]);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+
+    loadReviews();
+  }, [project.productNo]);
+
+  useEffect(() => {
     if (!project.sellerNo) {
       setIsFollowing(false);
       setFollowerCount(0);
@@ -618,7 +664,9 @@ export default function ProductDetailPage() {
               {activeDetailTab === 'reviews' && (
                 <div role="tabpanel">
                   <h2>후기</h2>
-                  {reviews.length === 0 ? (
+                  {reviewsLoading ? (
+                    <p className="detail-review-empty">후기를 불러오는 중입니다...</p>
+                  ) : reviews.length === 0 ? (
                     <p className="detail-review-empty">아직 작성된 후기가 없습니다.</p>
                   ) : (
                     <div className="detail-review-list">
