@@ -136,7 +136,7 @@ const MyPage = () => {
             
                 <main className="main-content">
                     <h2 className="greeting">
-                        {userInfo.userName || userInfo.nickname}님 반가워요! 👋
+                    
                     </h2>
 
                     {/* 활동 현황 배너 */}
