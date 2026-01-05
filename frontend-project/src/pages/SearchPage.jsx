@@ -63,7 +63,7 @@ export default function SearchPage() {
   return (
     <div className="app">
       <Header />
-      <main className="main-content">
+      <main className="main-content" style={{ paddingTop: "32px" }}>
         {!hasQuery && (
           <div className="search-empty-state">
             <h2>검색어를 입력해주세요.</h2>

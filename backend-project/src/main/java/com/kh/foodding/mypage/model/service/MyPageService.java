@@ -25,7 +25,7 @@ import com.kh.foodding.mypage.model.vo.FollowedSeller;
 public class MyPageService {
 
     @Autowired
-    private MyPageDao myPageDao; // 🚨 변수명 myPageDao로 통일
+    private MyPageDao myPageDao;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -49,6 +49,7 @@ public class MyPageService {
             myPage.setNickname(current.getNickname());
         }
 
+        // 비밀번호 변경 요청이 있을 경우 암호화 처리
         if (myPage.getUserPwd() != null && !myPage.getUserPwd().trim().isEmpty()) {
             String encodedPwd = passwordEncoder.encode(myPage.getUserPwd());
             myPage.setUserPwd(encodedPwd);
@@ -59,29 +60,28 @@ public class MyPageService {
     }
 
     /**
-     * 비밀번호 확인 로직
+     * 🔒 비밀번호 확인 로직 (계정 정보 탭 진입 시 사용)
      */
     public boolean verifyPassword(String userId, String rawPassword) {
+        // DB에 저장된 BCrypt 암호화된 비밀번호 조회
         String storedHashedPassword = myPageDao.selectHashedPassword(userId);
         if (storedHashedPassword == null) return false;
         
+        // 사용자가 입력한 평문 비밀번호와 DB 암호문을 매칭 확인
         return passwordEncoder.matches(rawPassword, storedHashedPassword);
     }
 
     /**
-     * ✅ 프로필 이미지 업데이트 (경로 수정됨)
+     * 프로필 이미지 업데이트
      */
     @Transactional
     public String updateProfileImage(String userId, MultipartFile file) {
         if (file == null || file.isEmpty()) return null;
 
         Path profileDir = FileStorageUtils.getProfileImagesDir();
-
         String originalName = file.getOriginalFilename();
-        String ext = "";
-        if (originalName != null && originalName.contains(".")) {
-            ext = originalName.substring(originalName.lastIndexOf("."));
-        }
+        String ext = (originalName != null && originalName.contains(".")) 
+                     ? originalName.substring(originalName.lastIndexOf(".")) : "";
         String storedName = UUID.randomUUID() + ext;
 
         try {
@@ -93,10 +93,8 @@ public class MyPageService {
             return null;
         }
 
-        String dbPath = storedName;
-        int result = myPageDao.updateProfileImage(userId, dbPath);
-
-        return (result == 1) ? dbPath : null;
+        int result = myPageDao.updateProfileImage(userId, storedName);
+        return (result == 1) ? storedName : null;
     }
 
     @Transactional
@@ -113,96 +111,79 @@ public class MyPageService {
         return myPageDao.updateMemberInfo(myPage) == 1;
     }
 
+    /**
+     * 🚨 [수정됨] 회원 탈퇴 로직 (논리 삭제 처리)
+     * 이 메서드는 매퍼에서 UPDATE TB_USER SET USER_STATUS = 'N' 쿼리를 실행합니다.
+     */
     @Transactional
     public boolean withdrawMember(String userId) {
+        // 제약 조건 에러를 피하기 위해 실제 삭제가 아닌 상태값 업데이트를 수행
         return myPageDao.deleteMember(userId) == 1;
     }
     
     /**
-     * [추가] 마이페이지 메인 정보 (회원정보 + 통계 같이 줌)
+     * 마이페이지 메인 정보 (모든 회원정보 + 통계 데이터)
      */
     public Map<String, Object> getMyPageInfo(String userId) {
         MyPage member = myPageDao.selectMemberById(userId);
-        
+        if (member == null) return null;
+
         Map<String, Object> stats = myPageDao.selectMyPageStats(member.getUserNo());
-        
         Map<String, Object> result = new HashMap<>();
         
+        // 리액트에서 필요한 모든 데이터 매핑
         result.put("userNo", member.getUserNo());
         result.put("userId", member.getUserId());
         result.put("userName", member.getUserName());
         result.put("nickname", member.getNickname());
         result.put("modifyProfile", member.getModifyProfile());
-        // 🚨 필드명 확인 필요 (보통 userRole 또는 role)
-        result.put("role", member.getUserRole()); 
+        result.put("role", member.getUserRole());
+        result.put("email", member.getEmail());
+        result.put("phone", member.getPhone());
+        result.put("postcode", member.getPostcode());
+        result.put("mainAddress", member.getMainAddress());
+        result.put("detailAddress", member.getDetailAddress());
         
         if (stats == null) {
-            stats = new HashMap<>();
-            stats.put("likedCount", 0);
-            stats.put("followingCount", 0);
-            stats.put("fundingCount", 0);
+            stats = new HashMap<>(Map.of("likedCount", 0, "followingCount", 0, "fundingCount", 0));
         }
         result.put("stats", stats);
         
         return result;
     }
 
- 
-    //좋아요한 프로젝트 목록 조회
+    // --- 이하 후원/팔로우/좋아요 목록 조회 로직 유지 ---
     public List<LikedProject> getLikedProjects(String userId) {
         MyPage member = myPageDao.selectMemberById(userId);
         return myPageDao.selectLikedProjects(member.getUserNo());
     }
     
-    // 내 후원 내역 가져오기
     public List<FundingHistory> getFundingHistory(String userId) {
         MyPage member = myPageDao.selectMemberById(userId);
-        if (member == null) return List.of();
-        
-        return myPageDao.selectFundingHistory(member.getUserNo());
+        return (member != null) ? myPageDao.selectFundingHistory(member.getUserNo()) : List.of();
     }
     
-    // 팔로우 목록 가져오기
     public List<FollowedSeller> getFollowList(String userId) {
         MyPage member = myPageDao.selectMemberById(userId);
-        if (member == null) return List.of();
-        
-        return myPageDao.selectFollowList(member.getUserNo());
+        return (member != null) ? myPageDao.selectFollowList(member.getUserNo()) : List.of();
     }
     
-    // 후원 상세 조회 서비스
     public Map<String, Object> selectFundingDetail(String orderNo, int userNo) {
-        // Mapper에 파라미터를 2개 넘겨야 하므로 Map으로 묶음
         Map<String, Object> params = new HashMap<>();
         params.put("orderNo", orderNo);
         params.put("userNo", userNo);
-        
         return myPageDao.selectFundingDetail(params);
     }
+
     @Transactional
     public int cancelFunding(String orderNo, int userNo) {
-        // 1. 주문 상태 변경 ('PAY' -> 'CANCEL')
         int result = myPageDao.updateOrderStatusToCancel(orderNo, userNo);
-        
-        if (result > 0) {
-            // 2. 상태 변경 성공 시, 프로젝트 모금액 차감
-            myPageDao.updateProductAmountDecrease(orderNo);
-        }
-        
-        return result; // 1이면 성공, 0이면 실패
+        if (result > 0) myPageDao.updateProductAmountDecrease(orderNo);
+        return result;
     }
-    /**
-     * 🚨 [필수 확인] 취소된 후원 내역 가져오기
-     * (이게 없으면 Controller에서 빨간 줄 에러가 뜹니다)
-     */
+
     public List<FundingHistory> getCanceledFundingHistory(String userId) {
-        // 1. 유저 정보 조회
         MyPage member = myPageDao.selectMemberById(userId);
-        
-        // 2. 없으면 빈 리스트 리턴
-        if (member == null) return List.of();
-        
-        // 3. 방금 작성하신 DAO 메서드 호출
-        return myPageDao.selectCanceledFundingHistory(member.getUserNo());
+        return (member != null) ? myPageDao.selectCanceledFundingHistory(member.getUserNo()) : List.of();
     }
 }

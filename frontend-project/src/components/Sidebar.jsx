@@ -129,6 +129,13 @@ const Sidebar = ({ userInfo, loading }) => {
                                 <Link to='/maker/settlement'>정산하기</Link>
                             </li>
                         </ul>
+                         
+                          <p className="menu-category">계정</p>
+                        <ul>
+                            <li>
+                                <Link to='/logout'>로그아웃</Link>
+                            </li>
+                            </ul>
                     </>
                 ) : (
                     <>
@@ -160,10 +167,14 @@ const Sidebar = ({ userInfo, loading }) => {
                             <li className={isActive('/mypage/qna')}>
                                 <Link to='/inquiries'>나의 문의(Q&A)</Link>
                             </li>
-                            <li>
-                                <Link to='/notice'>고객센터</Link>
-                            </li>
+                          
                         </ul>
+                          <p className="menu-category">계정</p>
+                        <ul>
+                            <li>
+                                <Link to='/logout' style={{ color: '#e03131', fontWeight: 'bold' }}>로그아웃</Link>
+                            </li>
+                            </ul>
                     </>
                 )}
             </nav>

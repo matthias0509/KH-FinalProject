@@ -21,7 +21,7 @@ const resolveApiBaseUrl = () => {
 
 const API_BASE_URL = resolveApiBaseUrl();
 
-const sanitizeRelativePath = (rawPath) => {
+const sanitizeRelativePath = (rawPath, defaultSubdir = 'thumbnails') => {
   if (!rawPath) {
     return '';
   }
@@ -51,13 +51,15 @@ const sanitizeRelativePath = (rawPath) => {
     if (!fileName) {
       return '';
     }
-    normalized = `/uploads/thumbnails/${fileName}`;
+    const subdir = (defaultSubdir || '').replace(/^\/+|\/+$|\s+/g, '');
+    const basePath = subdir ? `/uploads/${subdir}` : '/uploads';
+    normalized = `${basePath}/${fileName}`;
   }
 
   return normalized;
 };
 
-export const resolveProjectImageUrl = (path = '', fallback = PLACEHOLDER_IMAGE) => {
+export const resolveProjectImageUrl = (path = '', fallback = PLACEHOLDER_IMAGE, options = {}) => {
   if (!path) {
     return fallback;
   }
@@ -74,13 +76,16 @@ export const resolveProjectImageUrl = (path = '', fallback = PLACEHOLDER_IMAGE) 
     }
   }
 
-  const sanitized = sanitizeRelativePath(path);
+  const sanitized = sanitizeRelativePath(path, options.defaultSubdir ?? 'thumbnails');
   if (!sanitized) {
     return fallback;
   }
 
   return `${API_BASE_URL}${sanitized}`;
 };
+
+export const resolveProfileImageUrl = (path = '', fallback = PLACEHOLDER_IMAGE) =>
+  resolveProjectImageUrl(path, fallback, { defaultSubdir: 'profile_images' });
 
 export const getProjectThumbnail = (project, fallback = '') => {
   if (!project) {

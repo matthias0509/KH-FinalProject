@@ -1,35 +1,50 @@
 import React, { useState } from 'react';
-import Header from '../../components/Header';
-import AppFooter from '../../components/AppFooter';
-import '../../styles/AdminLoginPage.css'; // 관리자 로그인 전용 CSS 파일을 import 한다고 가정
+import { useNavigate } from 'react-router-dom'; // 1. useNavigate 추가
+import axios from 'axios';
+import '../../styles/AdminLoginPage.css';
 
 const AdminLoginPage = () => {
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate(); // 2. navigate 객체 생성
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         
-        // 실제 로그인 로직 (생략)
-        
-        if (userId === 'admin' && password === 'admin1234') {
-            console.log("관리자 로그인 성공");
-            alert("관리자 로그인 성공! 대시보드로 이동합니다.");
-            // TODO: 성공 시 AdminPage로 리다이렉트 (useNavigate 사용)
-        } else {
-            console.log("로그인 실패: ID 또는 비밀번호 오류");
+        try {
+            // 백엔드 로그인 API 호출
+            const response = await axios.post('http://localhost:8001/foodding/login', {
+                userId: userId,
+                userPwd: password
+            });
+
+            // 3. 응답 데이터 확인 (백엔드에서 넘겨주는 구조에 맞춰 수정 필요)
+            const { token, user } = response.data;
+
+            // 4. 관리자 권한 확인 (ADMIN)
+            if (user && user.userRole === 'ADMIN') {
+                console.log("관리자 로그인 성공");
+                
+                // 세션에 로그인 정보 저장 (토큰 및 유저 정보)
+                sessionStorage.setItem("loginUser", JSON.stringify(response.data));
+                
+                alert(`${user.userName} 관리자님, 환영합니다!`);
+                navigate('/adminpage'); // 5. 관리자 페이지로 이동
+            } else {
+                alert("관리자 권한이 없습니다. 접근할 수 없습니다.");
+            }
+        } catch (error) {
+            console.error("로그인 에러:", error);
             alert("로그인 실패: ID 또는 비밀번호를 확인해주세요.");
         }
     };
 
     return (
-        // page-wrapper 대신 전체 화면을 덮는 admin-full-screen-wrapper 사용
         <div className="admin-full-screen-wrapper"> 
-            
             <div className="login-container centered">
                 <div className="login-card">
                     <h2>관리자 로그인</h2>
-                    <p>관리자 ID와 비밀번호를 입력해주세요.</p>
+                    <p>관리 시스템 접속을 위해 인증이 필요합니다.</p>
                     
                     <form onSubmit={handleLogin} className="login-form">
                         <div className="form-group">

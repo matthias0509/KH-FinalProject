@@ -49,20 +49,20 @@
     </resultMap>
 
     <insert id="insertProject" parameterType="project">
-        <selectKey resultType="long" keyProperty="productNo" order="BEFORE">
-            SELECT SEQ_PRODUCT_NO.NEXTVAL FROM DUAL
-        </selectKey>
-        INSERT INTO PRODUCT (
-            PRODUCT_NO, PRODUCT_TITLE, PRODUCT_DESC, STORY_HTML, STORY_JSON,
-            TARGET_AMOUNT, CURRENT_AMOUNT, FUND_START_DATE, FUND_END_DATE,
-            SHIP_START_DATE, CATEGORY, ORIGIN_THUMBNAIL, SELLER_NO
-        ) VALUES (
-            #{productNo}, #{title}, #{summary}, #{content.html}, #{content.json},
-            #{targetAmount}, NVL(#{currentAmount}, 0), #{fundStartDate}, #{fundEndDate},
-            #{shipStartDate}, #{category}, NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
-            #{sellerNo}
-        )
-    </insert>
+    <selectKey resultType="long" keyProperty="productNo" order="BEFORE">
+        SELECT SEQ_PRODUCT_NO.NEXTVAL FROM DUAL
+    </selectKey>
+	    INSERT INTO PRODUCT (
+	        PRODUCT_NO, PRODUCT_TITLE, PRODUCT_DESC, STORY_HTML, STORY_JSON,
+	        TARGET_AMOUNT, CURRENT_AMOUNT, FUND_START_DATE, FUND_END_DATE,
+	        SHIP_START_DATE, CATEGORY, ORIGIN_THUMBNAIL, SELLER_NO,
+	        PRODUCT_STATUS  ) VALUES (
+	        #{productNo}, #{title}, #{summary}, #{content.html}, #{content.json},
+	        #{targetAmount}, NVL(#{currentAmount}, 0), #{fundStartDate}, #{fundEndDate},
+	        #{shipStartDate}, #{category}, NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'),
+	        #{sellerNo},
+	        'WAITING'       )
+	</insert>
 
     <insert id="insertProductOption" parameterType="map">
         INSERT INTO TB_OPTION (

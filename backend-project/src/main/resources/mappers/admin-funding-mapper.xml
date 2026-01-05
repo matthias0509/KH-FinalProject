@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.foodding.admin.model.dao.AdminFundingDao">
+
+    <select id="selectAdminFundingList" parameterType="map" resultType="com.kh.foodding.admin.model.vo.AdminFunding">
+        SELECT 
+            O.ORDER_NO AS orderNo,
+            U.USER_ID AS userId,
+            TO_CHAR(O.ORDER_DATE, 'YYYY-MM-DD') AS fundingDate,
+            P.PRODUCT_TITLE AS projectTitle,
+            O.ORDER_AMOUNT AS totalAmount,
+            O.ORDER_STATUS AS fundingStatus,
+            O.DELIVERY_STATUS AS deliveryStatus
+        FROM ORDERS O
+        JOIN TB_USER U ON O.USER_NO = U.USER_NO
+        JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO
+        JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO
+        JOIN PRODUCT P ON OPT.PRODUCT_NO = P.PRODUCT_NO
+        <where>
+            <if test="status != null and status != 'ALL'">
+                AND O.ORDER_STATUS = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    U.USER_ID LIKE '%' || #{keyword} || '%' 
+                    OR P.PRODUCT_TITLE LIKE '%' || #{keyword} || '%' 
+                    OR O.ORDER_NO LIKE '%' || #{keyword} || '%'
+                )
+            </if>
+        </where>
+        ORDER BY O.ORDER_DATE DESC
+    </select>
+
+</mapper>

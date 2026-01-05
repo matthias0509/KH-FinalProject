@@ -5,54 +5,50 @@ import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
 import Sidebar from '../../components/Sidebar'; 
 import '../../styles/MakerPage.css';
+import '../../styles/UserManagement.css'; 
 
 const SERVER_URL = "http://localhost:8001/foodding";
 const COMMISSION_RATE = 0.05; // 수수료 5%
 
 // --- [컴포넌트] 정산 리스트 아이템 ---
 const SettlementListItem = ({ item }) => {
-    // 금액 계산 (원단위 절사)
+    const navigate = useNavigate();
+    
+    // 금액 계산
     const totalAmount = Number(item.amount);
-    const fee = Math.floor(totalAmount * COMMISSION_RATE); // 수수료
-    const finalAmount = totalAmount - fee; // 최종 지급액
+    const fee = Math.floor(totalAmount * COMMISSION_RATE);
+    const finalAmount = totalAmount - fee;
 
     const formatCurrency = (num) => num.toLocaleString('ko-KR');
 
-    // 상태별 텍스트 및 스타일
-    const getStatusInfo = (status) => {
+    // 상태 표시 (텍스트만 반환하도록 간소화)
+    const getStatusText = (status) => {
         switch (status) {
-            case 'paid': return { text: '지급 완료', className: 'status-paid' };
-            case 'pending': return { text: '지급 대기', className: 'status-pending' };
-            case 'canceled': return { text: '정산 취소', className: 'status-canceled' };
-            default: return { text: '상태 미정', className: '' };
+            case 'paid': return '지급 완료';
+            case 'pending': return '지급 대기';
+            case 'canceled': return '정산 취소';
+            default: return '진행 중';
         }
     };
 
-    const { text, className } = getStatusInfo(item.status);
-
     return (
-        <div className="settlement-list-item">
-            {/* 1. 프로젝트 정보 */}
+        <div 
+            className="settlement-list-item" 
+            onClick={() => navigate(`/projects/${item.id}`)}
+            style={{ cursor: 'pointer' }}
+        >
             <div className="settlement-project-info">
                 <h4>{item.title}</h4>
                 <p className="date-info">
-                    종료일: {item.projectEndDate} 
-                    {item.status === 'paid' && ` · 지급일: ${item.paidDate}`}
-                    {item.status === 'pending' && ` · 지급 예정일: ${item.paidDate}`}
+                    종료일: {item.projectEndDate} · {getStatusText(item.status)}
                 </p>
-                {/* 상세 내역 (작게 표시) */}
                 <p style={{fontSize: '12px', color: '#999', marginTop: '4px'}}>
                     총 모금액 {formatCurrency(totalAmount)}원 - 수수료 {formatCurrency(fee)}원 (5%)
                 </p>
             </div>
             
-            {/* 2. 상태 뱃지 */}
-            <span className={`settlement-status ${className}`}>
-                {text}
-            </span>
-            
-            {/* 3. 최종 지급 금액 (강조) */}
             <div className="settlement-amount">
+                <span style={{fontSize: '14px', color: '#666', marginRight: '8px'}}>최종 정산액</span>
                 {formatCurrency(finalAmount)} 원
             </div>
         </div>
@@ -66,7 +62,10 @@ const SettlementPage = ({ userInfo }) => {
     const [settlements, setSettlements] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // 1. 데이터 가져오기
+    // 페이지네이션 상태 (5개 기준)
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
     useEffect(() => {
         const fetchSettlements = async () => {
             const token = localStorage.getItem('token');
@@ -93,20 +92,23 @@ const SettlementPage = ({ userInfo }) => {
         }
     }, [userInfo, navigate]);
 
-    // 2. 통계 자동 계산 (수수료 제외한 금액 기준)
-    const calculateTotal = (status) => {
-        return settlements
-            .filter(i => i.status === status)
-            .reduce((sum, item) => {
-                const amount = Number(item.amount);
-                const netAmount = amount - Math.floor(amount * COMMISSION_RATE); // 5% 제외
-                return sum + netAmount;
-            }, 0);
-    };
-
-    const totalPaid = calculateTotal('paid');
-    const totalPending = calculateTotal('pending');
+    // 1. 통계 계산 (필터 없이 전체 데이터 기준)
     const totalProjects = settlements.length;
+    
+    // 지급 예정 총액 계산 (지급 대기(pending) 상태인 금액들의 합산)
+    const totalPendingAmount = settlements
+        .filter(i => i.status === 'pending')
+        .reduce((sum, item) => {
+            const amount = Number(item.amount);
+            return sum + (amount - Math.floor(amount * COMMISSION_RATE));
+        }, 0);
+
+    // 2. 페이지네이션 로직
+    const totalPages = Math.ceil(settlements.length / itemsPerPage);
+    const currentItems = settlements.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const formatCurrency = (amount) => Number(amount).toLocaleString('ko-KR');
 
@@ -117,47 +119,63 @@ const SettlementPage = ({ userInfo }) => {
                 <Sidebar userInfo={userInfo} />
 
                 <main className="main-content">
-                    
                     <h2 className="page-title">정산 관리</h2>
 
-                    {/* 상단 요약 카드 */}
+                    {/* 상단 요약 카드: 요청하신 3가지 항목으로 구성 */}
                     <div className="settlement-summary-card">
                         <div className="summary-item">
                             <p className="label">총 정산 프로젝트</p>
                             <p className="value">{totalProjects} 건</p>
                         </div>
                         <div className="summary-item">
-                            <p className="label">지급 완료 (수수료 제외)</p>
-                            <p className="value">{formatCurrency(totalPaid)} 원</p>
+                            <p className="label">플랫폼 수수료율</p>
+                            <p className="value" style={{ color: '#888' }}>5 %</p>
                         </div>
                         <div className="summary-item">
-                            <p className="label">지급 예정 (수수료 제외)</p>
-                            <p className="value primary">{formatCurrency(totalPending)} 원</p>
+                            <p className="label">지급 예정 총액 <small>(수수료 제외)</small></p>
+                            <p className="value primary">{formatCurrency(totalPendingAmount)} 원</p>
                         </div>
                     </div>
 
-                    {/* 리스트 헤더 & 필터 */}
                     <div className="settlement-list-header">
-                        <span>상세 내역 <small style={{fontSize:'12px', color:'#888', fontWeight:'400'}}>(수수료 5% 제외 후 지급)</small></span>
-                        <select className="filter-select">
-                            <option>전체 보기</option>
-                            <option>지급 완료</option>
-                            <option>지급 대기</option>
-                        </select>
+                        <span>전체 정산 내역 <small style={{fontSize:'12px', color:'#888', fontWeight:'400'}}>(클릭 시 프로젝트 상세로 이동)</small></span>
+                        {/* 필터(select) 제거됨 */}
                     </div>
 
-                    {/* 정산 목록 리스트 */}
                     <div className="settlement-card-list">
                         {loading ? (
                             <div className="empty-state"><p>데이터를 불러오는 중입니다...</p></div>
-                        ) : settlements.length > 0 ? (
-                            settlements.map(item => (
-                                <SettlementListItem key={item.id} item={item} />
-                            ))
+                        ) : currentItems.length > 0 ? (
+                            <>
+                                {currentItems.map(item => (
+                                    <SettlementListItem key={item.id} item={item} />
+                                ))}
+
+                                {/* 페이지네이션 UI */}
+                                {totalPages > 1 && (
+                                    <div className="pagination-area" style={{ marginTop: '30px' }}>
+                                        <button 
+                                            className="btn-page" 
+                                            onClick={() => { setCurrentPage(p => Math.max(1, p - 1)); window.scrollTo(0,0); }}
+                                            disabled={currentPage === 1}
+                                        >
+                                            &lt;
+                                        </button>
+                                        <span className="page-info">{currentPage} / {totalPages}</span>
+                                        <button 
+                                            className="btn-page" 
+                                            onClick={() => { setCurrentPage(p => Math.min(totalPages, p + 1)); window.scrollTo(0,0); }}
+                                            disabled={currentPage === totalPages}
+                                        >
+                                            &gt;
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="empty-state">
                                 <p className="empty-title">정산 내역이 없습니다.</p>
-                                <p className="empty-desc">프로젝트가 종료되면 이곳에서 정산 내역을 확인할 수 있습니다.</p>
+                                <p className="empty-desc">종료된 프로젝트가 생기면 이곳에 정산 정보가 표시됩니다.</p>
                             </div>
                         )}
                     </div>

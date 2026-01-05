@@ -41,7 +41,16 @@ const MyPageLayout = ({ children, userInfo: propUserInfo }) => { // 1. props로 
         };
 
         fetchUserInfo();
-    }, [myInfo]); // myInfo가 없을 때만 실행
+    }, [myInfo]);
+
+  if (!myInfo && !propUserInfo) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login', { replace: true, state: { message: '로그인이 필요한 서비스입니다.' } });
+      return null;
+    }
+  }
+ // myInfo가 없을 때만 실행
 
     return (
         <div className="page-wrapper">

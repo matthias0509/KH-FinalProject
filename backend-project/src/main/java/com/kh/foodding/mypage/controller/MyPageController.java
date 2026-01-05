@@ -33,13 +33,18 @@ public class MyPageController {
         }
         
         String userId = principal.getName();
-        Map<String, Object> info = mypageService.getMyPageInfo(userId);
         
-        return (info != null)
-            ? ResponseEntity.ok(info)
-            : ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자를 찾을 수 없습니다."));
-    }
+        // 💡 Map이 아닌 MyPage VO 객체를 직접 리턴하는 서비스 메서드 사용
+        // (서비스에 selectMemberInfo 메서드가 이미 있으므로 활용)
+        MyPage member = mypageService.selectMemberInfo(userId); 
+        
+        if (member == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "사용자를 찾을 수 없습니다."));
+        }
 
+        // VO 객체를 그대로 리턴하면 JSON 변환 시 모든 필드(email, phone, address 등)가 포함됩니다.
+        return ResponseEntity.ok(member);
+    }
     /**
      * 2. 좋아요한 프로젝트 목록 조회
      */
@@ -211,6 +216,22 @@ public class MyPageController {
         } else {
             return ResponseEntity.badRequest().body("취소할 수 없는 상태이거나 주문을 찾을 수 없습니다.");
         }
+    }
+    
+ // MyPageController.java 에 추가
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<?> withdrawMember(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "로그인이 필요합니다."));
+        }
+
+        String userId = principal.getName();
+        // 서비스의 withdrawMember 메서드 호출 (이미 서비스에 구현되어 있음)
+        boolean result = mypageService.withdrawMember(userId);
+
+        return result 
+            ? ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다.")) 
+            : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", "탈퇴 처리 중 오류가 발생했습니다."));
     }
     
     

@@ -23,7 +23,7 @@ public class MemberService {
 		Path profileDir = FileStorageUtils.getProfileImagesDir();
         
         if (upfile != null && !upfile.isEmpty()) {
-            // 💡 파일 첨부가 있을 경우
+            // 💡 파일 첨부가 있을 경우	
             String originFileName = upfile.getOriginalFilename();
             m.setOriginProfile(originFileName);
             

@@ -30,9 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
         uploadLocations.add(storageUploads.toUri().toString());
 
         Path profileUploads = FileStorageUtils.getProfileImagesDir();
-        if (!profileUploads.equals(storageUploads)) {
-            uploadLocations.add(profileUploads.toUri().toString());
-        }
+        uploadLocations.add(profileUploads.toUri().toString());
     }
 
     // ... 아래 ensureDirectory랑 addResourceHandlers는 그대로 두세요 ...

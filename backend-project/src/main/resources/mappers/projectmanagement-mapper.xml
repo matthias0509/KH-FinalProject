@@ -4,41 +4,42 @@
 
     <resultMap id="managementProjectMap" type="com.kh.foodding.admin.model.vo.AdminProject">
         <id property="productNo" column="PRODUCT_NO"/>
-        
         <result property="category" column="CATEGORY"/> 
         <result property="productTitle" column="PRODUCT_TITLE"/>
-        
         <result property="sellerName" column="MAKER_NAME"/> 
         <result property="sellerId" column="MAKER_ID"/>
-        
         <result property="targetAmount" column="TARGET_AMOUNT"/>
         <result property="currentAmount" column="CURRENT_AMOUNT"/>
         <result property="achieveRate" column="ACHIEVE_RATE"/>
-        
         <result property="fundStartDate" column="START_DATE"/>
         <result property="fundEndDate" column="END_DATE"/>
-        
         <result property="productStatus" column="PRODUCT_STATUS"/>
         <result property="thumbnailUrl" column="MODIFY_THUMBNAIL"/>
     </resultMap>
 
     <sql id="manageSearchCriteria">
-        WHERE 1=1
-        <if test="status != null and status != '' and status != 'all'">
-            AND P.PRODUCT_STATUS = #{status}
-        </if>
-        
-        <if test="category != null and category != '' and category != 'all'">
-            AND P.CATEGORY = #{category}
-        </if>
-        
-        <if test="keyword != null and keyword != ''">
-            AND (
-                P.PRODUCT_TITLE LIKE '%' || #{keyword} || '%'
-                OR U.NICKNAME LIKE '%' || #{keyword} || '%'
-                OR U.USER_ID LIKE '%' || #{keyword} || '%'
-            )
-        </if>
+        <where>
+            <choose>
+                <when test="status == null or status == '' or status == 'all'">
+                    AND P.PRODUCT_STATUS != 'WAITING'
+                </when>
+                <otherwise>
+                    AND P.PRODUCT_STATUS = #{status}
+                </otherwise>
+            </choose>
+            
+            <if test="category != null and category != '' and category != 'all'">
+                AND P.CATEGORY = #{category}
+            </if>
+            
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    P.PRODUCT_TITLE LIKE '%' || #{keyword} || '%'
+                    OR U.NICKNAME LIKE '%' || #{keyword} || '%'
+                    OR U.USER_ID LIKE '%' || #{keyword} || '%'
+                )
+            </if>
+        </where>
     </sql>
 
     <select id="selectTotalCount" parameterType="hashmap" resultType="int">
@@ -57,28 +58,19 @@
                     P.CATEGORY, P.PRODUCT_TITLE,
                     U.NICKNAME AS MAKER_NAME,
                     U.USER_ID AS MAKER_ID,
-                    
                     P.TARGET_AMOUNT,
                     NVL(P.CURRENT_AMOUNT, 0) AS CURRENT_AMOUNT, 
-                    
-                    /* 달성률 계산 */
                     CASE WHEN P.TARGET_AMOUNT > 0 
                          THEN TRUNC((NVL(P.CURRENT_AMOUNT, 0) / P.TARGET_AMOUNT) * 100)
                          ELSE 0 END AS ACHIEVE_RATE,
-
-                    /* 날짜 포맷팅 */
                     TO_CHAR(P.FUND_START_DATE, 'YYYY-MM-DD') AS START_DATE,
                     TO_CHAR(P.FUND_END_DATE, 'YYYY-MM-DD') AS END_DATE,
-                    
                     P.PRODUCT_STATUS,
                     P.MODIFY_THUMBNAIL
-                    
                 FROM PRODUCT P
                 JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
                 JOIN TB_USER U ON S.USER_NO = U.USER_NO
-                
                 <include refid="manageSearchCriteria"/>
-                
                 ORDER BY P.PRODUCT_NO DESC
             ) A
         )
