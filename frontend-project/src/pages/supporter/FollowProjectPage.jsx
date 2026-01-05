@@ -53,8 +53,25 @@ const FollowProjectPage = () => {
         fetchFollowList();
     }, [navigate]);
 
+    // 판매자 프로필로 이동
+    const handleSellerClick = (seller) => {
+        console.log('판매자 클릭:', seller);
+        const sellerUserNo = seller.userNo || seller.id;
+        
+        if (!sellerUserNo) {
+            console.error('판매자 번호가 없습니다:', seller);
+            return;
+        }
+        
+        navigate(`/seller/${sellerUserNo}`);
+    };
+
     // 3. 언팔로우 핸들러 (InteractionController API 호출)
-    const handleUnfollow = async (sellerNo, sellerName) => {
+    const handleUnfollow = async (e, sellerNo, sellerName) => {
+
+        // 이벤트 버블링 방지 (카드 클릭 이벤트와 충돌 방지)
+        e.stopPropagation();
+
         if (!window.confirm(`'${sellerName}' 님을 팔로우 취소하시겠습니까?`)) {
             return;
         }
@@ -84,7 +101,23 @@ const FollowProjectPage = () => {
                     <div className="empty-state"><p>로딩 중입니다...</p></div>
                 ) : followingList.length > 0 ? (
                     followingList.map((maker) => (
-                        <div key={maker.id} className="follow-card">
+                        <div 
+                            key={maker.id} 
+                            className="follow-card"
+                            onClick={() => handleSellerClick(maker)}
+                            style={{ 
+                                cursor: 'pointer',
+                                transition: 'transform 0.2s, box-shadow 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '';
+                            }}
+                        >
                             <div className="follow-info-group">
                                 {/* 프로필 이미지 처리: 이미지가 있으면 img 태그, 없으면 이모지나 기본값 */}
                                 <div className="maker-profile-img" style={{overflow:'hidden'}}>
@@ -104,7 +137,7 @@ const FollowProjectPage = () => {
                             </div>
                             <button 
                                 className="following-btn active"
-                                onClick={() => handleUnfollow(maker.id, maker.name)}
+                                onClick={(e) => handleUnfollow(e, maker.id, maker.name)}
                             >
                                 팔로잉 v
                             </button>

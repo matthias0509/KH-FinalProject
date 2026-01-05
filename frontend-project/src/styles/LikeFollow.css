@@ -175,3 +175,20 @@
     padding: 80px 0;
     color: #adb5bd;
 }
+
+/* LikeFollow.css */
+
+.follow-card {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.follow-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 팔로잉 버튼 호버 시 카드 효과 방지 */
+.following-btn:hover {
+    transform: none;
+}
