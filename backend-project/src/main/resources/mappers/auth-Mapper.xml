@@ -92,6 +92,7 @@
     	SELECT USER_ID
     	  FROM TB_USER
     	 WHERE EMAIL = #{email}
+    	   AND USER_YN = 'N'
     </select>
     
     <select id="idEmailCheck" parameterType="member" resultType="_int">

@@ -102,15 +102,37 @@ export default function FindIdPage() {
                 )}
 
                 {step === 2 && (
-                    <div style={{ textAlign: 'center', padding: '20px' }}>
-                        <p style={{ fontSize: '18px', marginBottom: '10px' }}>찾으시는 아이디는</p>
-                        <h3 style={{ color: '#f97316', fontSize: '24px', fontWeight: 'bold' }}>{foundId}</h3>
-                        <p style={{ fontSize: '18px', marginTop: '10px' }}>입니다.</p>
-                        <div style={{ marginTop: '30px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                            <Link to="/login" className="submit-button" style={{ textDecoration: 'none', padding: '12px 20px' }}>로그인하기</Link>
-                        </div>
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <p style={{ fontSize: '18px', marginBottom: '10px' }}>찾으시는 아이디는</p>
+                    
+                    {/* 💡 아이디가 여러 개일 경우를 대비해 스타일 조정 */}
+                    <div style={{ 
+                        backgroundColor: '#fff7ed', 
+                        padding: '15px', 
+                        borderRadius: '8px', 
+                        border: '1px solid #ffedd5',
+                        margin: '20px 0'
+                    }}>
+                        <h3 style={{ 
+                            color: '#f97316', 
+                            fontSize: '22px', 
+                            fontWeight: 'bold',
+                            wordBreak: 'break-all', // 아이디가 너무 많을 경우 줄바꿈 처리
+                            lineHeight: '1.4'
+                        }}>
+                            {foundId}
+                        </h3>
                     </div>
-                )}
+
+                    <p style={{ fontSize: '18px', marginTop: '10px' }}>입니다.</p>
+                    
+                    <div style={{ marginTop: '30px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <Link to="/login" className="submit-button" style={{ textDecoration: 'none', padding: '12px 20px' }}>
+                            로그인하기
+                        </Link>
+                    </div>
+                </div>
+            )}
             </AuthLayout>
             <AppFooter />
             <ToastContainer />

@@ -10,6 +10,7 @@ export default function NewPasswordForm({ userId, onSuccess }) {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const pwdRegex = /^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$/;
 
     const handleInputFocus = () => {
         if (errorMsg) {
@@ -19,6 +20,12 @@ export default function NewPasswordForm({ userId, onSuccess }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrorMsg('');
+
+        if (!pwdRegex.test(password)) {
+            setErrorMsg("비밀번호는 영문자, 숫자, 특수문자를 포함한 8~16자여야 합니다.");
+            return;
+        }
 
         if (password !== confirmPassword) {
             alert("비밀번호가 일치하지 않습니다.");
