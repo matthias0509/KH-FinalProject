@@ -84,13 +84,13 @@ const Sidebar = ({ userInfo, loading }) => {
                             src={
                                 safeInfo.modifyProfile
                                     ? `${getFullImageUrl(safeInfo.modifyProfile)}?t=${imageTimestamp}`
-                                    : "/placeholder.png"
+                                    : "https://placehold.co/80x80?text=User"
                             }
                             alt="프로필"
                             className="sidebar-profile-img"
                             onError={(e) => {
                                 e.target.onerror = null; 
-                                e.target.src = "/placeholder.png";
+                                e.target.src = "https://placehold.co/80x80?text=User";
                             }}
                         />
                     )}
