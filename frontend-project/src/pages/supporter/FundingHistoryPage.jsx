@@ -42,7 +42,8 @@ const FundingHistoryPage = () => {
                     item.projectThumb || item.originThumbnail,
                     'https://via.placeholder.com/150',
                 ),
-                productNo: item.productNo
+                productNo: item.productNo,
+                hasReview: Boolean(item.hasReview)
             }));
 
             setHistoryList(mappedList);
@@ -135,8 +136,23 @@ const FundingHistoryPage = () => {
                                     <Link to={`/mypage/history/${item.id}`} className="history-btn">
                                         상세 보기
                                     </Link>
-                                    
-                                    {/* 🚨 [추가] 결제 완료 상태일 때만 취소 버튼 표시 */}
+
+                                    {item.status === 'PAY' && !item.hasReview && (
+                                        <Link
+                                            to={`/mypage/review/${item.id}`}
+                                            className="history-btn"
+                                            style={{ color: '#2563eb', borderColor: '#2563eb' }}
+                                        >
+                                            후기 작성
+                                        </Link>
+                                    )}
+
+                                    {item.status === 'PAY' && item.hasReview && (
+                                        <button className="history-btn" disabled>
+                                            후기 작성 완료
+                                        </button>
+                                    )}
+
                                     {item.status === 'PAY' && (
                                         <button 
                                             className="history-btn" 

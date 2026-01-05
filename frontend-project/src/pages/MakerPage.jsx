@@ -11,7 +11,7 @@ const SERVER_URL = "http://localhost:8001/foodding";
 const UPLOAD_PATH = "/uploads/";
 
 const getFullImageUrl = (filename) => {
-    if (!filename || filename === "null") return "/placeholder.png";
+    if (!filename || filename === "null") return "https://placehold.co/80x80?text=User";
     if (filename.startsWith("http")) return filename;
     return `${SERVER_URL}${UPLOAD_PATH}${filename}`;
 };
@@ -127,9 +127,9 @@ const MakerPage = ({ userInfo: propUserInfo }) => {
                                 <img 
                                     src={myInfo?.modifyProfile 
                                         ? `${getFullImageUrl(myInfo.modifyProfile)}?t=${imageTimestamp}`
-                                        : "/placeholder.png"}
+                                        : "https://placehold.co/80x80?text=User"}
                                     alt="프로필" 
-                                    onError={(e) => e.target.src = "/placeholder.png"}
+                                    onError={(e) => e.target.src = "https://placehold.co/80x80?text=User"}
                                 />
                             </div>
                             <div className="text-info">

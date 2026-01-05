@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kh.foodding.review.model.dao.ReviewDao">
+
+    <select id="selectReviewsByProduct" resultType="com.kh.foodding.review.model.vo.Review">
+        WITH ORDER_PRODUCT AS (
+            SELECT DISTINCT od.ORDER_NO, opt.PRODUCT_NO
+            FROM ORDER_DETAIL od
+            JOIN TB_OPTION opt ON od.OPTION_NO = opt.OPTION_NO
+        )
+        SELECT 
+            r.REVIEW_NO AS reviewNo,
+            r.REVIEW_TITLE AS reviewTitle,
+            r.REVIEW_CONTENT AS reviewContent,
+            r.REVIEW_CREATE_DATE AS reviewCreateDate,
+            r.RATING AS rating,
+            r.ORDER_NO AS orderNo,
+            r.USER_NO AS userNo,
+            op.PRODUCT_NO AS productNo,
+            p.PRODUCT_TITLE AS productTitle,
+            u.NICKNAME AS nickname,
+            u.MODIFY_PROFILE AS profileImage
+        FROM REVIEW r
+        JOIN ORDER_PRODUCT op ON r.ORDER_NO = op.ORDER_NO
+        JOIN PRODUCT p ON op.PRODUCT_NO = p.PRODUCT_NO
+        JOIN TB_USER u ON r.USER_NO = u.USER_NO
+        WHERE op.PRODUCT_NO = #{productNo}
+        ORDER BY r.REVIEW_CREATE_DATE DESC
+    </select>
+
+    <select id="selectReviewByOrder" resultType="com.kh.foodding.review.model.vo.Review">
+        WITH ORDER_PRODUCT AS (
+            SELECT DISTINCT od.ORDER_NO, opt.PRODUCT_NO
+            FROM ORDER_DETAIL od
+            JOIN TB_OPTION opt ON od.OPTION_NO = opt.OPTION_NO
+        )
+        SELECT 
+            r.REVIEW_NO AS reviewNo,
+            r.REVIEW_TITLE AS reviewTitle,
+            r.REVIEW_CONTENT AS reviewContent,
+            r.REVIEW_CREATE_DATE AS reviewCreateDate,
+            r.RATING AS rating,
+            r.ORDER_NO AS orderNo,
+            r.USER_NO AS userNo,
+            op.PRODUCT_NO AS productNo,
+            p.PRODUCT_TITLE AS productTitle,
+            u.NICKNAME AS nickname,
+            u.MODIFY_PROFILE AS profileImage
+        FROM REVIEW r
+        JOIN ORDER_PRODUCT op ON r.ORDER_NO = op.ORDER_NO
+        JOIN PRODUCT p ON op.PRODUCT_NO = p.PRODUCT_NO
+        JOIN TB_USER u ON r.USER_NO = u.USER_NO
+        WHERE r.ORDER_NO = #{orderNo}
+          AND r.USER_NO = #{userNo}
+    </select>
+
+    <select id="countReviewByOrder" resultType="int">
+        SELECT COUNT(*)
+        FROM REVIEW
+        WHERE ORDER_NO = #{orderNo}
+          AND USER_NO = #{userNo}
+    </select>
+
+    <select id="findProductNoByOrder" resultType="long">
+        SELECT product_no FROM (
+            SELECT opt.PRODUCT_NO AS product_no
+            FROM ORDERS o
+            JOIN ORDER_DETAIL od ON o.ORDER_NO = od.ORDER_NO
+            JOIN TB_OPTION opt ON od.OPTION_NO = opt.OPTION_NO
+            WHERE o.ORDER_NO = #{orderNo}
+              AND o.USER_NO = #{userNo}
+              AND o.ORDER_STATUS = 'PAY'
+        )
+        WHERE ROWNUM = 1
+    </select>
+
+    <insert id="insertReview" parameterType="com.kh.foodding.review.model.vo.Review">
+        INSERT INTO REVIEW (
+            REVIEW_NO,
+            REVIEW_TITLE,
+            REVIEW_CONTENT,
+            RATING,
+            ORDER_NO,
+            USER_NO
+        ) VALUES (
+            SEQ_REVIEW_NO.NEXTVAL,
+            #{reviewTitle},
+            #{reviewContent},
+            #{rating},
+            #{orderNo},
+            #{userNo}
+        )
+    </insert>
+</mapper>
