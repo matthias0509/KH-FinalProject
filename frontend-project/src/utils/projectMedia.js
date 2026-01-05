@@ -84,8 +84,9 @@ export const resolveProjectImageUrl = (path = '', fallback = PLACEHOLDER_IMAGE, 
   return `${API_BASE_URL}${sanitized}`;
 };
 
-export const resolveProfileImageUrl = (path = '', fallback = PLACEHOLDER_IMAGE) =>
-  resolveProjectImageUrl(path, fallback, { defaultSubdir: 'profile_images' });
+export const resolveProfileImageUrl = (path = '', fallback = PLACEHOLDER_IMAGE, options = {}) =>
+  // 마이페이지와 동일하게 /uploads/{파일명} 형태를 기본값으로 사용
+  resolveProjectImageUrl(path, fallback, { defaultSubdir: '', ...options });
 
 export const getProjectThumbnail = (project, fallback = '') => {
   if (!project) {
