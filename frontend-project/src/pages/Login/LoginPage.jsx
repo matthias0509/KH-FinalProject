@@ -78,7 +78,7 @@ export default function LoginPage() {
             }
             
         } catch (error) {
-            const errorMsg = error.response?.data || "서버와 통신 중 오류가 발생했습니다.";
+            const errorMsg = error.response?.data || "아이디 또는 비밀번호를 잘못 입력하셨습니다.";
             // 에러 메시지가 객체일 수도 있으므로 문자열 처리
             setMessage(typeof errorMsg === 'string' ? errorMsg : "로그인 중 오류 발생");
             console.error("로그인 실패:", error);
