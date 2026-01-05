@@ -75,7 +75,7 @@ public class MyPageController {
             : ResponseEntity.internalServerError().body(Map.of("message", "변경 실패"));
     }
 
-    // 4. 계정 정보 업데이트
+ // 4. 계정 정보 업데이트 (수정됨)
     @PostMapping("/account/update")
     public ResponseEntity<?> updateAccountInfo(@RequestBody MyPage dto, Principal principal) {
         if (principal == null) {
@@ -85,11 +85,22 @@ public class MyPageController {
         String userId = principal.getName();
         dto.setUserId(userId);
 
-        boolean result = mypageService.updateAccountInfo(dto);
+        try {
+            // 서비스 로직 실행
+            boolean result = mypageService.updateAccountInfo(dto);
 
-        return result
-            ? ResponseEntity.ok(Map.of("message", "계정 정보가 수정되었습니다."))
-            : ResponseEntity.internalServerError().body(Map.of("message", "계정 정보 수정 실패"));
+            return ResponseEntity.ok(Map.of("message", "계정 정보가 수정되었습니다."));
+
+        } catch (IllegalArgumentException e) {
+            // 🚨 [핵심] Service에서 "비밀번호가 같습니다"라고 예외를 던지면 여기서 잡습니다.
+            // 400 Bad Request 상태코드와 함께 에러 메시지를 프론트로 보냅니다.
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+
+        } catch (Exception e) {
+            // 그 외 알 수 없는 에러 처리
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(Map.of("message", "계정 정보 수정 중 오류가 발생했습니다."));
+        }
     }
 
     // 5. 비밀번호 확인

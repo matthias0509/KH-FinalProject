@@ -169,7 +169,7 @@ const PaymentSuccess = () => {
               <div className="payment-result__buttons">
                 <button 
                   className="payment-result__button payment-result__button--secondary"
-                  onClick={() => navigate('/payment')}
+                  onClick={() => navigate(-1)}
                 >
                   다시 시도
                 </button>

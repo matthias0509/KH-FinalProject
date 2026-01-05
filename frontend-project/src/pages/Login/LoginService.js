@@ -20,8 +20,7 @@ export const login = async (userId, userPwd) => {
         return null;
     } catch (error) {
         throw error;
-
-        console.error("로그인 통신 실패!", error);
+      
         return null;
 
     }

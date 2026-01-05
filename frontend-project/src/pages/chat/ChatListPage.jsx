@@ -9,8 +9,7 @@ import '../../styles/ChatListPage.css';
 
 const API_BASE_URL = 'http://localhost:8001/foodding';
 
-// 🚨 [수정 1] props로 isMaker를 받아옵니다.
-const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
+const ChatListPage = ({ isMaker }) => { // userInfo prop 제거
   const navigate = useNavigate();
   const [chatRooms, setChatrooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +17,7 @@ const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentUserNo, setCurrentUserNo] = useState(null);
   
-  // 내부 state용 userInfo (App.js에서 못 받을 경우 대비)
+  // 🚨 [수정] userInfo는 자체적으로 관리
   const [userInfo, setUserInfo] = useState(null);
   const [userInfoLoading, setUserInfoLoading] = useState(true);
 
@@ -27,16 +26,9 @@ const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
     console.log(`현재 모드: ${isMaker ? '메이커(판매자)' : '서포터(구매자)'}`);
   }, [isMaker]);
 
-  // 사용자 정보 가져오기
+  // 🚨 [수정] 사용자 정보 로드 - 무조건 자체적으로 가져오기
   useEffect(() => {
     const fetchUserInfo = async () => {
-      // App.js에서 받은 정보가 있으면 그걸 우선 사용
-      if (propUserInfo) {
-        setUserInfo(propUserInfo);
-        setUserInfoLoading(false);
-        return;
-      }
-
       const token = localStorage.getItem('token');
       
       if (!token) {
@@ -48,12 +40,14 @@ const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
       }
 
       try {
+        console.log('📡 [ChatListPage] 사용자 정보 API 호출 시작...');
         const response = await axios.get(`${API_BASE_URL}/api/mypage/info`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        console.log('👤 사용자 정보:', response.data);
+        console.log('✅ [ChatListPage] 사용자 정보 로드 성공:', response.data);
         setUserInfo(response.data);
+        setUserInfoLoading(false);
       } catch (error) {
         console.error('❌ 사용자 정보 로딩 실패:', error);
         
@@ -61,63 +55,62 @@ const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
           alert('로그인 정보가 만료되었습니다. 다시 로그인해주세요.');
           localStorage.removeItem('token');
           navigate('/login');
+        } else {
+          setError('사용자 정보를 불러올 수 없습니다.');
         }
-      } finally {
         setUserInfoLoading(false);
       }
     };
 
     fetchUserInfo();
-  }, [navigate, propUserInfo]);
+  }, [navigate]); // 마운트 시 한 번만 실행
 
-  // 채팅방 목록 및 유저 번호 로드
+  // 🚨 [수정] 채팅방 목록 로드 (userInfo 로드 완료 후 실행)
   useEffect(() => {
-    console.log('🔵 ChatListPage 마운트');
+    // userInfo가 로드되지 않았으면 대기
+    if (userInfoLoading || !userInfo) {
+      console.log('⏳ userInfo 로딩 대기 중...');
+      return;
+    }
+
+    console.log('🔵 채팅방 목록 로드 시작');
     
-    const getUserInfo = async () => {
+    const loadChatrooms = async () => {
       const token = localStorage.getItem('token');
       
       if (!token) {
         setError('로그인이 필요합니다');
         setLoading(false);
-        return null;
+        return;
       }
       
       try {
-        let userNo = null;
-        try {
-          const parts = token.split('.');
-          if (parts.length === 3) {
-            const payload = JSON.parse(atob(parts[1]));
-            userNo = payload.userNo || payload.sub || payload.id || payload.user_no || payload.USER_NO;
+        // 🚨 [수정] userInfo에서 userNo 추출
+        let userNo = userInfo.userNo || userInfo.USER_NO;
+        
+        // JWT에서도 시도
+        if (!userNo) {
+          try {
+            const parts = token.split('.');
+            if (parts.length === 3) {
+              const payload = JSON.parse(atob(parts[1]));
+              userNo = payload.userNo || payload.sub || payload.id || payload.user_no || payload.USER_NO;
+            }
+          } catch (jwtError) {
+            console.warn('⚠️ JWT 파싱 실패:', jwtError.message);
           }
-        } catch (jwtError) {
-          console.warn('⚠️ JWT 파싱 실패, API로 사용자 정보 조회:', jwtError.message);
         }
         
         if (!userNo) {
-          const response = await axios.get(`${API_BASE_URL}/api/mypage/info`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          });
-          userNo = response.data.userNo || response.data.USER_NO;
+          setError('사용자 정보를 확인할 수 없습니다');
+          setLoading(false);
+          return;
         }
         
-        return userNo;
-      } catch (e) {
-        console.error('❌ 사용자 정보 가져오기 실패:', e);
-        if (e.response && e.response.status === 401) {
-            localStorage.removeItem('token');
-            navigate('/login');
-        } else {
-            setError('인증 정보가 올바르지 않습니다');
-        }
-        setLoading(false);
-        return null;
-      }
-    };
-
-    const loadChatrooms = async (userNo) => {
-      try {
+        console.log('👤 현재 사용자 번호:', userNo);
+        setCurrentUserNo(userNo);
+        
+        // 채팅방 목록 조회
         const response = await axios.get(`${API_BASE_URL}/chat/rooms`, {
           params: { userNo }
         });
@@ -130,25 +123,21 @@ const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
         }
       } catch (error) {
         console.error('❌ 채팅방 목록 로딩 실패:', error);
-        setError('채팅 목록을 불러오지 못했습니다');
-        setChatrooms([]);
+        
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem('token');
+          navigate('/login');
+        } else {
+          setError('채팅 목록을 불러오지 못했습니다');
+          setChatrooms([]);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    const initialize = async () => {
-      const userNo = await getUserInfo();
-      if (userNo) {
-        setCurrentUserNo(userNo);
-        await loadChatrooms(userNo);
-      } else {
-        setLoading(false);
-      }
-    };
-
-    initialize();
-  }, [navigate]); // 의존성 배열 유지
+    loadChatrooms();
+  }, [userInfo, userInfoLoading, navigate]);
 
   // 채팅방 클릭 핸들러
   const handleChatroomClick = async (chatroom) => {
@@ -231,22 +220,18 @@ const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
     }
   };
 
-  // 🚨 [수정 2] 검색어 필터링 + 모드(메이커/서포터) 필터링 적용
+  // 검색어 필터링 + 모드(메이커/서포터) 필터링 적용
   const filteredChatrooms = chatRooms.filter(chatroom => {
     // 1. 검색어 일치 확인
     const matchesSearch = chatroom.OTHER_USER_NAME?.toLowerCase().includes(searchQuery.toLowerCase());
     
     // 2. 모드에 따른 구분 (판매자 vs 구매자)
-    // currentUserNo가 로드되기 전이면 필터링하지 않음 (안전장치)
     if (!currentUserNo) return matchesSearch;
 
     let matchesMode = true;
     if (isMaker) {
-        // 메이커 모드: 내가 판매자인 방만 표시 (SELLER가 나인 경우)
-        // 주의: DB 타입에 따라 문자열/숫자 비교가 다를 수 있으니 == 사용
         matchesMode = (chatroom.SELLER == currentUserNo);
     } else {
-        // 서포터 모드: 내가 구매자인 방만 표시 (BUYER가 나인 경우)
         matchesMode = (chatroom.BUYER == currentUserNo);
     }
 
@@ -257,6 +242,7 @@ const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
     <div className="page-wrapper">
       <Header />
       <div className="page-container">
+        {/* 🚨 [수정] Sidebar에 loading 상태 명시적으로 전달 */}
         <Sidebar userInfo={userInfo} loading={userInfoLoading} />
         <main className="page-content">
           {loading ? (
@@ -278,7 +264,6 @@ const ChatListPage = ({ userInfo: propUserInfo, isMaker }) => {
           ) : (
             <div className="chat-list-page">
               <div className="chat-list-page__header">
-                {/* 🚨 [수정 3] 제목 동적 변경 */}
                 <h1 className="chat-list-page__title">
                   <MessageCircle size={28} />
                   {isMaker ? '서포터 문의 관리' : '나의 메시지'}
