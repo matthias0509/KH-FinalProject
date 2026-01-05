@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
-@RequestMapping("seller/profile")
+@RequestMapping("api/seller/profile")
 public class SellerProfileController {
 
     @Autowired

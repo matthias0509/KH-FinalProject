@@ -17,9 +17,10 @@ const MyPage = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     
-    // 추가된 상태: 좋아요한 프로젝트 목록, 후원 내역
+    // [수정] 팔로우 목록 상태 추가
     const [likedProjects, setLikedProjects] = useState([]);
     const [fundingHistory, setFundingHistory] = useState([]);
+    const [followingList, setFollowingList] = useState([]); 
 
     // --- [데이터 가져오기] ---
     useEffect(() => {
@@ -31,32 +32,25 @@ const MyPage = () => {
                     return;
                 }
 
-                // 1. 내 정보 가져오기 (통계 포함)
+                // 1. 내 정보 가져오기
                 const userRes = await axios.get("http://localhost:8001/foodding/api/mypage/info", {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 setUserInfo(userRes.data);
 
-                // 2. 좋아요한 프로젝트 가져오기 (API 호출)
+                // 2. 좋아요한 프로젝트 가져오기
                 try {
                     const likeRes = await axios.get("http://localhost:8001/foodding/api/mypage/like", {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
-                    // 🚨 [수정 1] DB 컬럼명 대소문자 방어 로직 적용
                     const mappedLikes = likeRes.data.map((item, index) => ({
-                        // id가 없으면 index라도 사용해서 에러 방지
                         id: item.productNo || item.PRODUCT_NO || `like-${index}`, 
                         title: item.productTitle || item.PRODUCT_TITLE || '제목 없음',
                         maker: item.sellerName || item.SELLER_NAME || '메이커',
                         percent: item.fundingPercent || item.FUNDING_PERCENT || 0,
                         img: resolveProjectImageUrl(
-                            item.thumbnail ||
-                              item.THUMBNAIL ||
-                              item.thumbnailUrl ||
-                              item.THUMBNAIL_URL ||
-                              item.originThumbnail ||
-                              item.ORIGIN_THUMBNAIL,
+                            item.thumbnail || item.THUMBNAIL || item.thumbnailUrl || item.THUMBNAIL_URL || item.originThumbnail || item.ORIGIN_THUMBNAIL,
                             'https://via.placeholder.com/150',
                         ),
                     }));
@@ -66,13 +60,12 @@ const MyPage = () => {
                     setLikedProjects([]); 
                 }
 
-                // 3. 최근 후원 내역 가져오기 (API 호출)
+                // 3. 최근 후원 내역 가져오기
                 try {
                     const historyRes = await axios.get("http://localhost:8001/foodding/api/mypage/funding/history?limit=3", { 
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
-                    // 🚨 [수정 2] DB 컬럼명 대소문자 방어 로직 적용
                     const mappedHistory = historyRes.data.map((item, index) => ({
                         id: item.fundingNo || item.FUNDING_NO || item.orderNo || item.ORDER_NO || `history-${index}`,
                         title: item.projectTitle || item.PRODUCT_TITLE || '프로젝트',
@@ -80,12 +73,7 @@ const MyPage = () => {
                         amount: item.totalAmount || item.ORDER_AMOUNT || 0,
                         date: item.fundingDate || item.ORDER_DATE || '', 
                         img: resolveProjectImageUrl(
-                            item.projectThumb ||
-                              item.PROJECT_THUMB ||
-                              item.thumbnail ||
-                              item.THUMBNAIL ||
-                              item.originThumbnail ||
-                              item.ORIGIN_THUMBNAIL,
+                            item.projectThumb || item.PROJECT_THUMB || item.thumbnail || item.THUMBNAIL || item.originThumbnail || item.ORIGIN_THUMBNAIL,
                             'https://via.placeholder.com/100',
                         ),
                     }));
@@ -94,6 +82,17 @@ const MyPage = () => {
                 } catch (err) {
                     console.error("후원 내역 로딩 실패:", err);
                     setFundingHistory([]); 
+                }
+
+                // 4. [추가] 팔로우 목록 가져오기 (숫자 세기용)
+                try {
+                    const followRes = await axios.get("http://localhost:8001/foodding/api/mypage/follow", {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    setFollowingList(followRes.data);
+                } catch (err) {
+                    console.error("팔로우 목록 로딩 실패:", err);
+                    setFollowingList([]);
                 }
                 
             } catch (error) {
@@ -136,7 +135,7 @@ const MyPage = () => {
             
                 <main className="main-content">
                     <h2 className="greeting">
-                    
+                       {/* 닉네임 등을 표시하고 싶다면 userInfo.nickname 사용 */}
                     </h2>
 
                     {/* 활동 현황 배너 */}
@@ -153,11 +152,11 @@ const MyPage = () => {
                             <span className="value">{likedProjects.length || 0}</span>
                         </div>
                         <div className="divider-vertical"></div>
-                       <div className="activity-item">
+                        <div className="activity-item">
                             <span className="icon">👀</span>
                             <span className="label">팔로잉</span>
-                            {/* userInfo.stats가 null일 경우 대비 */}
-                            <span className="value">{userInfo.stats?.followingCount || 0}</span> 
+                            {/* [수정] 복잡한 변수 대신 목록 개수(.length) 사용 */}
+                            <span className="value">{followingList.length || 0}</span> 
                         </div>
                     </div>
 
