@@ -12,7 +12,17 @@
     </select>
 
     <select id="countTempProjects" resultType="int">
-        SELECT COUNT(*) FROM TEMPORARY WHERE SELLER_NO = #{userNo}
+        SELECT COUNT(*) 
+        FROM TEMPORARY T
+        WHERE T.SELLER_NO = #{userNo}
+        
+        AND NOT EXISTS (
+            SELECT 1 
+            FROM PRODUCT P
+            JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
+            WHERE S.USER_NO = T.SELLER_NO
+              AND P.PRODUCT_TITLE = T.TEMP_TITLE
+        )
     </select>
 
     <select id="selectProjectStatusCounts" resultType="map">
@@ -44,21 +54,29 @@
         WHERE ROWNUM &lt;= 5
     </select>
     
-    <select id="selectTempProjectList" resultType="map">
-    SELECT 
-        TEMP_NO AS "id",
-        NVL(TEMP_TITLE, '제목 없음') AS "title",
-        NVL(CATEGORY, '미정') AS "category",
-        'draft' AS "status",
-        '펀딩' AS "type",
-        0 AS "reward",
-        0 AS "backers",
-        -- 🚨 MODIFY_THUMBNAIL 대신 ORIGIN_THUMBNAIL을 조회하거나 둘 다 체크
-        NVL(ORIGIN_THUMBNAIL, MODIFY_THUMBNAIL) AS "thumbnail"
-    FROM TEMPORARY
-    WHERE SELLER_NO = #{userNo}
-    ORDER BY UPDATE_DATE DESC
-</select>
+<select id="selectTempProjectList" resultType="map">
+        SELECT 
+            T.TEMP_NO AS "id",
+            NVL(T.TEMP_TITLE, '제목 없음') AS "title",
+            NVL(T.CATEGORY, '미정') AS "category",
+            'draft' AS "status",
+            '펀딩' AS "type",
+            0 AS "reward",
+            0 AS "backers",
+            NVL(T.ORIGIN_THUMBNAIL, T.MODIFY_THUMBNAIL) AS "thumbnail"
+        FROM TEMPORARY T
+        WHERE T.SELLER_NO = #{userNo}
+        
+        AND NOT EXISTS (
+            SELECT 1 
+            FROM PRODUCT P
+            JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
+            WHERE S.USER_NO = T.SELLER_NO
+              AND P.PRODUCT_TITLE = T.TEMP_TITLE
+        )
+        
+        ORDER BY T.UPDATE_DATE DESC
+    </select>
 
     <select id="selectProductListByStatus" resultType="map">
         SELECT 
@@ -75,7 +93,9 @@
              JOIN ORDER_DETAIL OD ON O.ORDER_NO = OD.ORDER_NO 
              JOIN TB_OPTION OPT ON OD.OPTION_NO = OPT.OPTION_NO 
              WHERE OPT.PRODUCT_NO = P.PRODUCT_NO) AS "backers",
-            P.MODIFY_THUMBNAIL AS "thumbnail"
+            
+            NVL(P.MODIFY_THUMBNAIL, P.ORIGIN_THUMBNAIL) AS "thumbnail"
+            
         FROM PRODUCT P
         WHERE P.SELLER_NO = #{sellerNo}
         <if test="status == 'open'">
@@ -190,10 +210,16 @@
 	              AND PRODUCT_YN = 'Y'
 	              AND PRODUCT_STATUS IN ('OPEN', 'SUCCESS', 'FAIL', 'CLOSE')
 	            ORDER BY CREATE_DATE DESC
-	        ) A
+	        ) 
 	        WHERE ROWNUM <![CDATA[<=]]> (#{offset} + #{size})
 	    )
 	    WHERE RNUM <![CDATA[>]]> #{offset}
 	</select>
+	
+	
+	<delete id="deleteTempProject" parameterType="int">
+    DELETE FROM TEMPORARY 
+    WHERE TEMP_NO = #{tempNo}
+</delete>
 
 </mapper>

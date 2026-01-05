@@ -13,21 +13,48 @@ const SERVER_URL = "http://localhost:8001/foodding";
 // --- [컴포넌트] 프로젝트 리스트 아이템 ---
 const ProjectListItem = ({ project }) => {
     const navigate = useNavigate();
-    
-    const title = project.title || '제목 없음';
-    const category = project.category || '미정';
-    const type = project.type || '펀딩';
-    const reward = Number(project.reward || 0);
-    const backers = Number(project.backers || 0);
-    const status = project.status || 'draft';
-    const id = project.id || project.productNo;
 
-    // 이미지 경로 처리 (여러 필드명 대응)
-    const thumbnailPath = project.thumbnail || 
-                          project.thumbnailUrl || 
-                          project.MODIFY_THUMBNAIL || 
-                          project.ORIGIN_THUMBNAIL || 
-                          project.modifyThumbnail;
+    // 1. [변수명 방어] DB에서 넘어올 수 있는 모든 이미지 변수명 체크
+    const rawImage = 
+        project.thumbnail || 
+        project.THUMBNAIL || 
+        project.thumbnailUrl || 
+        project.THUMBNAIL_URL || 
+        project.modifyThumbnail || 
+        project.MODIFY_THUMBNAIL || 
+        project.originThumbnail || 
+        project.ORIGIN_THUMBNAIL ||
+        project.projectThumb ||      
+        project.PROJECT_THUMB;
+
+    // 2. [주소 완성] 여기가 핵심입니다!
+    const getImageUrl = (img) => {
+        if (!img) return null; // 이미지 없으면 회색박스
+        
+        // 1) http나 data:로 시작하면 그대로 씀 (외부 링크 등)
+        if (img.startsWith('http') || img.startsWith('data:')) return img;
+
+        // 2) DB에 이미 '/uploads/' 경로가 포함되어 있다면? (작성중 파일 등) -> 그대로 연결
+        if (img.includes('uploads/') || img.includes('resources/')) {
+             const pathPrefix = img.startsWith('/') ? '' : '/';
+             return `${SERVER_URL}${pathPrefix}${img}`;
+        }
+
+        // 3) [수정됨] 파일명만 딸랑 있는 경우 (진행중 파일 등) -> '/uploads/'를 강제로 붙여줌!
+        const pathPrefix = img.startsWith('/') ? '' : '/';
+        return `${SERVER_URL}/uploads${pathPrefix}${img}`; 
+    };
+
+    const finalImageUrl = getImageUrl(rawImage);
+
+    // 기본 정보 처리
+    const title = project.title || project.PROJECT_TITLE || '제목 없음';
+    const category = project.category || project.CATEGORY_NAME || '미정';
+    const type = project.type || '펀딩';
+    const reward = Number(project.reward || project.TOTAL_AMOUNT || 0);
+    const backers = Number(project.backers || project.SUPPORT_COUNT || 0);
+    const status = project.status || 'draft';
+    const id = project.id || project.productNo || project.PROJECT_NO;
 
     const formatCurrency = (amount) => amount.toLocaleString('ko-KR');
 
@@ -42,24 +69,32 @@ const ProjectListItem = ({ project }) => {
     return (
         <div className="project-list-item">
             <div className="project-info-row" onClick={handleDetailClick} style={{ cursor: 'pointer' }}>
-                <img 
-                    src={resolveProjectImageUrl(thumbnailPath)} 
-                    alt={title} 
-                    className="project-thumb-small" 
-                    onError={(e) => { 
-                        e.target.style.display = 'none'; 
-                        if(e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; 
-                    }} 
-                />
                 
-                {/* 이미지가 없거나 에러일 때 보여줄 대체 박스 */}
+                {/* 이미지가 있을 때만 렌더링 */}
+                {finalImageUrl ? (
+                    <img 
+                        src={finalImageUrl} 
+                        alt={title} 
+                        className="project-thumb-small" 
+                        onError={(e) => { 
+                            e.target.style.display = 'none'; 
+                            e.target.nextSibling.style.display = 'flex'; 
+                        }} 
+                    />
+                ) : null}
+
+                {/* 이미지가 없거나 깨졌을 때 보여줄 박스 */}
                 <div className="project-thumb-small fallback-box" style={{
-                    backgroundColor: '#eee', 
-                    display: 'none', 
+                    backgroundColor: '#f0f0f0', 
+                    display: finalImageUrl ? 'none' : 'flex',
                     alignItems: 'center', 
                     justifyContent: 'center', 
-                    color: '#999', 
-                    fontSize: '12px'
+                    color: '#888', 
+                    fontSize: '12px',
+                    width: '120px',
+                    height: '90px',
+                    borderRadius: '8px',
+                    border: '1px solid #ddd'
                 }}>
                     No Image
                 </div>
@@ -69,6 +104,7 @@ const ProjectListItem = ({ project }) => {
                         {status === 'draft' && <span className="list-status-badge status-draft">작성 중</span>}
                         {status === 'open' && <span className="list-status-badge status-open">진행 중</span>}
                         {status === 'closed' && <span className="list-status-badge status-closed">종료</span>}
+                        {status === 'ban' && <span className="list-status-badge status-closed" style={{backgroundColor:'red'}}>중단됨</span>}
                         {title}
                     </h4>
                     <div className="project-stats">
@@ -98,7 +134,6 @@ const ProjectListItem = ({ project }) => {
         </div>
     );
 };
-
 // --- [메인 페이지] ---
 const ProjectPage = ({ userInfo }) => {
     const navigate = useNavigate();

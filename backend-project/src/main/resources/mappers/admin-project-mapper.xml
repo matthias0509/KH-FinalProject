@@ -77,7 +77,7 @@
 
     <update id="updateProjectStatus">
         UPDATE PRODUCT
-        SET PRODUCT_STATUS = #{status}
+        SET PRODUCT_STATUS = 'OPEN'
             WHERE PRODUCT_NO = #{productNo}
     </update>
 
