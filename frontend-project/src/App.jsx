@@ -156,6 +156,7 @@ export default function App() {
       <Route path='/imbak' element={<ImbakPage/> }/>
       <Route path="/search" element={<SearchPage />} />
       <Route path="/projects/:ProjectNo" element={<ProductDetailPage />} />
+
       <Route path='/change' element={<PrivateRoute><ChangePage/></PrivateRoute>}/> {/* 전환 신청도 로그인 필요 */}
       
       <Route path="/notice" element={<NoticePage />}/>  

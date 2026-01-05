@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../../components/Header';
@@ -6,8 +6,6 @@ import AppFooter from '../../components/AppFooter';
 import Sidebar from '../../components/Sidebar';
 import '../../styles/MakerPage.css';
 import '../../styles/UserManagement.css'; 
-
-// 🚨 유틸리티 함수 가져오기
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
 
 const SERVER_URL = "http://localhost:8001/foodding";
@@ -24,12 +22,12 @@ const ProjectListItem = ({ project }) => {
     const status = project.status || 'draft';
     const id = project.id || project.productNo;
 
-    // 🚨 모든 가능성 있는 필드명을 전부 체크합니다 (매퍼 별칭 대응)
+    // 이미지 경로 처리 (여러 필드명 대응)
     const thumbnailPath = project.thumbnail || 
-                         project.thumbnailUrl || 
-                         project.MODIFY_THUMBNAIL || 
-                         project.ORIGIN_THUMBNAIL || 
-                         project.modifyThumbnail;
+                          project.thumbnailUrl || 
+                          project.MODIFY_THUMBNAIL || 
+                          project.ORIGIN_THUMBNAIL || 
+                          project.modifyThumbnail;
 
     const formatCurrency = (amount) => amount.toLocaleString('ko-KR');
 
@@ -44,26 +42,20 @@ const ProjectListItem = ({ project }) => {
     return (
         <div className="project-list-item">
             <div className="project-info-row" onClick={handleDetailClick} style={{ cursor: 'pointer' }}>
-                {/* 🚨 유효한 파일명이 있고, 기본 이미지명이 아닐 때만 출력 */}
-                {thumbnailPath && 
-                 thumbnailPath !== "null" && 
-                 thumbnailPath !== "undefined" && 
-                 thumbnailPath !== "DEFAULT_THUMBNAIL.png" ? (
-                    <img 
-                        src={resolveProjectImageUrl(thumbnailPath)} 
-                        alt={title} 
-                        className="project-thumb-small" 
-                        onError={(e) => { 
-                            e.target.style.display = 'none'; // 에러 시 이미지 숨기고 배경색 노출
-                            e.target.nextSibling.style.display = 'flex'; 
-                        }} 
-                    />
-                ) : null}
+                <img 
+                    src={resolveProjectImageUrl(thumbnailPath)} 
+                    alt={title} 
+                    className="project-thumb-small" 
+                    onError={(e) => { 
+                        e.target.style.display = 'none'; 
+                        if(e.target.nextSibling) e.target.nextSibling.style.display = 'flex'; 
+                    }} 
+                />
                 
                 {/* 이미지가 없거나 에러일 때 보여줄 대체 박스 */}
                 <div className="project-thumb-small fallback-box" style={{
                     backgroundColor: '#eee', 
-                    display: (thumbnailPath && thumbnailPath !== "DEFAULT_THUMBNAIL.png") ? 'none' : 'flex', 
+                    display: 'none', 
                     alignItems: 'center', 
                     justifyContent: 'center', 
                     color: '#999', 
@@ -108,47 +100,49 @@ const ProjectListItem = ({ project }) => {
 };
 
 // --- [메인 페이지] ---
-const ProjectPage = ({ userInfo: propUserInfo }) => {
+const ProjectPage = ({ userInfo }) => {
     const navigate = useNavigate();
     
-    const [myInfo, setMyInfo] = useState(propUserInfo || null);
+    // 1. 내 정보 상태 관리
+    const [myInfo, setMyInfo] = useState(userInfo || null);
     const [currentTab, setCurrentTab] = useState('draft'); 
     const [projects, setProjects] = useState([]);          
     const [loading, setLoading] = useState(false);
 
     // 페이지네이션 설정
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 4; 
+    const itemsPerPage = 3; 
 
+    // 2. [수정됨] 내 정보 로딩 (조건 없이 무조건 최신 정보 호출)
     useEffect(() => {
-        if (propUserInfo) setMyInfo(propUserInfo);
-    }, [propUserInfo]);
-
-    useEffect(() => {
-        const fetchUserInfo = async () => {
-            if (myInfo) return; 
-            const token = localStorage.getItem('token');
-            if (!token) return;
-            try {
-                const response = await axios.get(`${SERVER_URL}/api/mypage/info`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                setMyInfo(response.data);
-            } catch (error) {
-                console.error("❌ 내 정보 로딩 실패:", error);
-            }
-        };
-        fetchUserInfo();
-    }, [myInfo]);
-
-    useEffect(() => {
-        const fetchProjects = async () => {
+        const loadMyInfo = async () => {
             const token = localStorage.getItem('token');
             if (!token) {
                 alert("로그인이 필요합니다.");
                 navigate('/login');
                 return;
             }
+
+            try {
+                // 내 정보 API 호출 (무조건 실행하여 닉네임/프사 갱신)
+                const response = await axios.get(`${SERVER_URL}/api/mypage/info`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                console.log("내 정보 로딩 성공:", response.data);
+                setMyInfo(response.data); // 상태 업데이트 -> Sidebar로 전달됨
+            } catch (error) {
+                console.error("내 정보 로딩 실패:", error);
+            }
+        };
+        
+        loadMyInfo();
+    }, [navigate]); // myInfo 의존성 제거 (무한루프 방지 및 강제 로딩)
+
+    // 3. 프로젝트 목록 로딩
+    useEffect(() => {
+        const fetchProjects = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
 
             setLoading(true);
             try {
@@ -167,7 +161,7 @@ const ProjectPage = ({ userInfo: propUserInfo }) => {
         };
 
         fetchProjects();
-    }, [currentTab, navigate]);
+    }, [currentTab]);
 
     // 페이지네이션 로직
     const totalPages = Math.ceil(projects.length / itemsPerPage);
@@ -186,6 +180,7 @@ const ProjectPage = ({ userInfo: propUserInfo }) => {
         <div className="page-wrapper">
             <Header />
             <div className="mypage-container">
+                {/* 여기서 확보된 myInfo를 넘겨줍니다 */}
                 <Sidebar userInfo={myInfo} />
 
                 <main className="main-content">

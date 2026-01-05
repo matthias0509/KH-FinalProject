@@ -409,3 +409,18 @@
         flex-direction: column;
     }
 }
+/* --- Toast 알림창 최상위 노출 설정 --- */
+.Toastify__toast-container {
+    z-index: 9999999 !important; /* 헤더보다 무조건 위에 뜨게 함 */
+    top: 80px !important;        /* 헤더 아래쪽으로 살짝 내리기 (선택사항) */
+}
+
+/* 모바일 등 좁은 화면에서 가려짐 방지 */
+@media (max-width: 480px) {
+    .Toastify__toast-container {
+        top: 20px !important;
+        left: 50% !important;
+        transform: translateX(-50%);
+        width: 90% !important;
+    }
+}

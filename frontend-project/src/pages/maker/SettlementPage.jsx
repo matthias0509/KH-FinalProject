@@ -21,7 +21,7 @@ const SettlementListItem = ({ item }) => {
 
     const formatCurrency = (num) => num.toLocaleString('ko-KR');
 
-    // 상태 표시 (텍스트만 반환하도록 간소화)
+    // 상태 표시
     const getStatusText = (status) => {
         switch (status) {
             case 'paid': return '지급 완료';
@@ -59,21 +59,50 @@ const SettlementListItem = ({ item }) => {
 // --- [메인 페이지] ---
 const SettlementPage = ({ userInfo }) => {
     const navigate = useNavigate();
+    
+    // 1. 내 정보 상태 관리 (props가 없으면 null)
+    const [myInfo, setMyInfo] = useState(userInfo || null);
+    
     const [settlements, setSettlements] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // 페이지네이션 상태 (5개 기준)
+    // 페이지네이션 상태
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
+    // 2. [핵심 수정] 내 정보 로딩 (조건 없이 무조건 실행)
     useEffect(() => {
-        const fetchSettlements = async () => {
+        const loadMyInfo = async () => {
+            // 이미 정보가 있다면 API 호출 생략 (선택 사항)
+            // if (myInfo) return; 
+
             const token = localStorage.getItem('token');
             if (!token) {
                 alert("로그인이 필요합니다.");
                 navigate('/login');
                 return;
             }
+
+            try {
+                // 내 정보 API 호출 (무조건 실행하여 닉네임/프사 갱신)
+                const response = await axios.get(`${SERVER_URL}/api/mypage/info`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                console.log("내 정보 로딩 성공(정산페이지):", response.data);
+                setMyInfo(response.data); // 상태 업데이트 -> Sidebar로 전달됨
+            } catch (error) {
+                console.error("내 정보 로딩 실패:", error);
+            }
+        };
+        
+        loadMyInfo();
+    }, [navigate]); // 의존성 배열에서 myInfo 제거
+
+    // 3. 정산 내역 로딩
+    useEffect(() => {
+        const fetchSettlements = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) return;
 
             try {
                 const response = await axios.get(`${SERVER_URL}/api/maker/settlement`, {
@@ -87,15 +116,11 @@ const SettlementPage = ({ userInfo }) => {
             }
         };
 
-        if (userInfo) {
-            fetchSettlements();
-        }
-    }, [userInfo, navigate]);
+        fetchSettlements();
+    }, []);
 
-    // 1. 통계 계산 (필터 없이 전체 데이터 기준)
+    // 통계 및 페이징 로직
     const totalProjects = settlements.length;
-    
-    // 지급 예정 총액 계산 (지급 대기(pending) 상태인 금액들의 합산)
     const totalPendingAmount = settlements
         .filter(i => i.status === 'pending')
         .reduce((sum, item) => {
@@ -103,7 +128,6 @@ const SettlementPage = ({ userInfo }) => {
             return sum + (amount - Math.floor(amount * COMMISSION_RATE));
         }, 0);
 
-    // 2. 페이지네이션 로직
     const totalPages = Math.ceil(settlements.length / itemsPerPage);
     const currentItems = settlements.slice(
         (currentPage - 1) * itemsPerPage,
@@ -116,12 +140,13 @@ const SettlementPage = ({ userInfo }) => {
         <div className="page-wrapper">
             <Header />
             <div className="mypage-container">
-                <Sidebar userInfo={userInfo} />
+                {/* 🚨 확보된 myInfo 전달 */}
+                <Sidebar userInfo={myInfo} />
 
                 <main className="main-content">
                     <h2 className="page-title">정산 관리</h2>
 
-                    {/* 상단 요약 카드: 요청하신 3가지 항목으로 구성 */}
+                    {/* 상단 요약 카드 */}
                     <div className="settlement-summary-card">
                         <div className="summary-item">
                             <p className="label">총 정산 프로젝트</p>
@@ -139,7 +164,6 @@ const SettlementPage = ({ userInfo }) => {
 
                     <div className="settlement-list-header">
                         <span>전체 정산 내역 <small style={{fontSize:'12px', color:'#888', fontWeight:'400'}}>(클릭 시 프로젝트 상세로 이동)</small></span>
-                        {/* 필터(select) 제거됨 */}
                     </div>
 
                     <div className="settlement-card-list">
