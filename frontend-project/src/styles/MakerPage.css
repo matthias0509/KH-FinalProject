@@ -683,3 +683,51 @@
     min-width: 120px;
     text-align: right;
 }
+
+/* 페이징바 스타일 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 30px;
+    padding: 20px 0;
+}
+
+.pagination .page-btn,
+.pagination .page-num {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid #ddd;
+    background-color: white;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.pagination .page-btn:hover:not(:disabled),
+.pagination .page-num:hover:not(.active) {
+    border-color: #ff6b35;
+    color: #ff6b35;
+}
+
+.pagination .page-btn:disabled {
+    background-color: #f5f5f5;
+    color: #ccc;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+}
+
+.pagination .page-num.active {
+    background-color: #ff6b35;
+    color: white;
+    border-color: #ff6b35;
+    font-weight: 600;
+}
+
+.pagination .page-btn {
+    font-weight: 500;
+}

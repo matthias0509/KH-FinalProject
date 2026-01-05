@@ -17,16 +17,22 @@ const getFullImageUrl = (filename) => {
 
 const SellerProfile = ({ userInfo: propUserInfo }) => {
     const navigate = useNavigate();
-    const { sellerNo } = useParams(); // 🚨 URL에서 판매자 번호 가져오기
+    const { sellerNo } = useParams();
 
     const [myInfo, setMyInfo] = useState(propUserInfo || null);
-    const [sellerInfo, setSellerInfo] = useState(null); // 🚨 조회할 판매자 정보
+    const [sellerInfo, setSellerInfo] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isOwnProfile, setIsOwnProfile] = useState(false); // 🚨 내 프로필인지 확인
+    const [isOwnProfile, setIsOwnProfile] = useState(false);
     
     const [stats, setStats] = useState({ projectCount: 0, followerCount: 0 });
     const [projectStatus, setProjectStatus] = useState({ writing: 0, reviewing: 0, progress: 0, ended: 0 });
     const [recentProjects, setRecentProjects] = useState([]);
+
+    // ✅ 페이징 state 추가
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalProjects, setTotalProjects] = useState(0);
+    const itemsPerPage = 10; // 페이지당 프로젝트 수
 
     useEffect(() => {
         if (propUserInfo) {
@@ -34,80 +40,71 @@ const SellerProfile = ({ userInfo: propUserInfo }) => {
         }
     }, [propUserInfo]);
 
-    // 🚨 데이터 가져오기 로직 개선
+    // ✅ 페이지 변경 시 데이터 다시 불러오기
     useEffect(() => {
         const fetchAllData = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                alert("로그인이 필요합니다.");
-                navigate('/login');
-                return;
-            }
+            const token = sessionStorage.getItem('loginUser') || localStorage.getItem('token');
+            
+            // 비로그인 시 처리
+            const hasToken = token && token !== 'null' && token !== 'undefined';
 
             try {
-                // 1. 내 정보 먼저 가져오기
-                const userInfoRes = await axios.get(`${SERVER_URL}/api/mypage/info`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                const currentUserInfo = userInfoRes.data;
-                setMyInfo(currentUserInfo);
-
-                // 2. sellerNo가 있으면 해당 판매자 정보 조회, 없으면 내 정보 사용
-                if (sellerNo) {
-                    // URL에 판매자 번호가 있는 경우 -> 다른 판매자 프로필 보기
-                    const currentUserNo = currentUserInfo.userNo || currentUserInfo.USER_NO;
-                    
-                    // 내 번호와 같으면 내 프로필
-                    if (Number(sellerNo) === Number(currentUserNo)) {
-                        setIsOwnProfile(true);
-                        setSellerInfo(currentUserInfo);
-                    } else {
-                        // 다른 판매자 프로필 조회
-                        setIsOwnProfile(false);
-                        const sellerInfoRes = await axios.get(`${SERVER_URL}/api/seller/${sellerNo}`, {
+                // 로그인한 경우에만 내 정보 조회
+                if (hasToken) {
+                    try {
+                        const userInfoRes = await axios.get(`${SERVER_URL}/api/mypage/info`, {
                             headers: { 'Authorization': `Bearer ${token}` }
                         });
-                        setSellerInfo(sellerInfoRes.data);
+                        const currentUserInfo = userInfoRes.data;
+                        setMyInfo(currentUserInfo);
+
+                        // 본인 프로필인지 확인
+                        if (sellerNo) {
+                            const currentUserNo = currentUserInfo.userNo || currentUserInfo.USER_NO;
+                            setIsOwnProfile(Number(sellerNo) === Number(currentUserNo));
+                        } else {
+                            setIsOwnProfile(true);
+                        }
+                    } catch (error) {
+                        console.log('내 정보 조회 실패:', error);
                     }
-                } else {
-                    // URL에 판매자 번호가 없으면 내 프로필
-                    setIsOwnProfile(true);
-                    setSellerInfo(currentUserInfo);
                 }
 
-                // 3. 대시보드 데이터 (본인 프로필일 때만)
-                if (!sellerNo || isOwnProfile) {
-                    const dashboardRes = await axios.get(`${SERVER_URL}/api/maker/dashboard`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                const headers = hasToken ? { 'Authorization': `Bearer ${token}` } : {};
 
-                    const data = dashboardRes.data;
-                    if (data) {
-                        setStats(data.stats || { projectCount: 0, followerCount: 0 });
-                        setProjectStatus(data.status || { writing: 0, reviewing: 0, progress: 0, ended: 0 });
-                        setRecentProjects(data.recentProjects || []);
-                    }
-                } else {
-                    // 다른 판매자의 공개 정보만 조회
-                    const publicInfoRes = await axios.get(`${SERVER_URL}/api/seller/${sellerNo}/public`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
+                // 판매자 정보 조회
+                if (sellerNo) {
+                    const sellerInfoRes = await axios.get(`${SERVER_URL}/api/seller/${sellerNo}`, {
+                        headers
                     });
+                    setSellerInfo(sellerInfoRes.data);
+
+                    // ✅ 페이징 포함한 공개 정보 조회
+                    const publicInfoRes = await axios.get(
+                        `${SERVER_URL}/api/seller/${sellerNo}/public?page=${currentPage}&size=${itemsPerPage}`, 
+                        { headers }
+                    );
                     
                     if (publicInfoRes.data) {
                         setStats(publicInfoRes.data.stats || { projectCount: 0, followerCount: 0 });
-                        setRecentProjects(publicInfoRes.data.recentProjects || []);
+                        setRecentProjects(publicInfoRes.data.recentProjects || publicInfoRes.data.projects || []);
+                        
+                        // ✅ 페이징 정보 설정
+                        setTotalPages(publicInfoRes.data.totalPages || 1);
+                        setTotalProjects(publicInfoRes.data.totalProjects || 0);
+                        
+                        if (publicInfoRes.data.status) {
+                            setProjectStatus(publicInfoRes.data.status);
+                        }
                     }
                 }
 
             } catch (error) {
                 console.error("데이터 로딩 실패:", error);
-                if (error.response && error.response.status === 403) {
-                    if(window.confirm("메이커 권한이 없습니다. 신청하시겠습니까?")) {
-                        navigate('/change');
-                    } else {
-                        navigate('/mypage');
-                    }
+                
+                if (error.response && error.response.status === 401) {
+                    alert("로그인이 필요합니다.");
+                    navigate('/login');
                 } else if (error.response && error.response.status === 404) {
                     alert("판매자를 찾을 수 없습니다.");
                     navigate('/');
@@ -117,8 +114,10 @@ const SellerProfile = ({ userInfo: propUserInfo }) => {
             }
         };
 
-        fetchAllData();
-    }, [navigate, sellerNo]);
+        if (sellerNo) {
+            fetchAllData();
+        }
+    }, [navigate, sellerNo, currentPage]); // ✅ currentPage 의존성 추가
 
     const imageTimestamp = useMemo(() => Date.now(), [sellerInfo?.modifyProfile]);
 
@@ -132,14 +131,43 @@ const SellerProfile = ({ userInfo: propUserInfo }) => {
         }
     };
 
+    // ✅ 페이지 번호 생성 함수
+    const getPageNumbers = () => {
+        const pages = [];
+        const maxVisible = 5; // 한 번에 보여줄 페이지 번호 개수
+        
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+        
+        if (endPage - startPage + 1 < maxVisible) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(i);
+        }
+        
+        return pages;
+    };
+
+    // ✅ 페이지 변경 핸들러
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
 
     const displayInfo = sellerInfo || myInfo;
+
+    if (loading) {
+        return <div>로딩 중...</div>;
+    }
 
     return (
         <div className="page-wrapper">
             <Header />
             <div className="mypage-container">
-                {/* 🚨 내 프로필일 때만 Sidebar 표시 */}
                 {isOwnProfile && <Sidebar userInfo={myInfo} />}
 
                 <main className={`main-content maker-layout ${!isOwnProfile ? 'full-width' : ''}`}>
@@ -178,7 +206,6 @@ const SellerProfile = ({ userInfo: propUserInfo }) => {
                         </div>
                     </section>
 
-                    {/* 🚨 본인 프로필일 때만 프로젝트 현황 표시 */}
                     {isOwnProfile && (
                         <section className="dashboard-grid">
                             <div className="status-card"><h4>작성 중</h4><p className="count">{projectStatus.writing}</p></div>
@@ -188,7 +215,6 @@ const SellerProfile = ({ userInfo: propUserInfo }) => {
                         </section>
                     )}
 
-                    {/* 🚨 본인 프로필일 때만 프로젝트 생성 배너 표시 */}
                     {isOwnProfile && (
                         <section className="create-project-banner" onClick={() => navigate('/create')}>
                             <div className="banner-text">
@@ -227,6 +253,58 @@ const SellerProfile = ({ userInfo: propUserInfo }) => {
                                 </div>
                             )}
                         </div>
+
+                        {/* 페이징바 개선 버전 */}
+                        {totalPages > 1 && (
+                            <div className="pagination">
+                                {/* 맨 처음 */}
+                                <button 
+                                    className="page-btn"
+                                    onClick={() => handlePageChange(1)}
+                                    disabled={currentPage === 1}
+                                >
+                                    &lt;&lt;
+                                </button>
+                                
+                                {/* 이전 */}
+                                <button 
+                                    className="page-btn"
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                >
+                                    &lt;
+                                </button>
+                                
+                                {/* 페이지 번호 */}
+                                {getPageNumbers().map(page => (
+                                    <button
+                                        key={page}
+                                        className={`page-num ${currentPage === page ? 'active' : ''}`}
+                                        onClick={() => handlePageChange(page)}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+                                
+                                {/* 다음 */}
+                                <button 
+                                    className="page-btn"
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    &gt;
+                                </button>
+                                
+                                {/* 맨 끝 */}
+                                <button 
+                                    className="page-btn"
+                                    onClick={() => handlePageChange(totalPages)}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    &gt;&gt;
+                                </button>
+                            </div>
+                        )}
                     </section>
                 </main>
             </div>
