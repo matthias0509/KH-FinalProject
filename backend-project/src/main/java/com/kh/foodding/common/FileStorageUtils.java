@@ -45,6 +45,7 @@ public final class FileStorageUtils {
     }
 
     public static Path getProfileImagesDir() {
-        return createDirectory(BASE_DIR.resolve("profile_images"));
+        // Store profile images inside uploads so /uploads/** mapping can serve them directly
+        return createDirectory(getUploadsDir().resolve("profile_images"));
     }
 }

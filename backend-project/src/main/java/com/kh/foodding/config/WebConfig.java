@@ -29,8 +29,8 @@ public class WebConfig implements WebMvcConfigurer {
         Path storageUploads = FileStorageUtils.getUploadsDir();
         uploadLocations.add(storageUploads.toUri().toString());
 
-        Path profileUploads = FileStorageUtils.getProfileImagesDir();
-        uploadLocations.add(profileUploads.toUri().toString());
+        // Ensure the nested profile-images directory exists inside uploads
+        FileStorageUtils.getProfileImagesDir();
     }
 
     // ... 아래 ensureDirectory랑 addResourceHandlers는 그대로 두세요 ...
