@@ -31,7 +31,7 @@ public class MakerService {
 
         // 2. 각종 통계 데이터 조회 (DAO 호출)
         int followerCount = makerDao.countFollowers(sellerNo);
-        int writingCount = makerDao.countTempProjects(userNo); // 작성 중(임시저장)은 userNo 기준
+        int writingCount = makerDao.countTempProjects(sellerNo); // 임시저장은 sellerNo 기준
         
         // 상태별 프로젝트 수 (Map으로 받아옴)
         Map<String, Object> statusCounts = makerDao.selectProjectStatusCounts(sellerNo);
@@ -70,17 +70,16 @@ public class MakerService {
      */
     public List<Map<String, Object>> getProjectList(int userNo, String status) {
         
-        // 1. '작성 중(draft)'인 경우 -> TEMPORARY 테이블 조회 (SellerNo 불필요)
-        if ("draft".equals(status)) {
-            return makerDao.selectTempProjectList(userNo);
-        }
-
-        // 2. '진행 중(open)' 또는 '종료(closed)'인 경우 -> PRODUCT 테이블 조회
         Integer sellerNo = makerDao.selectSellerNo(userNo);
         if (sellerNo == null) {
             return List.of(); // 판매자가 아니면 빈 리스트 반환
         }
 
+        if ("draft".equals(status)) {
+            return makerDao.selectTempProjectList(sellerNo);
+        }
+
+        // 2. '진행 중(open)' 또는 '종료(closed)'인 경우 -> PRODUCT 테이블 조회
         return makerDao.selectProductListByStatus(sellerNo, status);
     }
     

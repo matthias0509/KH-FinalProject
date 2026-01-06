@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,5 +34,22 @@ public class AdminFundingController {
         // 서비스 호출
         List<AdminFunding> list = adminFundingService.getAdminFundingList(status, keyword);
         return ResponseEntity.ok(list);
+    }
+
+    /**
+     * ✅ 관리자가 특정 주문을 강제 취소/환불 처리
+     */
+    @PostMapping("/cancel")
+    public ResponseEntity<?> forceCancel(@RequestBody Map<String, String> request) {
+        String orderNo = request.get("orderNo");
+        if (orderNo == null || orderNo.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("주문번호가 필요합니다.");
+        }
+
+        boolean canceled = adminFundingService.forceCancelFunding(orderNo.trim());
+        if (canceled) {
+            return ResponseEntity.ok(Map.of("message", "취소 처리되었습니다."));
+        }
+        return ResponseEntity.badRequest().body("취소할 수 없는 상태이거나 주문을 찾을 수 없습니다.");
     }
 }

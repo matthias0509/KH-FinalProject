@@ -37,6 +37,7 @@
         <set>
             <if test="userName != null">USER_NAME = #{userName},</if>
             <if test="nickname != null">NICKNAME = #{nickname},</if>
+            <if test="email !=null">EMAIL = #{email},</if>
             <if test="postcode != null">POSTCODE = #{postcode},</if>
             <if test="mainAddress != null">MAIN_ADDRESS = #{mainAddress},</if>
             <if test="detailAddress != null">DETAIL_ADDRESS = #{detailAddress},</if>

@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+// 프로젝트 상세 및 목록 화면에서 재사용하는 VO
 public class ProjectList {
 
     private Long productNo;

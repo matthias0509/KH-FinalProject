@@ -18,4 +18,9 @@ public interface AdminFundingDao {
     // 🚨 이 메서드가 정의되어야 서비스와 Mapper XML이 연결됩니다.
     List<AdminFunding> selectAdminFundingList(Map<String, Object> params);
 
+    /**
+     * ✅ 관리자 강제 취소 처리 (사용자 번호 검증 없이)
+     */
+    int updateOrderStatusToCancelByAdmin(String orderNo);
+
 }

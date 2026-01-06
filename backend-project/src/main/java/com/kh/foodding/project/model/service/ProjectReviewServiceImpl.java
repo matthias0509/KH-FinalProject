@@ -14,6 +14,7 @@ import com.kh.foodding.project.dto.ProjectReviewReward;
 import com.kh.foodding.project.dto.ProjectReviewSummary;
 
 @Service
+// 프로젝트 심사(승인/반려) 흐름을 담당하는 서비스 구현체
 public class ProjectReviewServiceImpl implements ProjectReviewService {
 
     private static final String STATUS_WAITING = "WAITING";
@@ -29,6 +30,7 @@ public class ProjectReviewServiceImpl implements ProjectReviewService {
     private SqlSessionTemplate sqlSession;
 
     @Override
+    // 상태별로 심사 대상 프로젝트를 조회
     public List<ProjectReviewSummary> getProjects(String status) {
         String normalized = normalizeStatus(status);
         List<ProjectReviewSummary> projects = projectReviewDao.selectProjects(sqlSession, normalized);
@@ -36,6 +38,7 @@ public class ProjectReviewServiceImpl implements ProjectReviewService {
     }
 
     @Override
+    // 단일 프로젝트의 심사 상세(리워드 포함) 조회
     public ProjectReviewDetail getProjectDetail(long productNo) {
         if (productNo <= 0) {
             throw new IllegalArgumentException("유효하지 않은 프로젝트 번호입니다.");
@@ -51,6 +54,7 @@ public class ProjectReviewServiceImpl implements ProjectReviewService {
 
     @Override
     @Transactional
+    // 심사 결과를 승인/반려로 기록하고 갱신된 상세 정보를 반환
     public ProjectReviewDetail reviewProject(long productNo, String action, String reason) {
         String normalizedAction = normalizeAction(action);
         if (productNo <= 0 || normalizedAction == null) {
@@ -74,6 +78,7 @@ public class ProjectReviewServiceImpl implements ProjectReviewService {
         return getProjectDetail(productNo);
     }
 
+    // 허용된 상태 코드만 반환하도록 정규화
     private String normalizeStatus(String status) {
         if (status == null) {
             return "ALL";
@@ -91,6 +96,7 @@ public class ProjectReviewServiceImpl implements ProjectReviewService {
         return "ALL";
     }
 
+    // 심사 액션 문자열을 승인/반려 둘 중 하나로 제한
     private String normalizeAction(String action) {
         if (action == null) {
             return null;

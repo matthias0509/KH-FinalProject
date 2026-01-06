@@ -28,17 +28,17 @@ public class ProjectDao {
         return sqlSession.update("projectMapper.updateDraft", p);
     }
 
-    public ArrayList<Project> selectProject(SqlSessionTemplate sqlSession, int userNo){
+    public ArrayList<Project> selectProject(SqlSessionTemplate sqlSession, Long sellerNo){
         Map<String, Object> params = new HashMap<>();
-        params.put("userNo", userNo);
+        params.put("sellerNo", sellerNo);
 
         return (ArrayList)sqlSession.selectList("projectMapper.selectProject", params);
     }
 
     //
-    public Project selectProjectById(SqlSessionTemplate sqlSession, int userNo, long tempNo) {
+    public Project selectProjectById(SqlSessionTemplate sqlSession, Long sellerNo, long tempNo) {
         Map<String, Object> params = new HashMap<>();
-        params.put("userNo", userNo);
+        params.put("sellerNo", sellerNo);
         params.put("tempNo", tempNo);
 
         return sqlSession.selectOne("projectMapper.selectProjectById", params);
@@ -50,9 +50,9 @@ public class ProjectDao {
     }
 
     // 임시저장 프로젝트 삭제
-    public int deleteProject(SqlSessionTemplate sqlSession, int userNo, long tempNo){
+    public int deleteProject(SqlSessionTemplate sqlSession, Long sellerNo, long tempNo){
         Map<String, Object> params = new HashMap<>();
-        params.put("userNo", userNo);
+        params.put("sellerNo", sellerNo);
         params.put("tempNo", tempNo);
 
         return sqlSession.update("projectMapper.deleteProject", params);

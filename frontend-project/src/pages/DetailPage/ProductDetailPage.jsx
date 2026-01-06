@@ -457,7 +457,13 @@ export default function ProductDetailPage() {
         setProject(normalizeProjectDetail(item));
       } catch (error) {
         setProject(projectInit);
-        setLoadError('프로젝트 정보를 불러오지 못했습니다.');
+        if (error?.response?.status === 403) {
+          setLoadError('진행 중인 프로젝트만 열람할 수 있습니다.');
+        } else if (error?.response?.status === 404) {
+          setLoadError('존재하지 않거나 삭제된 프로젝트입니다.');
+        } else {
+          setLoadError('프로젝트 정보를 불러오지 못했습니다.');
+        }
       }
     };
     api();

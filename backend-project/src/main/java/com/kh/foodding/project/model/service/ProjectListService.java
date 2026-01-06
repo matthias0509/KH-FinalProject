@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.kh.foodding.project.model.vo.ProjectList;
 
+// 프로젝트 기본 정보 조회 및 관리용 서비스 인터페이스
 public interface ProjectListService{
 
     // 상세조회용

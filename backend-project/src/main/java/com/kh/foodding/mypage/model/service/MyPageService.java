@@ -16,10 +16,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.foodding.common.FileStorageUtils;
 import com.kh.foodding.mypage.model.dao.MyPageDao;
-import com.kh.foodding.mypage.model.vo.MyPage;
-import com.kh.foodding.mypage.model.vo.LikedProject;    
-import com.kh.foodding.mypage.model.vo.FundingHistory; 
-import com.kh.foodding.mypage.model.vo.FollowedSeller; 
+import com.kh.foodding.mypage.model.vo.FollowedSeller;
+import com.kh.foodding.mypage.model.vo.FundingHistory;
+import com.kh.foodding.mypage.model.vo.LikedProject;
+import com.kh.foodding.mypage.model.vo.MyPage; 
 
 @Service
 public class MyPageService {
@@ -50,6 +50,9 @@ public class MyPageService {
             myPage.setNickname(current.getNickname());
         }
 
+        if (myPage.getEmail() == null || myPage.getEmail().trim().isEmpty()) {
+            myPage.setEmail(current.getEmail());
+        }
         // 2. 비밀번호 변경 요청이 있을 경우
         if (myPage.getUserPwd() != null && !myPage.getUserPwd().trim().isEmpty()) {
             

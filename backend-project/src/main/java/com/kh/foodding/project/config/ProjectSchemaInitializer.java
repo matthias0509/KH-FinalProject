@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
+// 부트 실행 시 프로젝트 관련 스키마가 최신 상태인지 확인하는 헬퍼 컴포넌트
 public class ProjectSchemaInitializer {
 
     private final JdbcTemplate jdbcTemplate;
@@ -20,10 +21,12 @@ public class ProjectSchemaInitializer {
     }
 
     @PostConstruct
+    // 애플리케이션 기동 직후 필요한 컬럼이 있는지 점검
     public void ensureColumns() {
         ensureRejectReasonColumn();
     }
 
+    // PROJECT 테이블에 심사 반려 사유 컬럼이 없으면 생성
     private void ensureRejectReasonColumn() {
         final String tableName = "PRODUCT";
         final String columnName = "REJECT_REASON";

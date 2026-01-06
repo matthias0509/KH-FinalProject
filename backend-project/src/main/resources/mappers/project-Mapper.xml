@@ -84,7 +84,7 @@
             #{tempNo}, #{title}, #{summary}, #{targetAmount},
             #{fundStartDate}, #{fundEndDate}, #{shipStartDate}, #{category},
             NVL(#{thumbnailUrl}, 'DEFAULT_THUMBNAIL.png'), #{content.html}, #{content.json},
-            #{userNo} )
+            #{sellerNo} )
     </insert>
 
     <insert id="insertTempOption" parameterType="map">
@@ -110,7 +110,7 @@
             TEMP_STORY_JSON
         FROM TEMPORARY
         WHERE TEMP_STATUS = 'Y' 
-          AND SELLER_NO = #{userNo} ORDER BY TEMP_NO DESC
+          AND SELLER_NO = #{sellerNo} ORDER BY TEMP_NO DESC
     </select>
 
     <select id="selectProjectById" parameterType="map" resultMap="projectResultMap">
@@ -133,10 +133,10 @@
             U.PHONE AS SELLER_PHONE,
             U.MODIFY_PROFILE AS SELLER_PROFILE_IMAGE
         FROM TEMPORARY T
-        LEFT JOIN SELLER_PROFILE SP ON SP.USER_NO = T.SELLER_NO 
-        LEFT JOIN TB_USER U ON U.USER_NO = T.SELLER_NO
+        LEFT JOIN SELLER_PROFILE SP ON SP.SELLER_NO = T.SELLER_NO 
+        LEFT JOIN TB_USER U ON U.USER_NO = SP.USER_NO
         WHERE T.TEMP_NO = #{tempNo}
-          AND T.SELLER_NO = #{userNo} </select>
+          AND T.SELLER_NO = #{sellerNo} </select>
 
     <select id="selectTempOptions" parameterType="long" resultType="com.kh.foodding.createProject.model.vo.Project$Reward">
         SELECT
@@ -162,12 +162,12 @@
                 TEMP_STORY_JSON = #{content.json},
                 UPDATE_DATE = SYSDATE
         WHERE TEMP_NO = #{tempNo}
-          AND SELLER_NO = #{userNo} </update>
+          AND SELLER_NO = #{sellerNo} </update>
 
     <delete id="deleteProject" parameterType="map">
     DELETE FROM TEMPORARY 
     WHERE TEMP_NO = #{tempNo}
-      AND SELLER_NO = #{userNo}
+      AND SELLER_NO = #{sellerNo}
 </delete>
 
     <delete id="deleteTempOptions" parameterType="long">

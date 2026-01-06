@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+// 상세/심사 화면에 필요한 판매자 프로필 정보를 담는 VO
 public class SellerProfile {
 
     private Long sellerNo;

@@ -23,7 +23,7 @@ public interface MakerDao {
     /**
      * 작성 중인(임시저장) 프로젝트 수 조회
      */
-    int countTempProjects(int userNo);
+    int countTempProjects(int sellerNo);
 
     /**
      * 프로젝트 상태별(심사중, 진행중, 종료) 카운트 조회
@@ -37,7 +37,7 @@ public interface MakerDao {
     
     
     // 작성 중인 프로젝트 리스트
-    List<Map<String, Object>> selectTempProjectList(int userNo);
+    List<Map<String, Object>> selectTempProjectList(int sellerNo);
 
     // 진행 중 또는 종료된 프로젝트 리스트
     List<Map<String, Object>> selectProductListByStatus(@Param("sellerNo") int sellerNo, @Param("status") String status);

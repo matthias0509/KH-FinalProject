@@ -14,13 +14,13 @@
     <select id="countTempProjects" resultType="int">
         SELECT COUNT(*) 
         FROM TEMPORARY T
-        WHERE T.SELLER_NO = #{userNo}
-        
+        WHERE T.SELLER_NO = #{sellerNo}
+
         AND NOT EXISTS (
             SELECT 1 
             FROM PRODUCT P
             JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
-            WHERE S.USER_NO = T.SELLER_NO
+            WHERE S.SELLER_NO = T.SELLER_NO
               AND P.PRODUCT_TITLE = T.TEMP_TITLE
         )
     </select>
@@ -65,13 +65,13 @@
             0 AS "backers",
             NVL(T.ORIGIN_THUMBNAIL, '') AS "thumbnail"
         FROM TEMPORARY T
-        WHERE T.SELLER_NO = #{userNo}
+        WHERE T.SELLER_NO = #{sellerNo}
         
         AND NOT EXISTS (
             SELECT 1 
             FROM PRODUCT P
             JOIN SELLER_PROFILE S ON P.SELLER_NO = S.SELLER_NO
-            WHERE S.USER_NO = T.SELLER_NO
+            WHERE S.SELLER_NO = T.SELLER_NO
               AND P.PRODUCT_TITLE = T.TEMP_TITLE
         )
         

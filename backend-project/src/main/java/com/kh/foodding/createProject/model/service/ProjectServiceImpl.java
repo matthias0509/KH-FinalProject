@@ -52,9 +52,9 @@ public class ProjectServiceImpl implements ProjectService {
             }
         }
          // 임시저장이었다면 TEMP_STATUS를 N으로 바꿔 숨겨준다
-  if (result > 0 && p.getTempNo() != null) {
-      projectDao.deleteProject(sqlSession, p.getUserNo().intValue(), p.getTempNo());
-  }
+        if (result > 0 && p.getTempNo() != null) {
+            projectDao.deleteProject(sqlSession, p.getSellerNo(), p.getTempNo());
+        }
 
         return result;
     }
@@ -107,14 +107,16 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public ArrayList<Project> selectProject(int userNo){
-        return projectDao.selectProject(sqlSession, userNo);
+        Long sellerNo = requireSellerProfile((long) userNo);
+        return projectDao.selectProject(sqlSession, sellerNo);
     }
 
     // 임시저장 프로젝트 상세 조회
     @Transactional
     @Override
     public Project selectProjectById(int userNo, long tempNo) {
-        Project project = projectDao.selectProjectById(sqlSession, userNo, tempNo);
+        Long sellerNo = requireSellerProfile((long) userNo);
+        Project project = projectDao.selectProjectById(sqlSession, sellerNo, tempNo);
         if (project != null) {
             project.setRewards(projectDao.selectTempOptions(sqlSession, tempNo));
         }
@@ -125,7 +127,8 @@ public class ProjectServiceImpl implements ProjectService {
     @Transactional
     @Override
     public int deleteProject(int userNo, long tempNo){
-        return projectDao.deleteProject(sqlSession, userNo, tempNo);
+        Long sellerNo = requireSellerProfile((long) userNo);
+        return projectDao.deleteProject(sqlSession, sellerNo, tempNo);
     }
 
     private Long requireSellerProfile(Long userNo) {

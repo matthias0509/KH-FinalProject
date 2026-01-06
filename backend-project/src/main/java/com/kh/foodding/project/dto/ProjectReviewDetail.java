@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
+// 프로젝트 심사 상세 정보(요약 정보 + 설명/리워드/반려사유)
 public class ProjectReviewDetail extends ProjectReviewSummary {
     private String productDesc;
     private String storyHtml;

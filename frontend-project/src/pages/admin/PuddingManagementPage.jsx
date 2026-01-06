@@ -10,7 +10,6 @@ const formatStatus = (status) => {
         case 'OPEN':    return '✅ 진행중';
         case 'SUCCESS': return '🏆 성공';
         case 'FAIL':    return '❌ 실패';
-        case 'STOP':    return '🛑 중단';
         case 'BAN':     return '🚫 제재';
         default: return status;
     }
@@ -92,7 +91,6 @@ const PuddingDetailModal = ({ project, onClose, onRefresh }) => {
                                 <option value="OPEN">✅ 진행중 (OPEN)</option>
                                 <option value="SUCCESS">🏆 성공 (SUCCESS)</option>
                                 <option value="FAIL">❌ 실패 (FAIL)</option>
-                                <option value="STOP">🛑 강제 중단 (STOP)</option>
                                 <option value="BAN">🚫 제재/삭제 (BAN)</option>
                             </select>
                         </div>

@@ -15,10 +15,8 @@ const FundingDetailModal = ({ funding, onClose, onStatusChange }) => {
 
         try {
             const token = localStorage.getItem('token');
-            // 기존에 만들어둔 마이페이지용 취소 API 재활용 (관리자 권한으로도 작동하도록 백엔드 체크 필요)
-            // 혹은 관리자 전용 취소 API를 따로 만드는 것이 정석입니다.
-            // 여기서는 예시로 기존 API 호출
-            await axios.post(resolveApiUrl('/api/mypage/funding/cancel'), 
+            // 관리자 전용 취소 API 호출
+            await axios.post(resolveApiUrl('/admin/funding/cancel'), 
                 { orderNo: funding.orderNo },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );

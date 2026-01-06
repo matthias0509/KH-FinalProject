@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import lombok.Data;
 
 @Data
+// 심사 목록 화면에서 사용하는 프로젝트 요약 DTO
 public class ProjectReviewSummary {
     private Long productNo;
     private String productTitle;
