@@ -9,6 +9,7 @@ import InputField from '../../components/Login/InputField';
 import SubmitButton from '../../components/Login/SubmitButton';
 import EVerifyForm from '../../components/Login/EVerifyForm';
 import axios from 'axios';
+import { resolveApiUrl } from '../../utils/apiConfig';
 import { toast, ToastContainer } from 'react-toastify';
 
 export default function FindIdPage() {
@@ -35,7 +36,7 @@ export default function FindIdPage() {
 
         try {
             // 1. 이름/이메일 일치 확인
-            const response = await axios.post("http://localhost:8001/foodding/member/emailCheck", { 
+            const response = await axios.post(resolveApiUrl('/member/emailCheck'), { 
                 userName: name, 
                 email: email 
             });
@@ -70,7 +71,7 @@ export default function FindIdPage() {
 
     const handleVerificationSuccess = async () => {
         try {
-            const response = await axios.get("http://localhost:8001/foodding/member/findId", {
+            const response = await axios.get(resolveApiUrl('/member/findId'), {
                 params: { email: email }
             });
             setFoundId(response.data);

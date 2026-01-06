@@ -6,8 +6,9 @@ import AppFooter from '../../components/AppFooter';
 import Sidebar from '../../components/Sidebar'; 
 import '../../styles/MakerPage.css';
 import '../../styles/UserManagement.css'; 
+import { getApiBaseUrl } from '../../utils/apiConfig';
 
-const SERVER_URL = "http://localhost:8001/foodding";
+const SERVER_URL = getApiBaseUrl();
 const COMMISSION_RATE = 0.05; // 수수료 5%
 
 // --- [컴포넌트] 정산 리스트 아이템 ---

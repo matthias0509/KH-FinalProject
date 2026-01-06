@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react'; 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../styles/MyPageLayout.css'; 
+import { getApiBaseUrl } from '../utils/apiConfig';
 
-const SERVER_URL = "http://localhost:8001/foodding";
+const SERVER_URL = getApiBaseUrl();
 const UPLOAD_PATH = "/uploads/"; 
 
 const getFullImageUrl = (filename) => {

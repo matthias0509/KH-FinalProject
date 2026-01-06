@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { resolveApiUrl } from '../../utils/apiConfig';
 import '../../styles/PuddingManagement.css'; 
 
 // ===================================================
@@ -17,7 +18,7 @@ const FundingDetailModal = ({ funding, onClose, onStatusChange }) => {
             // 기존에 만들어둔 마이페이지용 취소 API 재활용 (관리자 권한으로도 작동하도록 백엔드 체크 필요)
             // 혹은 관리자 전용 취소 API를 따로 만드는 것이 정석입니다.
             // 여기서는 예시로 기존 API 호출
-            await axios.post("http://localhost:8001/foodding/api/mypage/funding/cancel", 
+            await axios.post(resolveApiUrl('/api/mypage/funding/cancel'), 
                 { orderNo: funding.orderNo },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
@@ -117,7 +118,7 @@ const FundingManagementPage = () => {
     const fetchData = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get("http://localhost:8001/foodding/admin/funding/all", {
+            const res = await axios.get(resolveApiUrl('/admin/funding/all'), {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setOriginalList(res.data);

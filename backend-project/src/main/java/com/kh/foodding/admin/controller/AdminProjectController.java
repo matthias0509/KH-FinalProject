@@ -12,7 +12,6 @@ import com.kh.foodding.admin.model.vo.AdminProject;
 
 @RestController
 @RequestMapping("/api/admin/project") // 프론트 API 경로와 일치시킴
-@CrossOrigin(origins = "http://localhost:5173", allowCredentials = "true")
 public class AdminProjectController {
 
     @Autowired

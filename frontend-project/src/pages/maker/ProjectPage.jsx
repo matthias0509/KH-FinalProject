@@ -7,8 +7,9 @@ import Sidebar from '../../components/Sidebar';
 import '../../styles/MakerPage.css';
 import '../../styles/UserManagement.css'; 
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
+import { getApiBaseUrl } from '../../utils/apiConfig';
 
-const SERVER_URL = "http://localhost:8001/foodding";
+const SERVER_URL = getApiBaseUrl();
 
 // --- [컴포넌트] 프로젝트 리스트 아이템 ---
 const ProjectListItem = ({ project }) => {

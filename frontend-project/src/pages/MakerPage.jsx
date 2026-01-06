@@ -5,9 +5,10 @@ import Header from '../components/Header';
 import AppFooter from '../components/AppFooter';
 import Sidebar from '../components/Sidebar';
 import '../styles/MakerPage.css';
+import { getApiBaseUrl } from '../utils/apiConfig';
 
 // 🚨 백틱(`) 사용 확인
-const SERVER_URL = "http://localhost:8001/foodding";
+const SERVER_URL = getApiBaseUrl();
 const UPLOAD_PATH = "/uploads/";
 
 const getFullImageUrl = (filename) => {

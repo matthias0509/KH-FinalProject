@@ -6,9 +6,10 @@ import Header from '../../components/Header';
 import Sidebar from '../../components/Sidebar';
 import AppFooter from '../../components/AppFooter';
 import '../../styles/ChatListPage.css';
+import { getApiBaseUrl } from '../../utils/apiConfig';
 
-const API_BASE_URL = 'http://localhost:8001/foodding';
-const SERVER_URL = "http://localhost:8001/foodding";
+const API_BASE_URL = getApiBaseUrl();
+const SERVER_URL = API_BASE_URL;
 const UPLOAD_PATH = "/uploads/";
 
 // 🔥 프로필 이미지 URL 처리 함수 추가

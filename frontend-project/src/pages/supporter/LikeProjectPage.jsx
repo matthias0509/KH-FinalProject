@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import MyPageLayout from '../../components/MyPageLayout'; 
 import { resolveProjectImageUrl } from '../../utils/projectMedia';
+import { getApiBaseUrl } from '../../utils/apiConfig';
 
 // 스타일
 import '../../styles/MyPageLayout.css';
 import '../../styles/LikeFollow.css';
 
-const API_BASE_URL = "http://localhost:8001/foodding/api/mypage";
+const API_BASE_URL = `${getApiBaseUrl()}/api/mypage`;
 
 const LikeProjectsPage = () => {
     const navigate = useNavigate();

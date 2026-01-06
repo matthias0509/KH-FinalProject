@@ -11,7 +11,6 @@ import com.kh.foodding.admin.model.vo.User;
 
 @RestController
 @RequestMapping("/api/admin/user") // URL은 Rest API 규칙에 맞춰 설정
-@CrossOrigin(origins = {"http://localhost:5173"})
 public class UserController {
 
     @Autowired

@@ -6,6 +6,9 @@ import MyPageLayout from '../../components/MyPageLayout';
 // 스타일
 import '../../styles/MyPageLayout.css';
 import '../../styles/LikeFollow.css';
+import { getApiBaseUrl } from '../../utils/apiConfig';
+
+const SERVER_URL = getApiBaseUrl();
 
 const FollowProjectPage = () => {
     const navigate = useNavigate();
@@ -25,7 +28,7 @@ const FollowProjectPage = () => {
                     return;
                 }
 
-                const response = await axios.get("http://localhost:8001/foodding/api/mypage/follow", {
+                const response = await axios.get(`${SERVER_URL}/api/mypage/follow`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -37,7 +40,7 @@ const FollowProjectPage = () => {
                     img: item.sellerImage 
                         ? (item.sellerImage.startsWith('http') 
                             ? item.sellerImage 
-                            : `http://localhost:8001/foodding/uploads/${item.sellerImage}`)
+                            : `${SERVER_URL}/uploads/${item.sellerImage}`)
                         : null // 이미지가 없으면 null (나중에 렌더링 때 처리)
                 }));
 
