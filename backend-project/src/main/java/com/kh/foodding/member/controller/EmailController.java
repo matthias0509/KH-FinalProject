@@ -2,7 +2,6 @@ package com.kh.foodding.member.controller;
 
 import java.util.Map;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/email")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173") // React 주소
 public class EmailController {
 
     private final EmailService emailService;

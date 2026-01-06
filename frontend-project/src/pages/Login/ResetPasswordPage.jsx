@@ -10,6 +10,7 @@ import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
 import NewPasswordForm from '../../components/Login/NewPasswordForm';
 import axios from 'axios';
+import { resolveApiUrl } from '../../utils/apiConfig';
 import { toast, ToastContainer } from 'react-toastify';
 
 export default function ResetPasswordPage() {
@@ -36,7 +37,7 @@ export default function ResetPasswordPage() {
         setIsLoading(true);
         try {
             // 아이디와 이메일 일치 확인 API 호출
-            const response = await axios.post("http://localhost:8001/foodding/member/idEmailCheck", { 
+            const response = await axios.post(resolveApiUrl('/member/idEmailCheck'), { 
                 userId: userId, 
                 email: email 
             });

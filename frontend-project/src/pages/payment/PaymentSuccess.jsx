@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import Header from '../../components/Header';
 import AppFooter from '../../components/AppFooter';
 import './PaymentResult.css';
+import { resolveApiUrl } from '../../utils/apiConfig';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -109,7 +110,7 @@ const PaymentSuccess = () => {
         
         console.log('백엔드로 전송할 데이터:', requestBody);
         
-        const response = await fetch('http://localhost:8001/foodding/api/payment/confirm', {
+        const response = await fetch(resolveApiUrl('/api/payment/confirm'), {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',

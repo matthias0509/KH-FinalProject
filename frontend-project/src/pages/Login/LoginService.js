@@ -1,13 +1,9 @@
 import axios from 'axios';
-
-// 포트번호 8001 확인 (백엔드 주소)
-const API_URL = "http://localhost:8001/foodding"; 
-
-const api = axios.create({ baseURL: API_URL });
+import { resolveApiUrl } from '../../utils/apiConfig';
 
 export const login = async (userId, userPwd) => {
     try {
-        const response = await api.post("/login", { userId, userPwd });
+        const response = await axios.post(resolveApiUrl('/login'), { userId, userPwd });
         
         // 🚨 [핵심 수정] 백엔드가 { token: "...", user: {...} } 객체를 줍니다.
         // 기존처럼 문자열 길이를 체크하거나 sessionStorage에 바로 넣지 말고,

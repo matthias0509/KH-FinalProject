@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +17,6 @@ import com.kh.foodding.project.dto.ProjectReviewDetail;
 import com.kh.foodding.project.dto.ProjectReviewSummary;
 import com.kh.foodding.project.model.service.ProjectReviewService;
 
-@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("project/admin/review")
 public class ProjectReviewController {

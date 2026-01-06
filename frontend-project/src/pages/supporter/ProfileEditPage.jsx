@@ -11,9 +11,10 @@ import { FiCamera, FiTrash2, FiChevronLeft, FiLock } from "react-icons/fi";
 import InputField from "../../components/Login/InputField";
 import PostCode from "../../components/Login/PostCode";
 import EmailVerificationForm from "../../components/Login/EmailVerificationForm";
+import { getApiBaseUrl } from "../../utils/apiConfig";
 
-const API_BASE_URL = "http://localhost:8001/foodding/api/mypage";
-const SERVER_URL = "http://localhost:8001/foodding";
+const SERVER_URL = getApiBaseUrl();
+const API_BASE_URL = `${SERVER_URL}/api/mypage`;
 const UPLOAD_PATH = "/uploads/";
 
 const getFullImageUrl = (filename) => {

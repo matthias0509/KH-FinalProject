@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, Loader } from 'lucide-react';
 import './ChatComponent.css';
 import axios from 'axios';
+import { getApiBaseUrl } from '../../utils/apiConfig';
 
-const API_BASE_URL = 'http://localhost:8001/foodding';
+const API_BASE_URL = getApiBaseUrl();
 
 const ChatComponent = () => {
   const [creator, setCreator] = useState(null);
