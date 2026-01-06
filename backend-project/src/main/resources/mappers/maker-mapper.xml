@@ -63,7 +63,7 @@
             '펀딩' AS "type",
             0 AS "reward",
             0 AS "backers",
-            NVL(T.ORIGIN_THUMBNAIL, T.MODIFY_THUMBNAIL) AS "thumbnail"
+            NVL(T.ORIGIN_THUMBNAIL, '') AS "thumbnail"
         FROM TEMPORARY T
         WHERE T.SELLER_NO = #{userNo}
         
@@ -210,7 +210,7 @@
 	              AND PRODUCT_YN = 'Y'
 	              AND PRODUCT_STATUS IN ('OPEN', 'SUCCESS', 'FAIL', 'CLOSE')
 	            ORDER BY CREATE_DATE DESC
-	        ) 
+	        )  A
 	        WHERE ROWNUM <![CDATA[<=]]> (#{offset} + #{size})
 	    )
 	    WHERE RNUM <![CDATA[>]]> #{offset}
@@ -218,8 +218,8 @@
 	
 	
 	<delete id="deleteTempProject" parameterType="int">
-    DELETE FROM TEMPORARY 
-    WHERE TEMP_NO = #{tempNo}
-</delete>
+	    DELETE FROM TEMPORARY 
+	    WHERE TEMP_NO = #{tempNo}
+	</delete>
 
 </mapper>
