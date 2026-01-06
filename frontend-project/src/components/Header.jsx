@@ -138,14 +138,15 @@ export default function Header() {
               </div>
             )}
           </form>
-          <button type="button" className="icon-button" aria-label="관심 프로젝트">
+          <a href='/mypage/like' type="button" className="icon-button" aria-label="관심 프로젝트">
             <Heart size={20} color="#6b7280" />
-          </button>
+          </a>
 
         
           <a href="/mypage" type="button" className="icon-button" aria-label="마이 페이지">
             <User size={20} color="#6b7280" />
           </a>
+          
           <Link to="/create" className="header__cta">
             프로젝트 올리기
           </Link>

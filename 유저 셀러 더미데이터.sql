@@ -6,11 +6,11 @@ INSERT INTO TB_USER (
     POSTCODE, MAIN_ADDRESS, DETAIL_ADDRESS,
     ENROLL_DATE, USER_YN, USER_ROLE
 ) VALUES (
-    1, 'testUser', 'password', '테스트유저',
+    SEQ_TB_USER_NO.NEXTVAL, 'testUser', 'password', '테스트유저',
     'tester', SYSDATE, 'M', 'test@example.com',
     '010-0000-0000', NULL, NULL,
     '00000', '서울시', '어딘가 101',
-    SYSDATE, 'N', 'USER'
+    SYSDATE, 'N', 'MAKER'
 );
 
 -- 테스트 유저용 판매자 프로필 더미 데이터
@@ -21,7 +21,7 @@ INSERT INTO SELLER_PROFILE (
 ) VALUES (
     SEQ_SELLER_PROFILE_NO.NEXTVAL,
     '테스트 셀러 프로필',
-    1
+    (SELECT USER_NO FROM TB_USER WHERE USER_ID = 'testUser')
 );
 
 
