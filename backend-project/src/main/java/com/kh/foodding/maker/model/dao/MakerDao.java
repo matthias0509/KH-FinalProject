@@ -74,4 +74,8 @@ public interface MakerDao {
         @Param("size") int size
     );
     
+    int insertProject(Map<String, Object> projectMap);
+    
+    int deleteTempProject(int tempNo);
+    
 }

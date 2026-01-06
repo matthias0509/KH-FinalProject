@@ -164,12 +164,11 @@
         WHERE TEMP_NO = #{tempNo}
           AND SELLER_NO = #{userNo} </update>
 
-    <update id="deleteProject" parameterType="map">
-        UPDATE TEMPORARY
-            SET TEMP_STATUS = 'N',
-                UPDATE_DATE = SYSDATE
-            WHERE TEMP_NO = #{tempNo}
-            AND SELLER_NO = #{userNo} </update>
+    <delete id="deleteProject" parameterType="map">
+    DELETE FROM TEMPORARY 
+    WHERE TEMP_NO = #{tempNo}
+      AND SELLER_NO = #{userNo}
+</delete>
 
     <delete id="deleteTempOptions" parameterType="long">
         DELETE FROM TEMP_OPTION WHERE TEMP_NO = #{tempNo}
